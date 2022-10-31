@@ -2,6 +2,9 @@
 
 return [
 
+    'owner' => 'Sensasi Apps',
+    'owner_url' => 'https://github.com/sensasi-apps',
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
