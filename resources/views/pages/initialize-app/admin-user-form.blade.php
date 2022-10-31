@@ -38,7 +38,7 @@
 
                     <form action="{{ route('initialize-app.store-admin-user') }}" method="POST" id="userForm">
                         @csrf
-                        
+
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input id="name" value="{{ old('name') }}" type="text" required
@@ -87,14 +87,12 @@
 
 @section('page-body')
 
-	<div class="d-flex justify-content-center">
-		<button type="button" class="btn btn-outline-primary mr-2 btn-lg" data-toggle="modal" data-target="#userFormModal">
-			Daftar sekarang
-		</button>
-		
-		<a class="btn btn-outline-primary btn-lg" href="{{ route('initialize-app.sign-up-admin-with-google') }}">
-			<span class="fab fa-google"></span> Daftar dengan Google
-		</a>
-	</div>
+    <button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="modal" data-target="#userFormModal">
+        Daftar sekarang
+    </button>
+
+    <a class="btn btn-outline-primary btn-lg btn-block" href="{{ route('initialize-app.sign-up-admin-with-google') }}">
+        <span class="fab fa-google"></span> Daftar dengan Google
+    </a>
 
 @endsection

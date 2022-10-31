@@ -26,7 +26,6 @@ class InitializeAppController extends Controller
 
   public function index()
   {
-    abort(403, __('abort.forbidden'));
     return redirect()->route('initialize-app.check');
   }
 
