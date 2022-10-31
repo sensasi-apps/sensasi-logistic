@@ -7,13 +7,6 @@ use Spatie\Permission\PermissionRegistrar;
 
 class CreatePermissionTables extends Migration
 {
-    private string $connection;
-
-    public function __construct()
-    {
-        $this->connection = env('SYSTEM_DB_CONNECTION', 'mysql_system');
-    }
-
     /**
      * Run the migrations.
      *
@@ -32,7 +25,7 @@ class CreatePermissionTables extends Migration
             throw new \Exception('Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
 
-        Schema::connection($this->connection)->create($tableNames['permissions'], function (Blueprint $table) {
+        Schema::create($tableNames['permissions'], function (Blueprint $table) {
             $table->bigIncrements('id'); // permission id
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
@@ -41,7 +34,7 @@ class CreatePermissionTables extends Migration
             $table->unique(['name', 'guard_name']);
         });
 
-        Schema::connection($this->connection)->create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames) {
+        Schema::create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames) {
             $table->bigIncrements('id'); // role id
             if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
                 $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
@@ -57,7 +50,7 @@ class CreatePermissionTables extends Migration
             }
         });
 
-        Schema::connection($this->connection)->create($tableNames['model_has_permissions'], function (Blueprint $table) use ($tableNames, $columnNames, $teams) {
+        Schema::create($tableNames['model_has_permissions'], function (Blueprint $table) use ($tableNames, $columnNames, $teams) {
             $table->unsignedBigInteger(PermissionRegistrar::$pivotPermission);
 
             $table->string('model_type');
@@ -81,7 +74,7 @@ class CreatePermissionTables extends Migration
 
         });
 
-        Schema::connection($this->connection)->create($tableNames['model_has_roles'], function (Blueprint $table) use ($tableNames, $columnNames, $teams) {
+        Schema::create($tableNames['model_has_roles'], function (Blueprint $table) use ($tableNames, $columnNames, $teams) {
             $table->unsignedBigInteger(PermissionRegistrar::$pivotRole);
 
             $table->string('model_type');
@@ -104,7 +97,7 @@ class CreatePermissionTables extends Migration
             }
         });
 
-        Schema::connection($this->connection)->create($tableNames['role_has_permissions'], function (Blueprint $table) use ($tableNames) {
+        Schema::create($tableNames['role_has_permissions'], function (Blueprint $table) use ($tableNames) {
             $table->unsignedBigInteger(PermissionRegistrar::$pivotPermission);
             $table->unsignedBigInteger(PermissionRegistrar::$pivotRole);
 
@@ -139,10 +132,10 @@ class CreatePermissionTables extends Migration
             throw new \Exception('Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
         }
 
-        Schema::connection($this->connection)->drop($tableNames['role_has_permissions']);
-        Schema::connection($this->connection)->drop($tableNames['model_has_roles']);
-        Schema::connection($this->connection)->drop($tableNames['model_has_permissions']);
-        Schema::connection($this->connection)->drop($tableNames['roles']);
-        Schema::connection($this->connection)->drop($tableNames['permissions']);
+        Schema::drop($tableNames['role_has_permissions']);
+        Schema::drop($tableNames['model_has_roles']);
+        Schema::drop($tableNames['model_has_permissions']);
+        Schema::drop($tableNames['roles']);
+        Schema::drop($tableNames['permissions']);
     }
 }

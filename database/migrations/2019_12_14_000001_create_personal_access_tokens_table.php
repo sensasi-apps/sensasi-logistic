@@ -6,13 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePersonalAccessTokensTable extends Migration
 {
-    private string $connection;
-
-    public function __construct()
-    {
-        $this->connection = env('SYSTEM_DB_CONNECTION', 'mysql_system');
-    }
-
     /**
      * Run the migrations.
      *
@@ -20,7 +13,7 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function up()
     {
-        Schema::connection($this->connection)->create('personal_access_tokens', function (Blueprint $table) {
+        Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
             $table->morphs('tokenable');
             $table->string('name');
@@ -38,6 +31,6 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function down()
     {
-        Schema::connection($this->connection)->dropIfExists('personal_access_tokens');
+        Schema::dropIfExists('personal_access_tokens');
     }
 }
