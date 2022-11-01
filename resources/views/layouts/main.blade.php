@@ -6,8 +6,8 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
 
     <title>
-        @hasSection('page-title')
-            @yield('page-title') &mdash;
+        @hasSection('title')
+            @yield('title') &mdash;
         @endif
         {{ config('app.name') }}
     </title>

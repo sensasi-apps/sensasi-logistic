@@ -12,11 +12,11 @@
 
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h4>@yield('page-title')</h4>
+                        <h4>@yield('title')</h4>
                     </div>
 
                     <div class="card-body">
-                        @yield('page-body')
+                        @yield('main-content')
                     </div>
                 </div>
 

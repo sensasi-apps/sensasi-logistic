@@ -60,9 +60,9 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="section">
-            @hasSection('page-title')
+            @hasSection('title')
                 <div class="section-header">
-                    <h1>@yield('page-title')</h1>
+                    <h1>@yield('title')</h1>
                 </div>
             @endif
 
@@ -72,7 +72,7 @@
                 @endforeach
             @endif
 
-            @yield('page-body')
+            @yield('main-content')
         </div>
     </div>
 
