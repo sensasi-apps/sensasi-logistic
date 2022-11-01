@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\App;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +53,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::get('/', function () {
-        return view('index');
-    })->name('index');
+    if (App::environment('local')) {
+        Route::get('basic-page-format', function () {
+            return view('basic-page-format');
+        });
+    }
 });
