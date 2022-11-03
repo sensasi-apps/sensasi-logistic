@@ -20,7 +20,7 @@
                         @endforeach
                     @endif
 
-                    <form action="{{ route('initialize-app.store-admin-user') }}" method="POST" id="userForm">
+                    <form action="{{ route('initialize-app.create-admin-user.store') }}" method="POST" id="userForm">
                         @csrf
 
                         <div class="form-group">
@@ -87,7 +87,7 @@
         Daftar sekarang
     </button>
 
-    <a class="btn btn-outline-primary btn-lg btn-block" href="{{ route('initialize-app.sign-up-admin-with-google') }}">
+    <a class="btn btn-outline-primary btn-lg btn-block" href="{{ route('initialize-app.create-admin-user.oauth.google') }}">
         <span class="fab fa-google"></span> Daftar dengan Google
     </a>
 
