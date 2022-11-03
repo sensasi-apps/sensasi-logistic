@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
@@ -22,11 +23,10 @@ Route::get('initialize-app', [InitializeAppController::class, 'index']);
 Route::get('initialize-app/check', [InitializeAppController::class, 'check'])->name('initialize-app.check');
 
 Route::middleware('guest')->group(function () {
-    Route::controller(InitializeAppController::class)
-        ->prefix('initialize-app')
-        ->name('initialize-app')
-        ->group(function () {
 
+    //
+    Route::controller(InitializeAppController::class)->group(function () {
+        Route::prefix('initialize-app')->name('initialize-app')->group(function () {
             Route::name('.create-admin-user')->prefix('create-admin-user')->group(function () {
                 Route::get('/', 'createAdminUser');
                 Route::post('/', 'storeAdminUser')->name('.store');
@@ -37,6 +37,7 @@ Route::middleware('guest')->group(function () {
                 });
             });
         });
+    });
 
 
     Route::controller(AuthController::class)
@@ -57,18 +58,17 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/', fn () => null)->name('/');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::controller(InitializeAppController::class)
-        ->prefix('sistem')
-        ->name('sistem')
-        ->group(function () {
-            Route::get('ip-addr', [WebSystemController::class, 'ipAddrIndex'])->name('ip-addr');
+
+    Route::controller(AppSystemController::class)->group(function () {
+        Route::prefix('system')->name('system')->group(function () {
+            Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
         });
+    });
 
     if (App::environment('local')) {
-        Route::get('basic-page-format', function () {
-            return view('basic-page-format');
-        });
+        Route::get('basic-page-format', fn () => view('basic-page-format'));
     }
 });
