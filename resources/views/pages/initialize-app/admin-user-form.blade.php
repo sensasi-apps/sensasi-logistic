@@ -1,25 +1,9 @@
-@extends('layouts.auth')
+@extends('layouts.main', ['layout' => 'auth'])
 
-@section('page-title', 'Daftarkan Super Admin')
+@section('title', 'Daftarkan Super Admin')
 
-
-@push('js-lib')
-    <script src="{{ asset('assets/modules/jquery-pwstrength/jquery.pwstrength.min.js') }}"></script>
-@endpush
 
 @push('js')
-    @if ($errors->any())
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#userFormModal').modal('show')
-            });
-        </script>
-    @endif
-@endpush
-
-@push('js-page')
-    <script src="{{ asset('assets/js/page/auth-register.js') }}"></script>
-
     <div id="userFormModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -83,11 +67,23 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('assets/js/page/auth-register.js') }}"></script>
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                $('#userFormModal').modal('show')
+            });
+        </script>
+    @endif
+
 @endpush
 
-@section('page-body')
+@section('main-content')
 
-    <button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="modal" data-target="#userFormModal">
+    <button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="modal"
+        data-target="#userFormModal">
         Daftar sekarang
     </button>
 

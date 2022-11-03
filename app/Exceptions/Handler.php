@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -34,7 +35,7 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        if (config('app.env') === 'production') {
+        if (App::environment('production')) {
             $this->reportable(function (Throwable $e) {
                 if (app()->bound('sentry')) {
                     app('sentry')->captureException($e);

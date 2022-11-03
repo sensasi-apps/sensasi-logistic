@@ -1,8 +1,8 @@
-@extends('layouts.auth')
+@extends('layouts.main', ['layout' => 'auth'])
 
-@section('page-title', 'Silahkan masuk')
+@section('title', 'Silahkan masuk')
 
-@section('page-body')
+@section('main-content')
     @if ($errors->any())
         @foreach ($errors->all() as $error)
             @include('components._alert', ['message' => $error])

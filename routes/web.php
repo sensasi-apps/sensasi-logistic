@@ -3,7 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\materials;
+use App\Http\Controllers\materialController;
+use Illuminate\Support\Facades\App;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,10 +54,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::get('/', [materials::class, 'index'])->name('index');
-    Route::post('/store', [materials::class, 'store'])->name('material.store');
-    Route::post('/update', [materials::class, 'update'])->name('material.update');
-    Route::post('/delete', [materials::class, 'delete'])->name('material.delete');
-    Route::post('/tags_set', [materials::class, 'tags_set'])->name('material.tags_set');
-    Route::post('/tags_delete', [materials::class, 'tags_delete'])->name('material.tags_delete');
+    Route::resource('materials', materialController::class);
+
+    if (App::environment('local')) {
+        Route::get('basic-page-format', function () {
+            return view('basic-page-format');
+        });
+    }
 });
