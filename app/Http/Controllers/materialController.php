@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\materials;
+use App\Models\Material;
 
-class materialController extends Controller
+class MaterialController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-         $data['materials'] = materials::all();
+        $data['materials'] = Material::all();
 
-        return view('materials.index', $data);
+        return view('material.index', $data);
     }
 
     /**
@@ -22,7 +27,7 @@ class materialController extends Controller
      */
     public function create()
     {
-
+        //
     }
 
     /**
@@ -37,11 +42,10 @@ class materialController extends Controller
             'name' => 'required',
             'code' => 'required',
             'unit' => 'required',
-            'tags_json' => 'required',
+            'tags_json' => 'nullable',
         ]);
-        dd($request->code);
 
-        materials::create($validatedInput);
+        Material::create($validatedInput);
 
         return redirect(route('materials.index'))->with('message', [
           'class' => 'success',
@@ -86,8 +90,13 @@ class materialController extends Controller
             'unit' => 'required',
             'tags_json' => 'nullable'
         ]);
-        $materi = materials::find($request->id);
-        $request->tags_json = $materi->tags_json.",".$request->tags_json;
+
+        $materi = Material::find($request->id);
+        if ($request->tags_json) {
+            $update['tags_json'] = $materi->tags_json.",".$update['tags_json'];
+        } else{
+            $update['tags_json'] = $materi->tags_json;
+        }
         $materi->update($update);
 
         return redirect(route('materials.index'))->with('message', [

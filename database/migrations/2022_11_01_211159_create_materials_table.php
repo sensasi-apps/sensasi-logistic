@@ -16,9 +16,9 @@ class CreateMaterialsTable extends Migration
         Schema::connection('mysql')->create('materials', function (Blueprint $table) {
             $table->id();
             $table->string('code', 10)->nullable()->unique();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('tags_json')->nullable();
-            $table->string('unit', 10)->nullable();
+            $table->string('unit', 10);
             $table->timestamps();
             $table->softDeletes();
         });
