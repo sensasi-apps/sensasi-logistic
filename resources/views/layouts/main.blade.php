@@ -12,6 +12,15 @@
         {{ config('app.name') }}
     </title>
 
+    <script src="https://js.sentry-cdn.com/9d286c0b3d5f47ed957410711969c083.min.js" crossorigin="anonymous"></script>
+    <script>
+        Sentry.onLoad(function() {
+            @if (App::environment('production'))
+                Sentry.init();
+            @endif
+        });
+    </script>
+
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -41,7 +50,6 @@
         @endswitch
     </div>
 
-    <!-- General JS Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"
         integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
