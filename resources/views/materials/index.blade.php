@@ -115,7 +115,6 @@
     <script type="text/javascript">
         $(document).on('click', '#tambahMateri', function() {
             const MaterialForm = document.querySelector('#materialForm')
-            // const materialTags = document.querySelector('#materialTags')
             const materialDelete = document.querySelector('#materialDelete')
             let idMaterial = $(this).data('materi_id')
 
@@ -146,71 +145,26 @@
 
         $(document).on('click', '#ubahMateri', function() {
             const MaterialForm = document.querySelector('#materialForm')
-            // const materialTags = document.querySelector('#materialTags')
             const materialDelete = document.querySelector('#materialDelete')
             var put = document.createElement('div')
             put.innerHTML = '@METHOD('PUT')'
             let idMaterial = $(this).data('materi_id')
 
-            // var anu = $(this).data('materi_tags').split(',')
+            // for (var i = 0; i < 100; i++) {
+            //     const name_tags = document.querySelector('#name_tags' + i)
 
-            for (var i = 0; i < 100; i++) {
-                const name_tags = document.querySelector('#name_tags' + i)
-
-                if (name_tags) {
-                    name_tags.remove()
-                }
-            }
-
-            // for (var i = 0; i < anu.length; i++) {
-            //     var form = document.createElement('form')
-            //     var csrf = document.createElement('div')
-
-            //     var material_id_tags = document.createElement('input')
-            //     var name_tags = document.createElement('span')
-            //     var name_tag = document.createTextNode(anu[i])
-            //     var name_tag_button = document.createElement('button')
-            //     var x = document.createElement('i')
-
-            //     csrf.setAttribute('class', 'csrf')
-            //     csrf.innerHTML = '@csrf'
-
-            //     x.setAttribute('class', 'fas fa-times')
-
-            //     name_tag_button.setAttribute('class', 'btn rounded-circle')
-            //     name_tag_button.appendChild(x)
-
-            //     name_tags.setAttribute('class', 'badge rounded-pill text-white bg-secondary')
-            //     name_tags.setAttribute('id', 'name_tags')
-            //     name_tags.appendChild(name_tag)
-            //     name_tags.appendChild(name_tag_button)
-
-            //     material_id_tags.setAttribute('type', 'hidden')
-            //     material_id_tags.setAttribute('id', 'material_id_tags')
-            //     material_id_tags.setAttribute('name', 'id')
-            //     material_id_tags.value = idMaterial
-
-            //     form.setAttribute('action', "")
-            //     form.setAttribute('method', 'post')
-            //     form.setAttribute('class', 'd-inline-block mb-3 tagsForm')
-            //     form.setAttribute('id', 'name_tags' + i)
-
-            //     form.appendChild(csrf)
-            //     form.appendChild(put)
-            //     form.appendChild(material_id_tags)
-            //     form.appendChild(name_tags)
-            //     modal_body_material.appendChild(form)
+            //     if (name_tags) {
+            //         name_tags.remove()
+            //     }
             // }
 
             $("#materialId").val(idMaterial)
             $("#idMaterialDelete").val(idMaterial)
             $("#materialName").val($(this).data('materi_name'))
             $("#materialUnit").val($(this).data('materi_unit'))
-            // $("#materialTagss").html($(this).data('materi_tags'))
             $("#materialCode").val($(this).data('materi_code'))
 
             $('#material_tags').val(idMaterial)
-            // $('#material_id_tags').val($(this).data('materi_tags'))
 
             $('#materialDelete').show()
             $('#name_tags').show()
@@ -220,3 +174,4 @@
         })
     </script>
 @endpush
+

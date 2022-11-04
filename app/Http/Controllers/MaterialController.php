@@ -90,11 +90,12 @@ class MaterialController extends Controller
         $update = $request->validate([
             'code' => 'nullable',
             'name' => 'required',
-            'unit' => 'required'
+            'unit' => 'required',
+            'tags' => 'nullable'
         ]);
 
         if ($request->tags) {
-            $update['tags_json'] = json_encode($request->tags);
+            $update['tags'] = json_encode($request->tags);
         }
 
         $material->update($update);
