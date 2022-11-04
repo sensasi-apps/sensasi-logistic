@@ -2,7 +2,6 @@
 
 @section('title', 'Basic Page Format')
 
-@section('page-body')
 @section('main-content')
     <div class="section-body">
         <h2 class="section-title">Heading 1</h2>
