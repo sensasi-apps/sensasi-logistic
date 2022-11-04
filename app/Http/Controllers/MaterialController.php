@@ -40,10 +40,13 @@ class MaterialController extends Controller
     {
         $validatedInput = $request->validate([
             'name' => 'required',
-            'code' => 'required',
-            'unit' => 'required',
-            'tags_json' => 'nullable',
+            'code' => 'nullable',
+            'unit' => 'required'
         ]);
+        
+        if ($request->tags) {
+            $validatedInput['tags_json'] = json_encode($request->tags);
+        }
 
         Material::create($validatedInput);
 
@@ -82,26 +85,23 @@ class MaterialController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Material $material)
     {
         $update = $request->validate([
-            'code' => 'required',
+            'code' => 'nullable',
             'name' => 'required',
-            'unit' => 'required',
-            'tags_json' => 'nullable'
+            'unit' => 'required'
         ]);
 
-        $materi = Material::find($request->id);
-        if ($request->tags_json) {
-            $update['tags_json'] = $materi->tags_json.",".$update['tags_json'];
-        } else{
-            $update['tags_json'] = $materi->tags_json;
+        if ($request->tags) {
+            $update['tags_json'] = json_encode($request->tags);
         }
-        $materi->update($update);
+
+        $material->update($update);
 
         return redirect(route('materials.index'))->with('message', [
           'class' => 'success',
-          'text' => 'Berhasil menambah riwayat pendidikan'
+          'text' => __(($material->code ?? $material->name) . ' was updated successfully') . '.'
         ]);
     }
 
@@ -111,9 +111,13 @@ class MaterialController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Material $material)
     {
-        material::where('id', $request->id)->delete();
+        try {
+            $material->delete();
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
 
         return redirect(route('materials.index'))->with('message', [
           'class' => 'success',
