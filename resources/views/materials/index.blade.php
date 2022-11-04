@@ -150,14 +150,6 @@
             put.innerHTML = '@METHOD('PUT')'
             let idMaterial = $(this).data('materi_id')
 
-            // for (var i = 0; i < 100; i++) {
-            //     const name_tags = document.querySelector('#name_tags' + i)
-
-            //     if (name_tags) {
-            //         name_tags.remove()
-            //     }
-            // }
-
             $("#materialId").val(idMaterial)
             $("#idMaterialDelete").val(idMaterial)
             $("#materialName").val($(this).data('materi_name'))
