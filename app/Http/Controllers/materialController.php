@@ -17,7 +17,7 @@ class MaterialController extends Controller
     {
         $data['materials'] = Material::all();
 
-        return view('material.index', $data);
+        return view('materials.index', $data);
     }
 
     /**
