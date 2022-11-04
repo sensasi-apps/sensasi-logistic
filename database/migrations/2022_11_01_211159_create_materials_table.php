@@ -13,13 +13,14 @@ class CreateMaterialsTable extends Migration
      */
     public function up()
     {
-        Schema::create('materials', function (Blueprint $table) {
+        Schema::connection('mysql')->create('materials', function (Blueprint $table) {
             $table->id();
-            $table->string('code', 10)->unique();
+            $table->string('code', 10)->nullable()->unique();
             $table->string('name');
             $table->string('tags_json');
-            $table->string('unit', 10);
+            $table->string('unit', 10)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -30,6 +31,6 @@ class CreateMaterialsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('materials');
+        Schema::connection('mysql')->dropIfExists('materials');
     }
 }
