@@ -32,7 +32,7 @@ class InitializeAppController extends Controller
   public function createAdminUser()
   {
     if ($this->isAdminExist()) {
-      abort('403', __('abort.forbidden'));
+      abort('403');
     }
 
     return view('pages.initialize-app.admin-user-form');
@@ -62,14 +62,14 @@ class InitializeAppController extends Controller
   public function signUpWithGoogle()
   {
     return Socialite::driver('google')
-      ->redirectUrl(route('initialize-app.sign-up-admin-with-google-callback'))
+      ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
       ->redirect();
   }
 
   public function handleGoogleCallback(Request $request)
   {
     $googleUser = Socialite::driver('google')
-      ->redirectUrl(route('initialize-app.sign-up-admin-with-google-callback'))
+      ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
       ->stateless()
       ->user();
 

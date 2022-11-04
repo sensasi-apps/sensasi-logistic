@@ -42,15 +42,19 @@
     <div class="main-sidebar sidebar-style-2">
         <aside id="sidebar-wrapper">
             <div class="sidebar-brand">
-                <a href="index.html">
+                <a href="{{ route('/') }}">
                     <i class="fas fa-box"></i>
                     {{ config('app.name') }}
                 </a>
             </div>
             <div class="sidebar-brand sidebar-brand-sm">
-                <a href="index.html">
+                <a href="{{ route('/') }}">
                     <i class="fas fa-box"></i>
                 </a>
+            </div>
+
+            <div class="text-right pr-4" style="transform: translateY(-1em)">
+                <span id="currentDate"></span>
             </div>
 
             @include('layouts.components._sidebar-menu-ul')
@@ -86,3 +90,23 @@
         </div> --}}
     </footer>
 </div>
+
+@once
+    @push('js')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"
+            integrity="sha512-hlLgIh4nncb2yc4YPtWk5wOykcFxF0fBd5rHfJ6xsALI2khY3H8LbivswJE5Fpz7hws7CJCqOzdyjWHiKJYl+A=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            moment.locale('{{ config('app.locale') }}')
+        </script>
+    @endpush
+@endonce
+
+@push('js')
+    <script>
+        {
+            const currentDateVal = moment().format('L');
+            $('#currentDate').html(currentDateVal);
+        };
+    </script>
+@endpush

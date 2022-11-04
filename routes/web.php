@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\materialController;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\App;
 
 /*
@@ -23,15 +24,21 @@ Route::get('initialize-app', [InitializeAppController::class, 'index']);
 Route::get('initialize-app/check', [InitializeAppController::class, 'check'])->name('initialize-app.check');
 
 Route::middleware('guest')->group(function () {
-    Route::controller(InitializeAppController::class)
-        ->prefix('initialize-app')
-        ->name('initialize-app.')
-        ->group(function () {
-            Route::get('admin-user', 'createAdminUser')->name('create-admin-user');
-            Route::post('admin-user', 'storeAdminUser')->name('store-admin-user');
-            Route::get('admin-user/oauth/google', 'signUpWithGoogle')->name('sign-up-admin-with-google');
-            Route::get('admin-user/oauth/google/redirect', 'handleGoogleCallback')->name('sign-up-admin-with-google-callback');
+
+    //
+    Route::controller(InitializeAppController::class)->group(function () {
+        Route::prefix('initialize-app')->name('initialize-app')->group(function () {
+            Route::name('.create-admin-user')->prefix('create-admin-user')->group(function () {
+                Route::get('/', 'createAdminUser');
+                Route::post('/', 'storeAdminUser')->name('.store');
+
+                Route::name('.oauth.google')->prefix('oauth/google')->group(function () {
+                    Route::get('/', 'signUpWithGoogle');
+                    Route::get('redirect', 'handleGoogleCallback')->name('.redirect');
+                });
+            });
         });
+    });
 
 
     Route::controller(AuthController::class)
@@ -52,13 +59,18 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/', fn () => null)->name('/');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::resource('materials', materialController::class);
+    Route::resource('materials', MaterialController::class);
+
+    Route::controller(AppSystemController::class)->group(function () {
+        Route::prefix('system')->name('system')->group(function () {
+            Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
+        });
+    });
 
     if (App::environment('local')) {
-        Route::get('basic-page-format', function () {
-            return view('basic-page-format');
-        });
+        Route::get('basic-page-format', fn () => view('basic-page-format'));
     }
 });
