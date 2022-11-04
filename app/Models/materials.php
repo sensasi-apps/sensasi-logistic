@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class materials_model extends Model
+class materials extends Model
 {
     use HasFactory;
-    protected $table = 'materials';
+    use SoftDeletes;
     protected $fillable = ['code', 'name', 'tags_json', 'unit'];
 }

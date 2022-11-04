@@ -17,7 +17,7 @@ class CreateMaterialsTable extends Migration
             $table->id();
             $table->string('code', 10)->nullable()->unique();
             $table->string('name');
-            $table->string('tags_json');
+            $table->string('tags_json')->nullable();
             $table->string('unit', 10)->nullable();
             $table->timestamps();
             $table->softDeletes();
