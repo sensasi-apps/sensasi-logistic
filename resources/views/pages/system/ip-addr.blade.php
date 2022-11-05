@@ -22,7 +22,7 @@
 
     </div>
 
-    <div id="shareSection">
+    <div id="shareSection" class="d-none">
         <p class="m-0">Bagikan:</p>
         <div>
             <a id="waShareButton" class="btn btn-success btn-sm p-0 text-light" target="_blank">
