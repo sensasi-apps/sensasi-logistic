@@ -12,14 +12,9 @@
         {{ config('app.name') }}
     </title>
 
-    <script src="https://js.sentry-cdn.com/9d286c0b3d5f47ed957410711969c083.min.js" crossorigin="anonymous"></script>
-    <script>
-        Sentry.onLoad(function() {
-            @if (App::environment('production'))
-                Sentry.init();
-            @endif
-        });
-    </script>
+    @if (App::environment('production'))
+        <script src="https://js.sentry-cdn.com/9d286c0b3d5f47ed957410711969c083.min.js" crossorigin="anonymous"></script>
+    @endif
 
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
