@@ -40,21 +40,22 @@ Route::middleware('guest')->group(function () {
     });
 
 
-    Route::controller(AuthController::class)
-        ->prefix('login')
-        ->name('login')
-        ->group(function () {
-            Route::get('/', [AuthController::class, 'loginForm']);
+
+
+    Route::view('forgot-password', 'pages.auth.forgot-password-form');
+
+    Route::controller(AuthController::class)->group(function () {
+        Route::prefix('login')->name('login')->group(function () {
+            Route::view('/', 'pages.auth.login-form');
             Route::post('/', 'login');
             Route::get('oauth/google', 'googleOauth')->name('.oauth.google');
             Route::get('oauth/google/redirect', 'handleGoogleOauth')->name('.oauth.google.callback');
         });
-
-
-    // Route::get('forgot-password', [ForgotPassword::class, 'index'])->name('forgot-password');
-    // Route::post('forgot-password', [ForgotPassword::class, 'send'])->name('forgot-password.send');
-    // Route::get('reset-password/{token}', [ForgotPassword::class, 'resetPasswordForm'])->name('password.reset');
-    // Route::post('reset-password', [ForgotPassword::class, 'resetPassword'])->name('password.update');
+        
+        Route::post('forgot-password', 'forgotPassword');
+        Route::get('reset-password/{token}', 'resetPasswordForm')->name('password.reset');
+        Route::post('reset-password', 'resetPassword')->name('password.update');
+    });
 });
 
 Route::middleware('auth')->group(function () {

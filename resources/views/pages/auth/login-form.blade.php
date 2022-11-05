@@ -3,12 +3,6 @@
 @section('title', 'Silahkan masuk')
 
 @section('main-content')
-    @if ($errors->any())
-        @foreach ($errors->all() as $error)
-            @include('components._alert', ['message' => $error])
-        @endforeach
-    @endif
-
     <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="">
         @csrf
 
@@ -20,11 +14,11 @@
         <div class="form-group">
             <div class="d-block">
                 <label for="password" class="control-label">Password</label>
-                {{-- <div class="float-right">
-                    <a href="auth-forgot-password.html" class="text-small">
+                <div class="float-right">
+                    <a href="{{ action('App\Http\Controllers\AuthController@forgotPassword') }}" class="text-small">
                         {{ __('auth.Forgot Password') }} ?
                     </a>
-                </div> --}}
+                </div>
             </div>
             <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" tabindex="2" required>
         </div>
