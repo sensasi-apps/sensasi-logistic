@@ -70,11 +70,7 @@
                 </div>
             @endif
 
-            @if ($errors->any())
-                @foreach ($errors->all() as $error)
-                    @include('components._alert', ['message' => $error])
-                @endforeach
-            @endif
+            @include('layouts.components._alert-catch')
 
             @yield('main-content')
         </div>
