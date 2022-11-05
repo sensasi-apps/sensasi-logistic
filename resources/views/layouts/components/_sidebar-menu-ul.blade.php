@@ -25,7 +25,7 @@
     @endif
 
     <li>
-        <a class="nav-link" href="materials">
+        <a class="nav-link" href="{{route('materials.index')}}">
             <i class="fas fa-pallet"></i>
             <span>Bahan</span>
         </a>

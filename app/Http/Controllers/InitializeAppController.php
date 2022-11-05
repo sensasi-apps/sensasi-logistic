@@ -46,7 +46,9 @@ class InitializeAppController extends Controller
       'password' => 'required|confirmed|min:8|max:255',
     ]);
 
+    $validatedInput['password'] = bcrypt($validatedInput['password']);
     $user = User::create($validatedInput);
+
     $user->assignRole('Super Admin');
 
     Auth::login($user);

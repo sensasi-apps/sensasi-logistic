@@ -4,6 +4,7 @@ use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\App;
 
 /*
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => null)->name('/');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
+    Route::resource('materials', MaterialController::class);
 
     Route::controller(AppSystemController::class)->group(function () {
         Route::prefix('system')->name('system')->group(function () {
