@@ -77,18 +77,18 @@
 
                         <input type="hidden" name="id" id="materialId">
                         <div class="mb-3">
-                            <label for="tags">{{ __('Code') }}</label>
+                            <label for="materialCode">{{ __('Code') }}</label>
                             <input type="text" class="form-control" name="code" id="materialCode"
                                 placeholder="Material Code">
                         </div>
                         <div class="mb-3">
-                            <label for="tags">{{ __('Name') }}</label>
+                            <label for="materialName">{{ __('Name') }}</label>
                             <input type="text" class="form-control" name="name" required id="materialName"
                                 placeholder="Material Name">
                         </div>
 
                         <div class="mb-3">
-                            <label for="tags">{{ __('Unit') }}</label>
+                            <label for="materialUnit">{{ __('Unit') }}</label>
                             <input type="text" class="form-control" name="unit" required id="materialUnit"
                                 placeholder="Material Unit">
                         </div>
@@ -117,62 +117,70 @@
 
     <script type="text/javascript">
         $(document).on('click', '#tambahMateri', function() {
-            const MaterialForm = document.querySelector('#materialForm')
-            const materialDelete = document.querySelector('#materialDelete')
-            let idMaterial = $(this).data('materi_id')
+            const MaterialForm = document.querySelector('#materialForm');
+            const materialDelete = document.querySelector('#materialDelete');
 
+            let MaterialId = $(this).data('materi_id');
+            let MaterialName = $(this).data('materi_name');
+            let MaterialUnit = $(this).data('materi_unit');
+            let MaterialCode = $(this).data('materi_code');
 
-            for (var i = 0; i < 100; i++) {
-                const name_tags = document.querySelector('#name_tags' + i)
-
-                if (name_tags) {
-                    name_tags.remove()
-                }
+            //jika ada method('put'), maka hapus
+            if (document.querySelector('.put')) {
+                document.querySelector('.put').remove();
             }
 
-            $("#materialId").val(idMaterial)
-            $("#materialName").val($(this).data('materi_name'))
-            $("#materialUnit").val($(this).data('materi_unit'))
-            // $("#materialTagss").html($(this).data('materi_tags'))
-            $("#materialCode").val($(this).data('materi_code'))
+            $("#materialId").val(MaterialId);
+            $("#materialName").val(MaterialName);
+            $("#materialUnit").val(MaterialUnit);
+            $("#materialCode").val(MaterialCode);
 
-            // materialTags.placeholder = 'Material Tags'
+            $('#material_tags').val(MaterialId);
 
-            $('#material_tags').val(idMaterial)
-            // $('#material_id_tags').val($(this).data('materi_tags'))
+            $('#exampleModalLabel').html('Add New Material');
 
-            $('#exampleModalLabel').html('Add New Material')
+            $('#materialDelete').hide();
+            $('#name_tags').hide();
 
-            $('#materialDelete').hide()
-            $('#name_tags').hide()
-
-            MaterialForm.action = "{{ route('materials.store') }}"
+            MaterialForm.action = "{{ route('materials.store') }}";
         })
 
         $(document).on('click', '#ubahMateri', function() {
-            const MaterialForm = document.querySelector('#materialForm')
-            const materialDelete = document.querySelector('#materialDelete')
-            var put = document.createElement('div')
-            put.innerHTML = '@METHOD('PUT')'
-            let idMaterial = $(this).data('materi_id')
+            const MaterialForm = document.querySelector('#materialForm');
+            const materialDelete = document.querySelector('#materialDelete');
 
+            let MaterialId = $(this).data('materi_id');
+            let MaterialName = $(this).data('materi_name');
+            let MaterialUnit = $(this).data('materi_unit');
+            let MaterialCode = $(this).data('materi_code');
 
+            //jika ada method('put'), maka hapus
+            if (document.querySelector('.put')) {
+                document.querySelector('.put').remove();
+            }
 
-            $("#materialId").val(idMaterial)
-            $("#idMaterialDelete").val(idMaterial)
-            $("#materialName").val($(this).data('materi_name'))
-            $("#materialUnit").val($(this).data('materi_unit'))
-            $("#materialCode").val($(this).data('materi_code'))
-            $('#exampleModalLabel').html('Edit Material')
+            //menambahkan method('put')
+            var put = document.createElement('div');
+            put.setAttribute('class', 'put');
+            put.innerHTML = '@METHOD('PUT')';
 
-            $('#material_tags').val(idMaterial)
+            $("#materialId").val(MaterialId);
+            $("#idMaterialDelete").val(MaterialId);
+            $("#materialName").val(MaterialName);
+            $("#materialUnit").val(MaterialUnit);
+            $("#materialCode").val(MaterialCode);
+            $('#exampleModalLabel').html('Edit Material');
 
-            $('#materialDelete').show()
-            $('#name_tags').show()
+            $('#material_tags').val(MaterialId);
 
-            MaterialForm.appendChild(put)
-            MaterialForm.action = "{{ route('materials.update', 1) }}"
-        })
+            $('#materialDelete').show();
+            $('#name_tags').show();
+
+            MaterialForm.appendChild(put);
+            MaterialForm.action = "{{route('materials.store')}}/"+MaterialId; //maaf saya melawan hukum pemrograman. meskipun route-nya ke store tapi karena ada METHOD("PUT") jadinya ke redirect ke update
+
+            //note : tadi itu sebenarnya routenya dialihkan ke materials.update tapi dengan id 1 saja.
+        });
     </script>
 @endpush
 
