@@ -41,7 +41,7 @@ class MaterialController extends Controller
         $validatedInput = $request->validate([
             'name' => 'required',
             'code' => 'nullable',
-            'unit' => 'required'
+            'unit' => 'required',
         ]);
         
         if ($request->tags) {
@@ -91,7 +91,6 @@ class MaterialController extends Controller
             'code' => 'nullable',
             'name' => 'required',
             'unit' => 'required',
-            'tags' => 'nullable'
         ]);
 
         if ($request->tags) {

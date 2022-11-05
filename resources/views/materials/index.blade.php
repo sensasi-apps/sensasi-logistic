@@ -77,15 +77,18 @@
 
                         <input type="hidden" name="id" id="materialId">
                         <div class="mb-3">
+                            <label for="tags">{{ __('Code') }}</label>
                             <input type="text" class="form-control" name="code" id="materialCode"
                                 placeholder="Material Code">
                         </div>
                         <div class="mb-3">
+                            <label for="tags">{{ __('Name') }}</label>
                             <input type="text" class="form-control" name="name" required id="materialName"
                                 placeholder="Material Name">
                         </div>
 
                         <div class="mb-3">
+                            <label for="tags">{{ __('Unit') }}</label>
                             <input type="text" class="form-control" name="unit" required id="materialUnit"
                                 placeholder="Material Unit">
                         </div>
@@ -118,6 +121,7 @@
             const materialDelete = document.querySelector('#materialDelete')
             let idMaterial = $(this).data('materi_id')
 
+
             for (var i = 0; i < 100; i++) {
                 const name_tags = document.querySelector('#name_tags' + i)
 
@@ -137,6 +141,8 @@
             $('#material_tags').val(idMaterial)
             // $('#material_id_tags').val($(this).data('materi_tags'))
 
+            $('#exampleModalLabel').html('Add New Material')
+
             $('#materialDelete').hide()
             $('#name_tags').hide()
 
@@ -150,11 +156,14 @@
             put.innerHTML = '@METHOD('PUT')'
             let idMaterial = $(this).data('materi_id')
 
+
+
             $("#materialId").val(idMaterial)
             $("#idMaterialDelete").val(idMaterial)
             $("#materialName").val($(this).data('materi_name'))
             $("#materialUnit").val($(this).data('materi_unit'))
             $("#materialCode").val($(this).data('materi_code'))
+            $('#exampleModalLabel').html('Edit Material')
 
             $('#material_tags').val(idMaterial)
 
