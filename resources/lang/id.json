@@ -2,7 +2,7 @@
   "Forbidden": "Halaman terlarang",
   "IP Addresses": "Alamat IP",
   "Share": "Bagikan",
-  "Something went wrong, please refresh this page.": "Terjadi kesalahan, silahkan muat ulang halaman.",
-  "Reset password": "Reset kata sandi",
-  "Forgot password": "Lupa kata sandi"
+  "Something went wrong, please refresh this page": "Terjadi kesalahan, silahkan muat ulang halaman",
+  ":data was updated successfully": ":data telah berhasil diperbaharui",
+  "Material": "Material"
 }
