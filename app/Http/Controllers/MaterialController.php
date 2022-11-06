@@ -36,8 +36,8 @@ class MaterialController extends Controller
     public function store(Request $request)
     {
         $validatedInput = $request->validate([
-            'name' => 'required',
-            'code' => 'nullable',
+            'name' => 'required|unique:mysql.materials',
+            'code' => 'nullable|unique:mysql.materials',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
@@ -82,8 +82,8 @@ class MaterialController extends Controller
     public function update(Request $request, Material $material)
     {
         $update = $request->validate([
-            'code' => 'nullable',
-            'name' => 'required',
+            'code' => 'nullable|unique:mysql.materials',
+            'name' => 'required|unique:mysql.materials',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
