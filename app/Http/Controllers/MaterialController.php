@@ -82,8 +82,8 @@ class MaterialController extends Controller
     public function update(Request $request, Material $material)
     {
         $update = $request->validate([
-            'code' => 'nullable|unique:mysql.materials',
-            'name' => 'required|unique:mysql.materials',
+            'code' => 'nullable',
+            'name' => 'required',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
