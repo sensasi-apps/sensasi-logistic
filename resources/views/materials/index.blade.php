@@ -77,9 +77,9 @@
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <form action="{{ route('materials.destroy', 1) }}" method="post">
+                    <form action="" method="post" id="DeleteForm">
                         @csrf
-                        @METHOD('PUT')
+                        @METHOD('DELETE')
                         <input type="hidden" name="id" id="idMaterialDelete">
                         <button type="submit" id="materialDelete" class="btn btn-danger">Delete</button>
                         <button type="submit" form="materialForm" class="btn btn-primary">Save</button>
@@ -120,18 +120,20 @@
                     data: 'name',
                     title: '{{ __('Name') }}'
                 }, {
-                    data: 'tags',
-                    title: '{{ __('Tags') }}',
-                    render: data => data.join(', ')
-                }, {
                     data: 'unit',
                     title: '{{ __('Unit') }}'
+                }, {
+                    data: 'tags',
+                    title: '{{ __('Tags') }}',
+                    render: data => data?.join(', '),
+                    "orderable": false
                 }, {
                     render: function(data, type, row) {
                         const rowEditButton = editButton.clone();
                         rowEditButton.attr('data-material-id', row.id);
                         return rowEditButton.prop('outerHTML');
-                    }
+                    },
+                    "orderable": false
                 }]
             });
 
@@ -228,9 +230,12 @@
             // $('#name_tags').show();
 
             MaterialForm.appendChild(put);
-            MaterialForm.action = "{{ route('materials.store') }}/" +
+            MaterialForm.action = "{{ route('materials.update', '') }}/" +
                 material
-                .id; //maaf saya melawan hukum pemrograman. meskipun route-nya ke store tapi karena ada METHOD("PUT") jadinya ke redirect ke update
+                .id;
+            DeleteForm.action = "{{route('materials.destroy', '')}}/"+material
+                .id;
+                 //maaf saya melawan hukum pemrograman. meskipun route-nya ke store tapi karena ada METHOD("PUT") jadinya ke redirect ke update
 
             //note : tadi itu sebenarnya routenya dialihkan ke materials.update tapi dengan id 1 saja.
         });
