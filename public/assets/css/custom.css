@@ -6,3 +6,39 @@
  */
 
 /*# sourceMappingURL=custom.css.map */
+
+.main-content
+ {
+  transition: unset;
+}
+
+#select2-tagsSelect-results {
+	display: none !important;
+}
+
+.select2-selection__choice {
+	background-color: var(--success) !important;
+	border-radius: 50rem !important;
+	border: unset !important;
+	margin-top: 0px !important;
+}
+
+.select2-selection {
+	display: flex !important;
+	align-items: center !important;
+}
+
+.select2-selection__rendered {
+	display: inherit !important;
+	align-items: inherit;
+}
+
+.btn-icon-custom {
+	border: none;
+	padding: 3.5px;
+}
+
+.btn-icon-custom .fas {
+	margin: 3.5px !important;
+	font-size: 1.5rem !important;
+}

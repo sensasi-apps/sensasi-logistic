@@ -66,19 +66,41 @@
                         </div>
                     </form>
                     <div class="d-flex justify-content-between">
-                        <div>
-                            <button type="submit" form="materialForm" class="btn btn-success">{{ __('Save') }}</button>
-                        </div>
-                        <form method="post" id="deleteForm">
-                            @csrf
-                            @method('delete')
-                            <input type="hidden" name="id" id="deleteId">
-                            <button type="submit" class="btn btn-icon btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button type="submit" form="materialForm" class="btn btn-primary">{{ __('Save') }}</button>
+
+                        <button id="deleteFormModalButtonToggle" type="submit" class="btn btn-icon btn-outline-danger"
+                            data-toggle="tooltip" title="{{ __('Delete') }}" onclick="$('#materialDeleteConfirmationModal').modal('show');">
+                            <i class="fas fa-trash" style="font-size: 1rem !important"></i>
+                        </button>
                     </div>
-    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="materialDeleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+        aria-hidden="">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Are you sure?') }}</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal_body_material" style="font-size: 1.1rem">
+                    {{ __('This action can not be undone') }}.
+                    {{ __('Do you want to continue delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
+                    <form method="post" id="deleteForm">
+                        @csrf
+                        @method('delete')
+                        <input type="hidden" name="id" id="deleteId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" form="deleteForm" class="btn btn-danger"
+                        id="">{{ __('Yes') }}</button>
+                    <button data-dismiss="modal" class="btn btn-secondary" id="">{{ __('Cancel') }}</button>
                 </div>
             </div>
         </div>
@@ -97,7 +119,6 @@
             $('#materialForm').append($('@method('put')'))
         }
 
-
         const setFormValue = material => {
             const selectOpts = tagsSelect.find('option');
             const optValues = selectOpts.map((i, select) => select.innerHTML);
@@ -115,11 +136,11 @@
             codeInput.value = material.code || null
             deleteId.value = material.id
         }
-        
 
-        const datatableSearch = tag =>  
+
+        const datatableSearch = tag =>
             materialDatatable.DataTable().search(tag).draw()
-         
+
 
         $(document).on('click', '.addMaterialButton', function() {
             materialFormModalLabel.innerHTML = '{{ __('Add new material') }}';
@@ -128,7 +149,7 @@
             deletePutMethodInput();
             setFormValue({});
 
-            deleteForm.style.display = "none";
+            deleteFormModalButtonToggle.style.display = "none";
             materialForm.action = "{{ route('materials.store') }}";
         })
 
@@ -142,12 +163,13 @@
             deletePutMethodInput();
             addPutMethodInput();
 
-            deleteForm.style.display = "block";
+            deleteFormModalButtonToggle.style.display = "block";
 
             materialForm.action = "{{ route('materials.update', '') }}/" +
                 material
                 .id;
 
+            deleteMaterialName.innerHTML = material.name
             deleteForm.action = "{{ route('materials.destroy', '') }}/" + material
                 .id;
         });
@@ -183,10 +205,14 @@
                     data: 'tags',
                     name: 'tags_json',
                     title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag => `<a href="#" onclick="datatableSearch('${tag}')" class="m-1 badge badge-success">${tag}</a>`).join('') || null,
+                    render: data => data?.map(tag =>
+                        `<a href="#" onclick="datatableSearch('${tag}')" class="m-1 badge badge-success">${tag}</a>`
+                    ).join('') || null,
                 }, {
                     render: function(data, type, row) {
-                        const editButton = $('<a href="#"><i class="fas fa-cog"></i></a>')
+                        const editButton = $(
+                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
+                            )
                         editButton.attr('data-toggle', 'modal')
                         editButton.attr('data-target', '#materialFormModal')
                         editButton.addClass('editMaterialButton');

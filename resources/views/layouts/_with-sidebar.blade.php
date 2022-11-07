@@ -6,6 +6,7 @@
                 <li>
                     <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg">
                         <i class="fas fa-bars"></i>
+                        <span id="currentDate" class="ml-4"></span>
                     </a>
                 </li>
             </ul>
@@ -53,10 +54,6 @@
                 </a>
             </div>
 
-            <div class="text-right pr-4" style="transform: translateY(-1em)">
-                <span id="currentDate"></span>
-            </div>
-
             @include('layouts.components._sidebar-menu-ul')
         </aside>
     </div>
@@ -102,7 +99,7 @@
     <script>
         {
             const currentDateVal = moment().format('L');
-            $('#currentDate').html(currentDateVal);
+            currentDate.innerHTML = currentDateVal;
         };
     </script>
 @endpush
