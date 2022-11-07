@@ -29,7 +29,7 @@
 @push('js')
     <div class="modal fade" id="materialFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
         aria-hidden="">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material') }}</h5>
@@ -67,13 +67,13 @@
                     </form>
                     <div class="d-flex justify-content-between">
                         <div>
-                            <button type="submit" form="materialForm" class="btn btn-outline-success">{{ __('Save') }}</button>
+                            <button type="submit" form="materialForm" class="btn btn-success">{{ __('Save') }}</button>
                         </div>
-                        <form action="" method="post" id="deleteForm">
+                        <form method="post" id="deleteForm">
                             @csrf
                             @method('delete')
                             <input type="hidden" name="id" id="deleteId">
-                            <button type="submit" class="btn btn-icon btn-outline-danger">
+                            <button type="submit" class="btn btn-icon btn-danger">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
