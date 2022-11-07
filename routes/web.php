@@ -4,7 +4,6 @@ use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\App;
 
 /*
@@ -41,34 +40,40 @@ Route::middleware('guest')->group(function () {
     });
 
 
-    Route::controller(AuthController::class)
-        ->prefix('login')
-        ->name('login')
-        ->group(function () {
-            Route::get('/', [AuthController::class, 'loginForm']);
+
+
+    Route::view('forgot-password', 'pages.auth.forgot-password-form');
+
+    Route::controller(AuthController::class)->group(function () {
+        Route::prefix('login')->name('login')->group(function () {
+            Route::view('/', 'pages.auth.login-form');
             Route::post('/', 'login');
             Route::get('oauth/google', 'googleOauth')->name('.oauth.google');
             Route::get('oauth/google/redirect', 'handleGoogleOauth')->name('.oauth.google.callback');
         });
-
-
-    // Route::get('forgot-password', [ForgotPassword::class, 'index'])->name('forgot-password');
-    // Route::post('forgot-password', [ForgotPassword::class, 'send'])->name('forgot-password.send');
-    // Route::get('reset-password/{token}', [ForgotPassword::class, 'resetPasswordForm'])->name('password.reset');
-    // Route::post('reset-password', [ForgotPassword::class, 'resetPassword'])->name('password.update');
+        
+        Route::post('forgot-password', 'forgotPassword');
+        Route::get('reset-password/{token}', 'resetPasswordForm')->name('password.reset');
+        Route::post('reset-password', 'resetPassword')->name('password.update');
+    });
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/', fn () => null)->name('/');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::resource('materials', MaterialController::class);
 
     Route::controller(AppSystemController::class)->group(function () {
         Route::prefix('system')->name('system')->group(function () {
             Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
         });
     });
+
+    
+    Route::resource('materials', MaterialController::class)->except([
+        'create', 'show', 'edit'
+    ]);
+
 
     if (App::environment('local')) {
         Route::get('basic-page-format', fn () => view('basic-page-format'));
