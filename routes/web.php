@@ -3,6 +3,7 @@
 use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
