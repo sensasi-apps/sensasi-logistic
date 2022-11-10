@@ -39,6 +39,7 @@ class Material_insController extends Controller
     {
         $validatedInput = $request->validate([
             'code' => 'nullable',
+            'type' => 'nullable',
             'note' => 'required',
             'desc' => 'required'
         ]);
@@ -46,7 +47,6 @@ class Material_insController extends Controller
         $validatedInput['at'] = date('Y-m-d h:i:s');
         $validatedInput['last_updated_by_user_id'] = Auth::user()->id;
         $validatedInput['created_by_user_id'] = Auth::user()->id;
-        $validatedInput['type'] = 'kosong'; //sementara isi ini aja dulu
         Material_ins::create($validatedInput);
 
         return redirect(route('materials.index'))->with('message', [
@@ -89,6 +89,7 @@ class Material_insController extends Controller
         $validatedInput = $request->validate([
             'code' => 'nullable',
             'last_updated_by_user_id' => 'required',
+            'type' => 'required',
             'note' => 'required',
             'desc' => 'required'
         ]);

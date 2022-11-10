@@ -55,7 +55,7 @@
                         <div class="form-group">
                             <label for="typeSelect">{{ __('Type') }}</label>
                             <select id="typeSelect" name="type" class="form-control select2" data-select2-opts='{"tags": "true"}'>
-                                <option selected>asdasd</option>
+
                             </select>
                         </div>
 
@@ -90,7 +90,7 @@
 
     <script>
         let materials
-        const tagsSelect = $('#tagsSelect')
+        const typeSelect = $('#typeSelect')
         let materialDatatable = $('#materialDatatable')
 
         const materialFormModalLabel = $('#materialFormModalLabel')
@@ -108,7 +108,7 @@
         const setMaterialInsertValue = material_ins => {
             idIns.value = material_ins.id || null
             last_updated_by_user_id.value = material_ins.last_updated_by_user_id || null
-            typeSelect.value = material_ins.type || null
+            typeSelect.val('asdasdasd').change();
             codeInsInput.value = material_ins.code || null
             noteInsInput.value = material_ins.note || null
             descInsInput.value = material_ins.desc || null
@@ -131,8 +131,10 @@
             const materialId = $(this).data('material-id');
             const material = materials.find(material => material.id === materialId);
             deleteForm.style.display = "block";
-            addPutMethodInputInsert();
 
+            
+            
+            addPutMethodInputInsert();
             setMaterialInsertValue(material);
             materiInsertForm.action = "{{ route('material_ins.update', '') }}/"+material.id;
 
@@ -141,6 +143,11 @@
         })
 
         $(document).ready(function() {
+            $('#typeSelect').select2('destroy').select2({
+                tags:true,
+                dropdownParent:$('#modal_body_material')
+            })
+
             materialDatatable = materialDatatable.dataTable({
                 processing: true,
                 serverSide: true,
