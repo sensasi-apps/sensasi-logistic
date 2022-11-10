@@ -19,6 +19,7 @@ class CreateMaterialInDetailsTable extends Migration
             ->constrained('material_ins')
             ->cascadeOnUpdate()
             ->restrictOnDelete();
+
             $table->foreignId('material_id')
             ->constrained('materials')
             ->cascadeOnUpdate()
@@ -26,7 +27,7 @@ class CreateMaterialInDetailsTable extends Migration
 
             $table->integer('qty');
             $table->integer('price');
-            $table->unique('material_in_id', 'material_id');
+            $table->unique(['material_id','material_in_id']);
             $table->timestamps();
         });
     }

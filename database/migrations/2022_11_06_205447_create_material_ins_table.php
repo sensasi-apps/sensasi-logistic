@@ -17,18 +17,9 @@ class CreateMaterialInsTable extends Migration
         Schema::connection('mysql')->create('material_ins', function (Blueprint $table) {
             $database = \DB::connection('mysql_system')->getDatabaseName();
             $table->id();
-            $table->integer('code')->nullable()->unique();
+            $table->string('code', 15)->nullable()->unique();
             $table->dateTime('at');
             $table->string('type');
-            // $table->unsignedBigInteger('created_by_user_id');
-            // $table->unsignedBigInteger('last_updated_by_user_id');
-            // $table->foreign('created_by_user_id')->references('id')->on('mysql_system.users')
-            // ->cascadeOnUpdate()
-            // ->restrictOnDelete();
-
-            // $table->foreign('last_updated_by_user_id')->references('id')->on('mysql_system.users')
-            // ->cascadeOnUpdate()
-            // ->restrictOnDelete();
 
             $table->foreignId('created_by_user_id')
                 ->constrained("$database.users")

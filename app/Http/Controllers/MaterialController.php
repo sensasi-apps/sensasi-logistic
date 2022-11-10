@@ -80,7 +80,7 @@ class MaterialController extends Controller
 
         return redirect(route('materials.index'))->with('message', [
           'class' => 'success',
-          'text' => 'Berhasil menambah riwayat pendidikan'
+          'text' => 'Berhasil menghapus Material'
         ]);
     }
 }
