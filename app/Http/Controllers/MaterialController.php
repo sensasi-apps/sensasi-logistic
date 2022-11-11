@@ -55,8 +55,9 @@ class MaterialController extends Controller
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
-
+        
         $material->update($update);
+
 
         return redirect(route('materials.index'))->with('message', [
           'class' => 'success',

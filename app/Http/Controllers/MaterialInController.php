@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Material_ins;
+use App\Models\MaterialIn;
+
 use Auth;
 
-class Material_insController extends Controller
+
+class MaterialInController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +18,7 @@ class Material_insController extends Controller
      */
     public function index()
     {
-        //
+        return view('material_ins.index');
     }
 
     /**
@@ -47,9 +49,9 @@ class Material_insController extends Controller
         $validatedInput['at'] = date('Y-m-d h:i:s');
         $validatedInput['last_updated_by_user_id'] = Auth::user()->id;
         $validatedInput['created_by_user_id'] = Auth::user()->id;
-        Material_ins::create($validatedInput);
+        MaterialIn::create($validatedInput);
 
-        return redirect(route('materials.index'))->with('message', [
+        return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
           'text' => 'Berhasil menambah Material Insert'
         ]);
@@ -95,9 +97,9 @@ class Material_insController extends Controller
         ]);
 
         $validatedInput['at'] = date('Y-m-d h:i:s');
-        Material_ins::find($id)->update($validatedInput);
+        MaterialIn::find($id)->update($validatedInput);
 
-        return redirect(route('materials.index'))->with('message', [
+        return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
           'text' => 'Berhasil menambah Material Insert'
         ]);
@@ -112,7 +114,7 @@ class Material_insController extends Controller
     public function destroy($id)
     {
         Material_ins::find($id)->delete();
-        return redirect(route('materials.index'))->with('message', [
+        return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
           'text' => 'Berhasil menambah Material Insert'
         ]);

@@ -4,7 +4,8 @@ use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\Material_insController;
+use App\Http\Controllers\MaterialInController;
+use App\Http\Controllers\Material_in_detailsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -76,7 +77,11 @@ Route::middleware('auth')->group(function () {
         'create', 'show', 'edit'
     ]);
 
-    Route::resource('material_ins', Material_insController::class)->except([
+    Route::resource('material_ins', MaterialInController::class)->except([
+        'create', 'show', 'edit'
+    ]);
+
+    Route::resource('material_in_details', Material_in_detailsController::class)->except([
         'create', 'show', 'edit'
     ]);
 
