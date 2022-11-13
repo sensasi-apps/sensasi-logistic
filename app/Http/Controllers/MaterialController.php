@@ -49,6 +49,7 @@ class MaterialController extends Controller
      */
     public function update(Request $request, Material $material)
     {
+
         $update = $request->validate([
             'code' => 'nullable',
             'name' => 'required',

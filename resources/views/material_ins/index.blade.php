@@ -98,13 +98,56 @@
     </div>
 
     <script>
-        let materials
+        let materialIns
         const typeSelect = $('#typeSelect')
         let materialDatatable = $('#materialDatatable')
 
         const materialFormModalLabel = $('#materialFormModalLabel')
 
         let materialInsert = $('#materialInsert')
+
+        function removeMaterialDetail(){
+            $('div .details').remove()
+        }
+
+        function addMaterialDetail(detail){
+            var MaterialInId = detail.id || ''
+            var MaterialId = detail.material_id || ''
+            var MaterialName = detail.material?.name || ''
+            var qty = detail.qty || ''
+            var price = detail.price || ''
+
+            let div = document.createElement('div')
+            div.setAttribute('class', 'mb-3 border border-1 p-1 d-flex details')
+
+            let div2 = document.createElement('div')
+            div2.setAttribute('class', 'mx-1')
+
+            let div3 = document.createElement('div')
+            div3.setAttribute('class', 'mx-1')
+
+            let div4 = document.createElement('div')
+            div4.setAttribute('class', 'mx-1')
+
+            materiInsertForm.append(div)
+            $(div).append(div2)
+            $(div).append(div3)
+            $(div).append(div4)
+            $(div).append("<input type='hidden' name='idDetail[]' value="+MaterialInId+">")
+
+            let select = $("<select><option value="+MaterialId+" selected>"+MaterialName+"</option></select>").addClass('form-control select2 listSelect').attr('name', 'material_id[]')
+
+            $(div2).append("<label class='form-label'>Materi</label>")
+            $(div2).append(select)
+                
+            $(div3).append("<label class='form-label'>Jumlah</label>")
+            $(div3).append("<input class='form-control' name='qty[]' value="+qty+">")
+
+            $(div4).append("<label class='form-label'>Harga</label>")
+            $(div4).append("<input class='form-control' name='price[]'value="+price+">")
+
+            
+        }
 
         const deletePutMethodInput = () => {
             $('[name="_method"][value="put"]').remove()
@@ -113,22 +156,27 @@
         const addPutMethodInputInsert = () => {
             $('#materiInsertForm').append($('@method('put')'))
         }
+        
 
-        const setMaterialInsertValue = material_ins => {
+        const setMaterialInsertValue = materialIn => {
             const selectOpts = typeSelect.find('option');
             const optValues = selectOpts.map((i, select) => select.innerHTML);
 
-            if ($.inArray(material_ins.type, optValues) === -1) {
-                typeSelect.append(`<option>${material_ins.type}</option>`);
+            if ($.inArray(materialIn.type, optValues) === -1) {
+                typeSelect.append(`<option>${materialIn.type}</option>`);
             };
 
-            idIns.value = material_ins.id || null
-            last_updated_by_user_id.value = material_ins.last_updated_by_user_id || null
-            typeSelect.val(material_ins.type).change();
-            codeInsInput.value = material_ins.code || null
-            noteInsInput.value = material_ins.note || null
-            descInsInput.value = material_ins.desc || null
-            deleteInsId.value = material_ins.id
+            idIns.value = materialIn.id || null
+            last_updated_by_user_id.value = materialIn.last_updated_by_user_id || null
+            typeSelect.val(materialIn.type).change();
+            codeInsInput.value = materialIn.code || null
+            noteInsInput.value = materialIn.note || null
+            descInsInput.value = materialIn.desc || null
+            deleteInsId.value = materialIn.id || null
+            // console.log(materialIn.details)
+            materialIn.details?.map(function(detail){
+                addMaterialDetail(detail)
+            })
         }
         
 
@@ -140,72 +188,27 @@
             setMaterialInsertValue({});
             deleteForm.style.display = "none";
 
+            removeMaterialDetail()
+
             materiInsertForm.action = "{{ route('material_ins.store') }}";
         });
 
         $(document).on('click', '.editMaterialInsertButton', function(){
-            const materialId = $(this).data('material-id');
-            const material = materials.find(material => material.id === materialId);
+            const materialInId = $(this).data('material-id');
+            const materialIn = materialIns.find(materialIn => materialIn.id === materialInId);
             deleteForm.style.display = "block";
 
-            
+            removeMaterialDetail();
             
             addPutMethodInputInsert();
-            setMaterialInsertValue(material);
-            materiInsertForm.action = "{{ route('material_ins.update', '') }}/"+material.id;
+            setMaterialInsertValue(materialIn);
 
-            deleteForm.action = "{{ route('material_ins.destroy', '') }}/" + material
+            materiInsertForm.action = "{{ route('material_ins.update', '') }}/"+materialIn.id;
+
+            deleteForm.action = "{{ route('material_ins.destroy', '') }}/" + materialIn
                 .id;
-        })
 
-        $(document).on('click', '#addMaterial', function(){
-            let div = document.createElement('div')
-            div.setAttribute('class', 'mb-3 border border-1 p-1')
-
-            
-
-            let idLabel = document.createElement('label')
-            idLabel.innerHTML = 'Materi'
-            idLabel.setAttribute('class', 'label-form')
-            idLabel.setAttribute('for', 'idMateri')
-
-            let idMateri = document.createElement('select')
-            idMateri.setAttribute('id', 'idMateri')
-            idMateri.setAttribute('class', 'select2 listSelect')
-            idMateri.setAttribute('name', 'idMateri[]')
-
-            let qtyLabel = document.createElement('label')
-            qtyLabel.innerHTML = 'Jumlah'
-            qtyLabel.setAttribute('class', 'label-form')
-            qtyLabel.setAttribute('for', 'qyt')
-
-            let qty = document.createElement('input')
-            qty.setAttribute('id', 'qyt')
-            qty.setAttribute('class', 'form-control')
-            qty.setAttribute('name', 'qyt[]')
-
-            let priceLabel = document.createElement('label')
-            priceLabel.innerHTML = 'Price'
-            priceLabel.setAttribute('class', 'label-form')
-            priceLabel.setAttribute('for', 'price')
-
-            let price = document.createElement('input')
-            price.setAttribute('id', 'price')
-            price.setAttribute('class', 'form-control')
-            price.setAttribute('name', 'price[]')
-
-            div.append(idLabel)
-            div.append(idMateri)
-            
-            div.append(qtyLabel)
-            div.append(qty)
-
-            div.append(priceLabel)
-            div.append(price)
-            
-            materiInsertForm.append(div)
-
-            $('#idMateri').select2({
+            $('.listSelect').select2({
                 dropdownParent:$('#modal_body_material'),
                 ajax:{
                     url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
@@ -217,12 +220,36 @@
                     },
                     processResults: function (data) {
                       // Transforms the top-level key of the response object from 'items' to 'results'
-                      const items = data.map(item => { return { id: item.id, text: item.name }});
+                      const items = data.data.map(item => { return { id: item.id, text: item.name }});
 
                       return {results:items};
                     }
                 }
             });
+        })
+
+        $(document).on('click', '#addMaterial', function(){
+            addMaterialDetail({})
+
+            $('.listSelect').select2({
+                dropdownParent:$('#modal_body_material'),
+                ajax:{
+                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
+                    beforeSend: function(request) {
+                        request.setRequestHeader(
+                            "Authorization",
+                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                        )
+                    },
+                    processResults: function (data) {
+                      // Transforms the top-level key of the response object from 'items' to 'results'
+                      const items = data.data.map(item => { return { id: item.id, text: item.name }});
+
+                      return {results:items};
+                    }
+                }
+            });
+            
         })
 
         $(document).ready(function() {
@@ -235,9 +262,9 @@
                 processing:true,
                 serverSide:true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialIn') }}',
+                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialIn') }}?with=details.material',
                     dataSrc: json => {
-                        materials = json.data;
+                        materialIns = json.data;
                         return json.data;
                     },
                     beforeSend: function(request) {

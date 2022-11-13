@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\MaterialIn;
+use App\Models\Material_in_details;
 
 use Auth;
 
@@ -49,7 +50,16 @@ class MaterialInController extends Controller
         $validatedInput['at'] = date('Y-m-d h:i:s');
         $validatedInput['last_updated_by_user_id'] = Auth::user()->id;
         $validatedInput['created_by_user_id'] = Auth::user()->id;
-        MaterialIn::create($validatedInput);
+        $materialIn = MaterialIn::create($validatedInput);
+
+        foreach($request->material_id as $row => $key){
+            $materialInDetail = new Material_in_details();
+            $materialInDetail->material_in_id = $materialIn->id;
+            $materialInDetail->material_id = $request->material_id[$row];
+            $materialInDetail->qty = $request->qty[$row];
+            $materialInDetail->price = $request->price[$row];
+            $materialInDetail->save();
+        }
 
         return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
@@ -96,8 +106,26 @@ class MaterialInController extends Controller
             'desc' => 'required'
         ]);
 
+        // dd($request->all());
+
         $validatedInput['at'] = date('Y-m-d h:i:s');
         MaterialIn::find($id)->update($validatedInput);
+
+        foreach($request->material_id as $row => $key){
+            if ($materialInDetail = Material_in_details::find($request->idDetail[$row])) {
+                $materialInDetail->material_id = $request->material_id[$row];
+                $materialInDetail->qty = $request->qty[$row];
+                $materialInDetail->price = $request->price[$row];
+                $materialInDetail->update();
+            } else {
+                $materialInDetail = new Material_in_details();
+                $materialInDetail->material_in_id = $id;
+                $materialInDetail->material_id = $request->material_id[$row];
+                $materialInDetail->qty = $request->qty[$row];
+                $materialInDetail->price = $request->price[$row];
+                $materialInDetail->save();
+            }
+        }
 
         return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
@@ -113,7 +141,7 @@ class MaterialInController extends Controller
      */
     public function destroy($id)
     {
-        Material_ins::find($id)->delete();
+        MaterialIn::find($id)->delete();
         return redirect(route('material_ins.index'))->with('message', [
           'class' => 'success',
           'text' => 'Berhasil menambah Material Insert'
