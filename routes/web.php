@@ -46,10 +46,11 @@ Route::middleware('guest')->group(function () {
     Route::view('forgot-password', 'pages.auth.forgot-password-form');
 
     Route::controller(AuthController::class)->group(function () {
-        Route::view('/', 'pages.auth.login-form')->name('login');
+        
         Route::post('/', 'login');
-
+        
         Route::prefix('login')->name('login')->group(function () {
+            Route::view('/', 'pages.auth.login-form');
             Route::get('oauth/google', 'googleOauth')->name('.oauth.google');
             Route::get('oauth/google/redirect', 'handleGoogleOauth')->name('.oauth.google.callback');
         });
