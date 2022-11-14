@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', __('Material'))
+@section('title', __('Material In'))
 
 @include('components.assets._datatable')
 @include('components.assets._select2')
@@ -9,7 +9,7 @@
 
     <div class="section-body">
         <h2 class="section-title">
-            {{ __('Material Insert List') }}
+            {{ __('Material In List') }}
             <button type="button" class="ml-2 btn btn-success addMaterialInsButton" data-toggle="modal"
                 data-target="#materialInsertFormModal">
                 <i class="fas fa-plus-circle"></i> Tambah
@@ -31,10 +31,10 @@
 
     <div class="modal fade" id="materialInsertFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
         aria-hidden="">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material') }}</h5>
+                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material in') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -45,40 +45,55 @@
                         @csrf
 
                         <input type="hidden" name="id" id="idIns">
-                        <input type="hidden" name="last_updated_by_user_id" id="last_updated_by_user_id" value="{{Auth::user()->id}}">
 
-                        <div class="mb-3">
-                            <label for="materialCode">{{ __('Code') }}</label>
-                            <input type="text" class="form-control" name="code" id="codeInsInput">
+                        
+                        <div class="row">
+                            <div class="col form-group">
+                                <label for="codeInsInput">{{ __('Code') }}</label>
+                                <input type="text" class="form-control" name="code" id="codeInsInput">
+                            </div>
+                            
+                            <div class="col form-group">
+                                <label for="typeSelect">{{ __('Type') }}</label>
+                                <select id="typeSelect" name="type" required class="form-control select2" data-select2-opts='{"tags": "true"}'></select>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="typeSelect">{{ __('Type') }}</label>
-                            <select id="typeSelect" name="type" class="form-control select2" data-select2-opts='{"tags": "true"}'>
-
-                            </select>
+                            <label for="atInput">{{ __('Date') }}</label>
+                            <input type="date" class="form-control" name="at" required id="atInput">
                         </div>
-
-                        <div class="mb-3">
-                            <label for="materialName">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" required id="noteInsInput"></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="materialUnit">{{ __('Description') }}</label>
+                            
+                        <div class="form-group">
+                            <label for="descInsInput">{{ __('Description') }}</label>
                             <input type="text" class="form-control" name="desc" required id="descInsInput">
                         </div>
 
-                        <div class="mb-3 d-flex justify-content-between col-12">
-                            <a href="{{route('materials.index')}}">Material Not Exist?</a>
-                            <a href="#" id="addMaterial" class="btn btn-success">Add Material</a>
+                        <div class="form-group">
+                            <label for="noteInsInput">{{ __('Note') }}</label>
+                            <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
                         </div>
 
-                        <div class="mb-3">
-                            
+                        <div class="px-1" style="overflow-x: auto">
+                            <div id="materialInDetailsParent"  style="width: 100%">
+                                <div class="row m-0">
+                                    <label class="col-4">{{ __('Name') }}</label>
+                                    <label class="col-2">{{ __('Qty') }}</label>
+                                    <label class="col-3">{{ __('Price/qty') }}</label>
+                                    <label class="col-2">{{ __('Subtotal') }}</label>
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                    <div class="d-flex justify-content-between">
+
+
+                        <div class="">
+                            <a href="#" id="addMaterialButton" class="btn btn-success btn-sm mr-2"><i class="fas fa-plus"></i> {{ __('More') }}</a>
+                            <a href="{{route('materials.index')}}">{{ __('New material') }}?</a>
+                        </div>
+                    </form>    
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    {{-- <div class=""> --}}
                         <div>
                             <button type="submit" form="materiInsertForm" class="btn btn-outline-success">{{ __('Save') }}</button>
                         </div>
@@ -90,14 +105,14 @@
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
-                    </div>
-    
+                    {{-- </div> --}}
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        const materials = {{ Js::from(App\Models\Material::all()) }};
         let materialIns
         const typeSelect = $('#typeSelect')
         let materialDatatable = $('#materialDatatable')
@@ -106,47 +121,57 @@
 
         let materialInsert = $('#materialInsert')
 
-        function removeMaterialDetail(){
+        function removeMaterialInDetails(){
             $('div .details').remove()
         }
 
-        function addMaterialDetail(detail){
+        function removeMaterialInDetailRow(dom){
+            dom.parentNode.parentNode.remove();
+        }
+
+        function addMaterialInDetailRow(detail){
             var MaterialInId = detail.id || ''
-            var MaterialId = detail.material_id || ''
             var MaterialName = detail.material?.name || ''
             var qty = detail.qty || ''
             var price = detail.price || ''
 
-            let div = document.createElement('div')
-            div.setAttribute('class', 'mb-3 border border-1 p-1 d-flex details')
+            const materialSelectParentDiv = document.createElement('div')
+            materialSelectParentDiv.setAttribute('class', 'col-4 pl-0 pr-2')
+            const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
+                .addClass('form-control select2 listSelect')
+                .attr('name', 'material_ids[]')
+            $(materialSelectParentDiv).append($selectDom)
+            initMaterialSelects($selectDom);
+            $selectDom.val(detail.material_id || '').change();
 
-            let div2 = document.createElement('div')
-            div2.setAttribute('class', 'mx-1')
+            const qtyInputParentDiv = document.createElement('div')
+            qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
+            $(qtyInputParentDiv).append(`<input class="form-control" name="qty[]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${qty}">`)
 
-            let div3 = document.createElement('div')
-            div3.setAttribute('class', 'mx-1')
+            const priceInputParentDiv = document.createElement('div')
+            priceInputParentDiv.setAttribute('class', 'col-3 px-2')
+            $(priceInputParentDiv).append(`<input class='form-control' name='price[]' min="0" type="number" required placeholder="{{ __('Price') }}" value="${price}">`)
 
-            let div4 = document.createElement('div')
-            div4.setAttribute('class', 'mx-1')
+            const subtotalPreviewParentDiv = document.createElement('div')
+            subtotalPreviewParentDiv.setAttribute('class', 'col-2 px-2')
+            subtotalPreviewParentDiv.innerHTML="Rp. 0";
 
-            materiInsertForm.append(div)
-            $(div).append(div2)
-            $(div).append(div3)
-            $(div).append(div4)
-            $(div).append("<input type='hidden' name='idDetail[]' value="+MaterialInId+">")
+            const removeRowButtonParentDiv = document.createElement('div')
+            removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
+            $(removeRowButtonParentDiv).append($('<button class="btn btn-outline-danger btn-icon" onclick="removeMaterialInDetailRow(this)"><i class="fas fa-trash"></i></button>'))
 
-            let select = $("<select><option value="+MaterialId+" selected>"+MaterialName+"</option></select>").addClass('form-control select2 listSelect').attr('name', 'material_id[]')
+            const detailRowDiv = document.createElement('div')
+            detailRowDiv.setAttribute('class', 'form-group row details mx-0 align-items-center')
+            $(detailRowDiv).append(materialSelectParentDiv)
+            $(detailRowDiv).append(qtyInputParentDiv)
+            $(detailRowDiv).append(priceInputParentDiv)
+            $(detailRowDiv).append(subtotalPreviewParentDiv)
+            $(detailRowDiv).append(removeRowButtonParentDiv)
+            $(detailRowDiv).append(`<input type="hidden" name="idDetail[]" value="${MaterialInId}">`)
 
-            $(div2).append("<label class='form-label'>Materi</label>")
-            $(div2).append(select)
-                
-            $(div3).append("<label class='form-label'>Jumlah</label>")
-            $(div3).append("<input class='form-control' name='qty[]' value="+qty+">")
+            materialInDetailsParent.append(detailRowDiv);
 
-            $(div4).append("<label class='form-label'>Harga</label>")
-            $(div4).append("<input class='form-control' name='price[]'value="+price+">")
-
-            
+            // $('#').parent().before(detailRowDiv);
         }
 
         const deletePutMethodInput = () => {
@@ -159,97 +184,80 @@
         
 
         const setMaterialInsertValue = materialIn => {
-            const selectOpts = typeSelect.find('option');
-            const optValues = selectOpts.map((i, select) => select.innerHTML);
-
-            if ($.inArray(materialIn.type, optValues) === -1) {
-                typeSelect.append(`<option>${materialIn.type}</option>`);
-            };
-
+            
+            if (materialIn.type) {
+                const selectOpts = typeSelect.find('option');
+                const optValues = selectOpts.map((i, select) => select.innerHTML);
+                if ($.inArray(materialIn.type, optValues) === -1) {
+                    typeSelect.append(`<option>${materialIn.type}</option>`);
+                };
+            }
+            
+            typeSelect.val(materialIn.type || null).change();
             idIns.value = materialIn.id || null
-            last_updated_by_user_id.value = materialIn.last_updated_by_user_id || null
-            typeSelect.val(materialIn.type).change();
             codeInsInput.value = materialIn.code || null
             noteInsInput.value = materialIn.note || null
             descInsInput.value = materialIn.desc || null
             deleteInsId.value = materialIn.id || null
-            // console.log(materialIn.details)
+
+            if (materialIn.at) {
+                const dateObj = new Date(materialIn.at);
+                
+                const month = dateObj.getMonth() + 1; //months from 1-12
+                const day = dateObj.getDate();
+                const year = dateObj.getFullYear();
+                
+                atInput.value = `${year}-${month}-${day}`
+            } else {
+                atInput.value = '{{ date('Y-m-d') }}'
+            }
+
             materialIn.details?.map(function(detail){
-                addMaterialDetail(detail)
+                addMaterialInDetailRow(detail)
             })
         }
         
-
-        const datatableSearch = tag =>  
-            materialDatatable.DataTable().search(tag).draw()
+        const datatableSearch = tag => materialDatatable.DataTable().search(tag).draw()
 
         $(document).on('click', '.addMaterialInsButton', function(){
             deletePutMethodInput();
             setMaterialInsertValue({});
             deleteForm.style.display = "none";
 
-            removeMaterialDetail()
+            removeMaterialInDetails()
 
-            materiInsertForm.action = "{{ route('material_ins.store') }}";
+            for (let i = 0; i < 3; i++) {
+                addMaterialInDetailRow({})
+            }
+
+            materiInsertForm.action = "{{ route('material-ins.store') }}";
         });
+
+
+        const initMaterialSelects = $selectDom => $selectDom.select2({
+            dropdownParent:$('#modal_body_material'),
+            placeholder: '{{ __('Material') }}',
+            data: materials.map(material => formattedMaterial = {id: material.id, text: material.name})
+        }); 
 
         $(document).on('click', '.editMaterialInsertButton', function(){
             const materialInId = $(this).data('material-id');
             const materialIn = materialIns.find(materialIn => materialIn.id === materialInId);
             deleteForm.style.display = "block";
 
-            removeMaterialDetail();
+            removeMaterialInDetails();
             
             addPutMethodInputInsert();
             setMaterialInsertValue(materialIn);
 
-            materiInsertForm.action = "{{ route('material_ins.update', '') }}/"+materialIn.id;
+            materiInsertForm.action = "{{ route('material-ins.update', '') }}/"+materialIn.id;
 
-            deleteForm.action = "{{ route('material_ins.destroy', '') }}/" + materialIn
+            deleteForm.action = "{{ route('material-ins.destroy', '') }}/" + materialIn
                 .id;
-
-            $('.listSelect').select2({
-                dropdownParent:$('#modal_body_material'),
-                ajax:{
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    processResults: function (data) {
-                      // Transforms the top-level key of the response object from 'items' to 'results'
-                      const items = data.data.map(item => { return { id: item.id, text: item.name }});
-
-                      return {results:items};
-                    }
-                }
-            });
         })
 
-        $(document).on('click', '#addMaterial', function(){
-            addMaterialDetail({})
-
-            $('.listSelect').select2({
-                dropdownParent:$('#modal_body_material'),
-                ajax:{
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    processResults: function (data) {
-                      // Transforms the top-level key of the response object from 'items' to 'results'
-                      const items = data.data.map(item => { return { id: item.id, text: item.name }});
-
-                      return {results:items};
-                    }
-                }
-            });
-            
+        $(document).on('click', '#addMaterialButton', function(){
+            addMaterialInDetailRow({})
         })
 
         $(document).ready(function() {

@@ -15,6 +15,6 @@ class MaterialIn extends Model
     protected $fillable = ['code', 'at', 'type', 'created_by_user_id', 'last_updated_by_user_id', 'note', 'desc', 'history_json'];
 
     public function details(){
-        return $this->hasMany(Material_in_details::class);
+        return $this->hasMany(MaterialInDetail::class);
     }
 }

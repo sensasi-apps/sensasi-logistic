@@ -77,11 +77,7 @@ Route::middleware('auth')->group(function () {
         'create', 'show', 'edit'
     ]);
 
-    Route::resource('material_ins', MaterialInController::class)->except([
-        'create', 'show', 'edit'
-    ]);
-
-    Route::resource('material_in_details', Material_in_detailsController::class)->except([
+    Route::resource('material-ins', MaterialInController::class)->except([
         'create', 'show', 'edit'
     ]);
 
