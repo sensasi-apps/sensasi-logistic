@@ -1,18 +1,16 @@
 <?php
 
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
+use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Role;
 
-class SpatiePermissionSeeder extends Seeder
+class InsertRolesTable extends Migration
 {
     /**
-     * Run the database seeds.
+     * Run the migrations.
      *
      * @return void
      */
-    public function run()
+    public function up()
     {
         Role::create(['name' => 'Super Admin']);
 
@@ -20,5 +18,15 @@ class SpatiePermissionSeeder extends Seeder
         $manufactureRole = Role::create(['name' => 'Manufacture']);
         $salesRole = Role::create(['name' => 'Sales']);
         $warehouseRole = Role::create(['name' => 'Warehouse']);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Role::all()->delete();
     }
 }
