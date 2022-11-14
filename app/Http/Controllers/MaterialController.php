@@ -79,8 +79,7 @@ class MaterialController extends Controller
         }
 
         return redirect(route('materials.index'))->with('message', [
-          'class' => 'success',
-          'text' => 'Berhasil menambah riwayat pendidikan'
+            [__('Material has been deleted successfully'), 'warning']
         ]);
     }
 }

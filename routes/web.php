@@ -4,6 +4,8 @@ use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InitializeAppController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\MaterialInController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -77,6 +79,9 @@ Route::middleware('auth')->group(function () {
         'create', 'show', 'edit'
     ]);
 
+    Route::resource('material-ins', MaterialInController::class)->except([
+        'create', 'show', 'edit'
+    ]);
 
     if (App::environment('local')) {
         Route::get('basic-page-format', fn () => view('basic-page-format'));
