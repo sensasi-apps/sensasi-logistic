@@ -15,7 +15,7 @@ return [
     |
     */
 
-	'default' => env('SYSTEM_DB_CONNECTION', 'mysql_system'),
+	'default' => env('DEFAULT_DB_CONNECTION', 'mysql_system'),
 
 	/*
     |--------------------------------------------------------------------------
@@ -93,13 +93,13 @@ return [
 
 		'mysql_system' => [
 			'driver' => 'mysql',
-			'url' => env('DATABASE_URL_SYSTEM'),
-			'host' => env('DB_HOST_SYSTEM', '127.0.0.1'),
-			'port' => env('DB_PORT_SYSTEM', '3306'),
-			'database' => env('DB_DATABASE_SYSTEM', 'forge'),
-			'username' => env('DB_USERNAME_SYSTEM', 'forge'),
-			'password' => env('DB_PASSWORD_SYSTEM', ''),
-			'unix_socket' => env('DB_SOCKET_SYSTEM', ''),
+			'url' => env('DATABASE_URL_SYSTEM', env('DATABASE_URL')),
+			'host' => env('DB_HOST_SYSTEM', env('DB_HOST', '127.0.0.1')),
+			'port' => env('DB_PORT_SYSTEM', env('DB_PORT', '3306')),
+			'database' => env('DB_DATABASE_SYSTEM', env('DB_DATABASE', 'forge')),
+			'username' => env('DB_USERNAME_SYSTEM', env('DB_USERNAME', 'forge')),
+			'password' => env('DB_PASSWORD_SYSTEM', env('DB_PASSWORD', '')),
+			'unix_socket' => env('DB_SOCKET_SYSTEM', env('DB_SOCKET', '')),
 			'charset' => 'utf8mb4',
 			'collation' => 'utf8mb4_unicode_ci',
 			'prefix' => '',
