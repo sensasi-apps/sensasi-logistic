@@ -13,8 +13,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call([
-            SpatiePermissionSeeder::class
-        ]);
+        // \App\Models\User::factory(10)->create();
     }
 }
