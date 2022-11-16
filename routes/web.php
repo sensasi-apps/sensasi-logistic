@@ -49,7 +49,7 @@ Route::middleware('guest')->group(function () {
 
     Route::controller(AuthController::class)->group(function () {
         
-        Route::post('/', 'login');
+        Route::post('login', 'login');
         
         Route::prefix('login')->name('login')->group(function () {
             Route::view('/', 'pages.auth.login-form');
