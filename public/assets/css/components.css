@@ -394,7 +394,7 @@
 }
 
 /* 1.8 DataTables */
-table.dataTable {
+/* table.dataTable {
   border-collapse: collapse !important;
 }
 table.dataTable thead th, table.dataTable thead td {
@@ -428,7 +428,7 @@ div.dataTables_wrapper div.dataTables_processing {
   transform: translate(-50%, -50%) !important;
   margin: 0 !important;
   opacity: 1 !important;
-}
+} */
 
 /* 1.9 Date Range Picker */
 .daterangepicker.dropdown-menu {
