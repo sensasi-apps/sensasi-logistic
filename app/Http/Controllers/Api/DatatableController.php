@@ -15,10 +15,12 @@ class DatatableController extends Controller
 			$modelClass = "App\Models\\$modelName";
 			
 			if ($request->with) {
-				return DataTables::of($modelClass::with($request->with))->make();
+				$queryBuilder = $modelClass::with($request->with);
 			} else {
-				return DataTables::of($modelClass::query())->make();
+				$queryBuilder = $modelClass::query();
 			}
+			
+			return DataTables::eloquent($queryBuilder)->make();
 		}
 	}
 }
