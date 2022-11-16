@@ -12,7 +12,18 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        // \App\Models\User::factory(10)->create();
+    {        
+        if (\App\Models\User::where('name', 'superman')->count() == 0) {
+            \App\Models\User::create([
+                'name' => 'superman',
+                'email' => 'super@man.com',
+                'password' => bcrypt('superman')
+            ])->assignRole('Super Admin');
+        }
+
+        \App\Models\User::factory(10)->create();
+        \App\Models\Material::factory(25)->create();
+        \App\Models\MaterialIn::factory(50)->create();
+        \App\Models\MaterialInDetail::factory(300)->create();
     }
 }
