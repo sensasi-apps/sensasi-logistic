@@ -90,7 +90,7 @@
             integrity="sha512-hlLgIh4nncb2yc4YPtWk5wOykcFxF0fBd5rHfJ6xsALI2khY3H8LbivswJE5Fpz7hws7CJCqOzdyjWHiKJYl+A=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script>
-            moment.locale('{{ config('app.locale') }}')
+            moment.locale('{{ app()->getLocale() }}')
         </script>
     @endpush
 @endonce
@@ -98,7 +98,7 @@
 @push('js')
     <script>
         {
-            const currentDateVal = moment().format('L');
+            const currentDateVal = moment().format('DD-MM-YYYY');
             currentDate.innerHTML = currentDateVal;
         };
     </script>

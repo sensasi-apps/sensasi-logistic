@@ -8,10 +8,10 @@
 @section('main-content')
     <div class="section-body">
         <h2 class="section-title">
-            {{ __('Material list') }}
+            {{ __('Material List') }}
             <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
                 data-target="#materialFormModal">
-                <i class="fas fa-plus-circle"></i> Tambah
+                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
             </button>
         </h2>
 
@@ -44,22 +44,23 @@
 
                         <input type="hidden" name="id" id="idInput">
 
-                        <div class="mb-3">
-                            <label for="materialCode">{{ __('Code') }}</label>
+                        <div class="form-group">
+                            <label for="codeInput">{{ __('Code') }}</label>
                             <input type="text" class="form-control" name="code" id="codeInput">
                         </div>
-                        <div class="mb-3">
-                            <label for="materialName">{{ __('Name') }}</label>
+
+                        <div class="form-group">
+                            <label for="nameInput">{{ __('Name') }}</label>
                             <input type="text" class="form-control" name="name" required id="nameInput">
                         </div>
 
-                        <div class="mb-3">
-                            <label for="materialUnit">{{ __('Unit') }}</label>
+                        <div class="form-group">
+                            <label for="unitInput">{{ __('Unit') }}</label>
                             <input type="text" class="form-control" name="unit" required id="unitInput">
                         </div>
 
                         <div class="form-group">
-                            <label for="tags">{{ __('Tags') }}</label>
+                            <label for="tagsSelect">{{ __('Tags') }}</label>
                             <select id="tagsSelect" name="tags[]" class="form-control select2" multiple
                                 data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
                             </select>
@@ -69,7 +70,8 @@
                         <button type="submit" form="materialForm" class="btn btn-primary">{{ __('Save') }}</button>
 
                         <button id="deleteFormModalButtonToggle" type="submit" class="btn btn-icon btn-outline-danger"
-                            data-toggle="tooltip" title="{{ __('Delete') }}" onclick="$('#materialDeleteConfirmationModal').modal('show');">
+                            data-toggle="tooltip" title="{{ __('Delete') }}"
+                            onclick="$('#materialDeleteConfirmationModal').modal('show');">
                             <i class="fas fa-trash" style="font-size: 1rem !important"></i>
                         </button>
                     </div>
@@ -83,14 +85,14 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Are you sure?') }}</h5>
+                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Are you sure') }}?</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body" id="modal_body_material" style="font-size: 1.1rem">
                     {{ __('This action can not be undone') }}.
-                    {{ __('Do you want to continue delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
+                    {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
                     <form method="post" id="deleteForm">
                         @csrf
                         @method('delete')
@@ -177,6 +179,9 @@
         $(document).ready(function() {
             materialDatatable = materialDatatable.dataTable({
                 processing: true,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
+                },
                 serverSide: true,
                 ajax: {
                     url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
@@ -212,7 +217,7 @@
                     render: function(data, type, row) {
                         const editButton = $(
                             '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
+                        )
                         editButton.attr('data-toggle', 'modal')
                         editButton.attr('data-target', '#materialFormModal')
                         editButton.addClass('editMaterialButton');

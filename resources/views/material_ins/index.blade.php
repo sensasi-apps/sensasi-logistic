@@ -94,7 +94,6 @@
                     </form>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
-                    {{-- <div class=""> --}}
                     <div>
                         <button type="submit" form="materiInsertForm"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
@@ -107,7 +106,6 @@
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
-                    {{-- </div> --}}
                 </div>
             </div>
         </div>
@@ -126,6 +124,15 @@
         const renderTagButton = text =>
             `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
+        const initMaterialSelects = $selectDom => $selectDom.select2({
+            dropdownParent: $('#modal_body_material'),
+            placeholder: '{{ __('Material') }}',
+            data: materials.map(material => formattedMaterial = {
+                id: material.id,
+                text: material.name
+            })
+        });
+
 
         function removeMaterialInDetails() {
             $('div .details').remove()
@@ -143,18 +150,18 @@
                 .attr('name', 'material_ids[]')
             $(materialSelectParentDiv).append($selectDom)
             initMaterialSelects($selectDom);
-            $selectDom.val(detail.material_id || '').change();
+            $selectDom.val(detail.material_id).change();
 
             const qtyInputParentDiv = document.createElement('div')
             qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
             $(qtyInputParentDiv).append(
-                `<input class="form-control" name="qty[]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty}">`
+                `<input class="form-control" name="qty[]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
             )
 
             const priceInputParentDiv = document.createElement('div')
             priceInputParentDiv.setAttribute('class', 'col-3 px-2')
             $(priceInputParentDiv).append(
-                `<input class='form-control' name='price[]' min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price}">`
+                `<input class='form-control' name='price[]' min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price || ''}">`
             )
 
             const subtotalPreviewParentDiv = document.createElement('div')
@@ -188,7 +195,7 @@
         }
 
 
-        const setMaterialInsertValue = materialIn => {
+        const setMaterialInFormValue = materialIn => {
 
             if (materialIn.type) {
                 const selectOpts = typeSelect.find('option');
@@ -225,7 +232,7 @@
 
         $(document).on('click', '.addMaterialInsButton', function() {
             deletePutMethodInput();
-            setMaterialInsertValue({});
+            setMaterialInFormValue({});
             deleteForm.style.display = "none";
 
             removeMaterialInDetails()
@@ -237,16 +244,6 @@
             materiInsertForm.action = "{{ route('material-ins.store') }}";
         });
 
-
-        const initMaterialSelects = $selectDom => $selectDom.select2({
-            dropdownParent: $('#modal_body_material'),
-            placeholder: '{{ __('Material') }}',
-            data: materials.map(material => formattedMaterial = {
-                id: material.id,
-                text: material.name
-            })
-        });
-
         $(document).on('click', '.editMaterialInsertButton', function() {
             const materialInId = $(this).data('material-id');
             const materialIn = materialIns.find(materialIn => materialIn.id === materialInId);
@@ -255,7 +252,7 @@
             removeMaterialInDetails();
 
             addPutMethodInputInsert();
-            setMaterialInsertValue(materialIn);
+            setMaterialInFormValue(materialIn);
 
             materiInsertForm.action = "{{ route('material-ins.update', '') }}/" + materialIn.id;
 
@@ -279,6 +276,9 @@
                 processing: true,
                 search: {
                     return: true,
+                },
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
                 },
                 serverSide: true,
                 ajax: {
