@@ -14,7 +14,7 @@ class UserRoleSeeder extends Seeder
      */
     public function run()
     {
-        $users = User::whereNot('name', 'superman')->get();
+        $users = User::where('name', '!=','superman')->get();
 
         $roles = [
             'Stackholder',
@@ -24,7 +24,7 @@ class UserRoleSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
-            $user->assignRole($roles[rand(0, 4)]);
+            $user->assignRole($roles[rand(0, 3)]);
         }
     }
 }

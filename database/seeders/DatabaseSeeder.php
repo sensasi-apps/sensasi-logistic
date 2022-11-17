@@ -25,5 +25,9 @@ class DatabaseSeeder extends Seeder
         \App\Models\Material::factory(25)->create();
         \App\Models\MaterialIn::factory(50)->create();
         \App\Models\MaterialInDetail::factory(300)->create();
+
+        $this->call([
+            UserRoleSeeder::class
+        ]);
     }
 }
