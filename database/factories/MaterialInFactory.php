@@ -16,7 +16,7 @@ class MaterialInFactory extends Factory
         $userIds = \App\Models\User::all()->pluck('id');
         return [
             'code' => $this->faker->unique()->numerify('#####'),
-            'at' => $this->faker->dateTimeThisYear('+2 months'),
+            'at' => $this->faker->dateTimeThisYear(),
             'type' => $this->faker->randomElement(['Pembelian', 'Hibah']),
             'created_by_user_id' => $this->faker->randomElement($userIds),
             'last_updated_by_user_id' => $this->faker->randomElement($userIds),
