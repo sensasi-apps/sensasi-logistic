@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', __('Material In'))
+@section('title', __('Material Out'))
 
 @include('components.assets._datatable')
 @include('components.assets._select2')
@@ -9,9 +9,9 @@
 
     <div class="section-body">
         <h2 class="section-title">
-            {{ __('Material In List') }}
-            <button type="button" class="ml-2 btn btn-success addMaterialInsButton" data-toggle="modal"
-                data-target="#materialInsertFormModal">
+            {{ __('Material Out List') }}
+            <button type="button" class="ml-2 btn btn-success addMaterialOutsButton" data-toggle="modal"
+                data-target="#materialOutFormModal">
                 <i class="fas fa-plus-circle"></i> Tambah
             </button>
         </h2>
@@ -28,12 +28,12 @@
 @endsection
 
 @push('js')
-    <div class="modal fade" id="materialInsertFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+    <div class="modal fade" id="materialOutFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
         aria-hidden="">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material in') }}</h5>
+                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material out') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -77,10 +77,8 @@
                         <div class="px-1" style="overflow-x: auto">
                             <div id="materialInDetailsParent" style="width: 100%">
                                 <div class="row m-0">
-                                    <label class="col-4">{{ __('Name') }}</label>
-                                    <label class="col-2">{{ __('Qty') }}</label>
-                                    <label class="col-3">{{ __('Price/qty') }}</label>
-                                    <label class="col-2">{{ __('Subtotal') }}</label>
+                                    <label class="col-6">{{ __('Name') }}</label>
+                                    <label class="col-5">{{ __('Qty') }}</label>
                                 </div>
                             </div>
                         </div>
@@ -112,11 +110,11 @@
     </div>
 
     <script>
-        let materialIns
+        let materialOuts
         let materialInDatatable = $('#materialInDatatable')
 
 
-        const materials = {{ Js::from(App\Models\Material::all()) }};
+        const materialInDetails = {{ Js::from(App\Models\MaterialInDetail::with('material')->get()) }};
         const typeSelect = $('#typeSelect')
         const materialFormModalLabel = $('#materialFormModalLabel')
 
@@ -127,12 +125,11 @@
         const initMaterialSelects = $selectDom => $selectDom.select2({
             dropdownParent: $('#modal_body_material'),
             placeholder: '{{ __('Material') }}',
-            data: materials.map(material => formattedMaterial = {
-                id: material.id,
-                text: material.name
+            data: materialInDetails.map(item => formattedMaterial = {
+                id: item.id,
+                text: item.material?.name+' '+'['+item.qty+']'
             })
         });
-
 
         function removeMaterialInDetails() {
             $('div .details').remove()
@@ -142,31 +139,23 @@
             dom.parentNode.parentNode.remove();
         }
 
-        function addMaterialInDetailRow(detail) {
+        function addMaterialOutDetailRow(detail) {
             const materialSelectParentDiv = document.createElement('div')
-            materialSelectParentDiv.setAttribute('class', 'col-4 pl-0 pr-2')
+            materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
             const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
                 .addClass('form-control select2 listSelect')
                 .attr('name', 'material_ids[]')
             $(materialSelectParentDiv).append($selectDom)
             initMaterialSelects($selectDom);
-            $selectDom.val(detail.material_id).change();
+            console.log(detail.detail_ins);
+            $selectDom.val(detail.mat_in_detail_id).change();
+
 
             const qtyInputParentDiv = document.createElement('div')
-            qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
+            qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
             $(qtyInputParentDiv).append(
                 `<input class="form-control" name="qty[]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
             )
-
-            const priceInputParentDiv = document.createElement('div')
-            priceInputParentDiv.setAttribute('class', 'col-3 px-2')
-            $(priceInputParentDiv).append(
-                `<input class='form-control' name='price[]' min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price || ''}">`
-            )
-
-            const subtotalPreviewParentDiv = document.createElement('div')
-            subtotalPreviewParentDiv.setAttribute('class', 'col-2 px-2')
-            subtotalPreviewParentDiv.innerHTML = "Rp. 0";
 
             const removeRowButtonParentDiv = document.createElement('div')
             removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
@@ -178,8 +167,6 @@
             detailRowDiv.setAttribute('class', 'form-group row details mx-0 align-items-center')
             $(detailRowDiv).append(materialSelectParentDiv)
             $(detailRowDiv).append(qtyInputParentDiv)
-            $(detailRowDiv).append(priceInputParentDiv)
-            $(detailRowDiv).append(subtotalPreviewParentDiv)
             $(detailRowDiv).append(removeRowButtonParentDiv)
             $(detailRowDiv).append(`<input type="hidden" name="idDetail[]" value="${detail.id}">`)
 
@@ -195,25 +182,25 @@
         }
 
 
-        const setMaterialInFormValue = materialIn => {
+        const setMaterialInFormValue = materialOut => {
 
-            if (materialIn.type) {
+            if (materialOut.type) {
                 const selectOpts = typeSelect.find('option');
                 const optValues = selectOpts.map((i, select) => select.innerHTML);
-                if ($.inArray(materialIn.type, optValues) === -1) {
-                    typeSelect.append(`<option>${materialIn.type}</option>`);
+                if ($.inArray(materialOut.type, optValues) === -1) {
+                    typeSelect.append(`<option>${materialOut.type}</option>`);
                 };
             }
 
-            typeSelect.val(materialIn.type || null).change();
-            idIns.value = materialIn.id || null
-            codeInsInput.value = materialIn.code || null
-            noteInsInput.value = materialIn.note || null
-            descInsInput.value = materialIn.desc || null
-            deleteInsId.value = materialIn.id || null
+            typeSelect.val(materialOut.type || null).change();
+            idIns.value = materialOut.id || null
+            codeInsInput.value = materialOut.code || null
+            noteInsInput.value = materialOut.note || null
+            descInsInput.value = materialOut.desc || null
+            deleteInsId.value = materialOut.id || null
 
-            if (materialIn.at) {
-                const dateObj = new Date(materialIn.at);
+            if (materialOut.at) {
+                const dateObj = new Date(materialOut.at);
 
                 const month = dateObj.getMonth() + 1; //months from 1-12
                 const day = dateObj.getDate();
@@ -224,44 +211,42 @@
                 atInput.value = '{{ date('Y-m-d') }}'
             }
 
-            materialIn.details?.map(function(detail) {
-                addMaterialInDetailRow(detail)
+            materialOut.detail_outs?.map(function(detail) {
+                addMaterialOutDetailRow(detail)
             })
         }
 
 
-        $(document).on('click', '.addMaterialInsButton', function() {
+        $(document).on('click', '.addMaterialOutsButton', function() {
             deletePutMethodInput();
             setMaterialInFormValue({});
             deleteForm.style.display = "none";
 
             removeMaterialInDetails()
 
-            for (let i = 0; i < 3; i++) {
-                addMaterialInDetailRow({})
-            }
+            addMaterialOutDetailRow({})
 
-            materiInsertForm.action = "{{ route('material-ins.store') }}";
+            materiInsertForm.action = "{{ route('material-outs.store') }}";
         });
 
-        $(document).on('click', '.editMaterialInsertButton', function() {
-            const materialInId = $(this).data('material-id');
-            const materialIn = materialIns.find(materialIn => materialIn.id === materialInId);
+        $(document).on('click', '.editMaterialOutButton', function() {
+            const materialOutId = $(this).data('material-id');
+            const materialOut = materialOuts.find(materialOut => materialOut.id === materialOutId);
             deleteForm.style.display = "block";
 
             removeMaterialInDetails();
 
             addPutMethodInputInsert();
-            setMaterialInFormValue(materialIn);
+            setMaterialInFormValue(materialOut);
 
-            materiInsertForm.action = "{{ route('material-ins.update', '') }}/" + materialIn.id;
+            materiInsertForm.action = "{{ route('material-outs.update', '') }}/" + materialOut.id;
 
-            deleteForm.action = "{{ route('material-ins.destroy', '') }}/" + materialIn
+            deleteForm.action = "{{ route('material-outs.destroy', '') }}/" + materialOut
                 .id;
         })
 
         $(document).on('click', '#addMaterialButton', function() {
-            addMaterialInDetailRow({})
+            addMaterialOutDetailRow({})
         })
 
 
@@ -282,9 +267,9 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialIn') }}?with=details.material',
+                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialOut') }}?with=detail_outs.detail_ins.material',
                     dataSrc: json => {
-                        materialIns = json.data;
+                        materialOuts = json.data;
                         return json.data;
                     },
                     beforeSend: function(request) {
@@ -309,19 +294,18 @@
                 }, {
                     orderable: false,
                     title: '{{ __('Items') }}',
-                    data: 'details',
-                    name: 'details.material.name',
+                    data: 'detail_outs',
                     width: '20%',
-                    render: details => details.map(detail => renderTagButton(
-                        `${detail.material?.name} (${detail.qty})`)).join('')
+                    render: detail_outs => detail_outs.map(detail_out => renderTagButton(
+                        `${detail_out.detail_ins.material.name} (${detail_out.qty})`)).join('')
                 }, {
                     render: function(data, type, row) {
                         const editButton = $(
                             '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
                         )
                         editButton.attr('data-toggle', 'modal')
-                        editButton.attr('data-target', '#materialInsertFormModal')
-                        editButton.addClass('editMaterialInsertButton');
+                        editButton.attr('data-target', '#materialOutFormModal')
+                        editButton.addClass('editMaterialOutButton');
                         editButton.attr('data-material-id', row.id)
                         return editButton.prop('outerHTML')
                     },

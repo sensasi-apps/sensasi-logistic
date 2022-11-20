@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMaterialInsTable extends Migration
+class CreateMaterialOutsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,7 @@ class CreateMaterialInsTable extends Migration
      */
     public function up()
     {
-        
-        Schema::connection('mysql')->create('material_ins', function (Blueprint $table) {
+        Schema::connection('mysql')->create('material_outs', function (Blueprint $table) {
             $database = \DB::connection('mysql_system')->getDatabaseName();
             $table->id();
             $table->string('code', 15)->nullable()->unique();
@@ -45,8 +44,6 @@ class CreateMaterialInsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('material_ins');
+        Schema::connection('mysql')->dropIfExists('material_outs');
     }
-
-
 }
