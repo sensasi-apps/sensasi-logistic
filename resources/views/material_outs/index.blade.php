@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped" id="materialInDatatable" style="width:100%">
+                    <table class="table table-striped" id="materialOutDatatable" style="width:100%">
                     </table>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                     <form method="POST" id="materiInsertForm">
                         @csrf
 
-                        <input type="hidden" name="id" id="idIns">
+                        <input type="hidden" name="id" id="idOuts">
 
 
                         <div class="row">
@@ -75,7 +75,7 @@
                         </div>
 
                         <div class="px-1" style="overflow-x: auto">
-                            <div id="materialInDetailsParent" style="width: 100%">
+                            <div id="materialOutDetailsParent" style="width: 100%">
                                 <div class="row m-0">
                                     <label class="col-6">{{ __('Name') }}</label>
                                     <label class="col-5">{{ __('Qty') }}</label>
@@ -111,31 +111,33 @@
 
     <script>
         let materialOuts
-        let materialInDatatable = $('#materialInDatatable')
+        let materialOutDatatable = $('#materialOutDatatable')
 
 
-        const materialInDetails = {{ Js::from(App\Models\MaterialInDetail::with('material')->get()) }};
+        const materialInDetails = {{ Js::from(App\Models\MaterialInDetail::with('material', 'materialIn')->get()) }};
+
+        console.log(materialInDetails);
         const typeSelect = $('#typeSelect')
         const materialFormModalLabel = $('#materialFormModalLabel')
 
-        const datatableSearch = tag => materialInDatatable.DataTable().search(tag).draw()
+        const datatableSearch = tag => materialOutDatatable.DataTable().search(tag).draw()
         const renderTagButton = text =>
             `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
         const initMaterialSelects = $selectDom => $selectDom.select2({
             dropdownParent: $('#modal_body_material'),
             placeholder: '{{ __('Material') }}',
-            data: materialInDetails.map(item => formattedMaterial = {
-                id: item.id,
-                text: item.material?.name+' '+'['+item.qty+']'
+            data: materialInDetails.map(materialInDetail => _ = {
+                id: materialInDetail.id,
+                text: `${materialInDetail.material?.name} (${materialInDetail.qty}) ${materialInDetail.material_in?.at}`
             })
         });
 
-        function removeMaterialInDetails() {
+        function removeMaterialOutDetails() {
             $('div .details').remove()
         }
 
-        function removeMaterialInDetailRow(dom) {
+        function removeMaterialOutDetailRow(dom) {
             dom.parentNode.parentNode.remove();
         }
 
@@ -147,7 +149,6 @@
                 .attr('name', 'material_ids[]')
             $(materialSelectParentDiv).append($selectDom)
             initMaterialSelects($selectDom);
-            console.log(detail.detail_ins);
             $selectDom.val(detail.mat_in_detail_id).change();
 
 
@@ -160,7 +161,7 @@
             const removeRowButtonParentDiv = document.createElement('div')
             removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
             $(removeRowButtonParentDiv).append($(
-                '<button class="btn btn-outline-danger btn-icon" onclick="removeMaterialInDetailRow(this)"><i class="fas fa-trash"></i></button>'
+                '<button class="btn btn-outline-danger btn-icon" onclick="removeMaterialOutDetailRow(this)"><i class="fas fa-trash"></i></button>'
             ))
 
             const detailRowDiv = document.createElement('div')
@@ -170,7 +171,7 @@
             $(detailRowDiv).append(removeRowButtonParentDiv)
             $(detailRowDiv).append(`<input type="hidden" name="idDetail[]" value="${detail.id}">`)
 
-            materialInDetailsParent.append(detailRowDiv);
+            materialOutDetailsParent.append(detailRowDiv);
         }
 
         const deletePutMethodInput = () => {
@@ -182,7 +183,7 @@
         }
 
 
-        const setMaterialInFormValue = materialOut => {
+        const setMaterialOutFormValue = materialOut => {
 
             if (materialOut.type) {
                 const selectOpts = typeSelect.find('option');
@@ -193,7 +194,7 @@
             }
 
             typeSelect.val(materialOut.type || null).change();
-            idIns.value = materialOut.id || null
+            idOuts.value = materialOut.id || null
             codeInsInput.value = materialOut.code || null
             noteInsInput.value = materialOut.note || null
             descInsInput.value = materialOut.desc || null
@@ -219,10 +220,10 @@
 
         $(document).on('click', '.addMaterialOutsButton', function() {
             deletePutMethodInput();
-            setMaterialInFormValue({});
+            setMaterialOutFormValue({});
             deleteForm.style.display = "none";
 
-            removeMaterialInDetails()
+            removeMaterialOutDetails()
 
             addMaterialOutDetailRow({})
 
@@ -234,10 +235,10 @@
             const materialOut = materialOuts.find(materialOut => materialOut.id === materialOutId);
             deleteForm.style.display = "block";
 
-            removeMaterialInDetails();
+            removeMaterialOutDetails();
 
             addPutMethodInputInsert();
-            setMaterialInFormValue(materialOut);
+            setMaterialOutFormValue(materialOut);
 
             materiInsertForm.action = "{{ route('material-outs.update', '') }}/" + materialOut.id;
 
@@ -257,7 +258,7 @@
                 dropdownParent: $('#modal_body_material')
             })
 
-            materialInDatatable = materialInDatatable.dataTable({
+            materialOutDatatable = materialOutDatatable.dataTable({
                 processing: true,
                 search: {
                     return: true,
