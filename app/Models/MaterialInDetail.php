@@ -11,6 +11,7 @@ class MaterialInDetail extends Model
     
     protected $connection = 'mysql';
     protected $fillable = ['material_in_id', 'material_id', 'qty', 'price'];
+    public $timestamps = false;
 
     public function material(){
         return $this->belongsTo(Material::class, 'material_id', 'id');
