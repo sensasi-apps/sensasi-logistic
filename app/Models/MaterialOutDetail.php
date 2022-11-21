@@ -11,6 +11,7 @@ class MaterialOutDetail extends Model
 
     protected $connection = 'mysql';
     protected $fillable = ['mat_in_detail_id', 'material_out_id', 'qty'];
+    public $timestamps = false;
 
     public function detail_ins(){
         return $this->belongsTo(MaterialInDetail::class, 'mat_in_detail_id', 'id');

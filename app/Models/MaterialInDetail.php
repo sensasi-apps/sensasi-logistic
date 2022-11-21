@@ -21,4 +21,14 @@ class MaterialInDetail extends Model
     {
         return $this->belongsTo(MaterialIn::class);
     }
+
+    public function getQtyRemainAttribute()
+    {
+        return $this->stock->qty;
+    }
+
+    public function stock()
+    {
+        return $this->hasOne(MaterialInDetailsStockView::class);
+    }
 }
