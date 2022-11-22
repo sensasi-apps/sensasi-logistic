@@ -6,8 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
-
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class MaterialOutController extends Controller
 {

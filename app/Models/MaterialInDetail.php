@@ -31,4 +31,11 @@ class MaterialInDetail extends Model
     {
         return $this->hasOne(MaterialInDetailsStockView::class);
     }
+
+    public static function search($q)
+    {
+        return self::with(['material', 'materialIn', 'stock'])
+            ->whereRelation('material', 'name', 'LIKE', "%${q}%")
+            ->orWhereRelation('materialIn', 'at', 'LIKE', "%${q}%");
+    }
 }

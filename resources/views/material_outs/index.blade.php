@@ -113,10 +113,6 @@
         let materialOuts
         let materialOutDatatable = $('#materialOutDatatable')
 
-
-        const materialInDetails = {{ Js::from(App\Models\MaterialInDetail::with('material', 'materialIn')->get()) }};
-
-        console.log(materialInDetails);
         const typeSelect = $('#typeSelect')
         const materialFormModalLabel = $('#materialFormModalLabel')
 
@@ -127,10 +123,30 @@
         const initMaterialSelects = $selectDom => $selectDom.select2({
             dropdownParent: $('#modal_body_material'),
             placeholder: '{{ __('Material') }}',
-            data: materialInDetails.map(materialInDetail => _ = {
-                id: materialInDetail.id,
-                text: `${materialInDetail.material?.name} (${materialInDetail.qty}) ${materialInDetail.material_in?.at}`
-            })
+            ajax: {
+                url: '/api/select2/MaterialInDetail',
+                dataType: 'json',
+                beforeSend: function(request) {
+                    request.setRequestHeader(
+                        "Authorization",
+                        'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                    )
+                },
+                processResults: function(data) {
+                    const theResults = data.map(materialInDetail => {
+                        console.log(materialInDetail.material_in);
+                        return {
+                            id: materialInDetail.id,
+                            text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${moment(materialInDetail.material_in.at).format('DD-MM-YYYY')}`
+                        }
+                    })
+
+                    return {
+                        results: theResults
+                    };
+                }
+            },
+            minimumInputLength: 3
         });
 
         function removeMaterialOutDetails() {
@@ -212,7 +228,7 @@
                 atInput.value = '{{ date('Y-m-d') }}'
             }
 
-            materialOut.detail_outs?.map(function(detail) {
+            materialOut.details?.map(function(detail) {
                 addMaterialOutDetailRow(detail)
             })
         }
@@ -268,7 +284,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialOut') }}?with=detail_outs.detail_ins.material',
+                    url: '/api/datatable/MaterialOut?with=details.materialInDetail.material',
                     dataSrc: json => {
                         materialOuts = json.data;
                         return json.data;
@@ -295,10 +311,11 @@
                 }, {
                     orderable: false,
                     title: '{{ __('Items') }}',
-                    data: 'detail_outs',
+                    data: 'details',
+                    name: 'detail.materialDetailIn.material.name',
                     width: '20%',
-                    render: detail_outs => detail_outs.map(detail_out => renderTagButton(
-                        `${detail_out.detail_ins.material.name} (${detail_out.qty})`)).join('')
+                    render: details => details.map(detail => renderTagButton(
+                        `${detail.material_in_detail?.material.name} (${detail.qty})`)).join('')
                 }, {
                     render: function(data, type, row) {
                         const editButton = $(

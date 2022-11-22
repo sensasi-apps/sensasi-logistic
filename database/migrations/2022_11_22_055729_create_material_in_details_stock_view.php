@@ -16,9 +16,9 @@ class CreateMaterialInDetailsStockView extends Migration
             VIEW material_in_details_stock_view AS
             SELECT
                 mid.id as material_in_detail_id,
-                mid.qty - SUM(`mod`.qty) as qty
-            FROM material_out_details `mod`
-            LEFT JOIN material_in_details mid ON mid.id = `mod`.material_in_detail_id
+                mid.qty - COALESCE(SUM(`mod`.qty),0) as qty
+            FROM material_in_details mid
+            LEFT JOIN material_out_details `mod` ON `mod`.material_in_detail_id = mid.id
             GROUP BY mid.id, mid.qty
         ');
     }

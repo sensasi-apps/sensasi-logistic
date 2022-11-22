@@ -20,4 +20,5 @@ Route::middleware('auth:sanctum')->group(function() {
     // });
 
     Route::get('datatable/{modelName}', '\App\Http\Controllers\Api\DatatableController');
+    Route::get('select2/{modelName}', '\App\Http\Controllers\Api\Select2Controller');
 });
