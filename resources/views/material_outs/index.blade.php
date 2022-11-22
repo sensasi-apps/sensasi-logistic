@@ -134,7 +134,7 @@
                 },
                 processResults: function(data) {
                     const theResults = data.map(materialInDetail => {
-                        console.log(materialInDetail.material_in);
+                        
                         return {
                             id: materialInDetail.id,
                             text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${moment(materialInDetail.material_in.at).format('DD-MM-YYYY')}`
@@ -158,20 +158,22 @@
         }
 
         function addMaterialOutDetailRow(detail) {
+            const nDetailInputSet = $('.detailInputSetDiv').length
             const materialSelectParentDiv = document.createElement('div')
             materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
             const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
                 .addClass('form-control select2 listSelect')
-                .attr('name', 'material_ids[]')
+                .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
             $(materialSelectParentDiv).append($selectDom)
+
             initMaterialSelects($selectDom);
-            $selectDom.val(detail.mat_in_detail_id).change();
+            $selectDom.val(detail.material_in_detail_id).change();
 
 
             const qtyInputParentDiv = document.createElement('div')
             qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
             $(qtyInputParentDiv).append(
-                `<input class="form-control" name="qty[]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
             )
 
             const removeRowButtonParentDiv = document.createElement('div')
@@ -185,7 +187,7 @@
             $(detailRowDiv).append(materialSelectParentDiv)
             $(detailRowDiv).append(qtyInputParentDiv)
             $(detailRowDiv).append(removeRowButtonParentDiv)
-            $(detailRowDiv).append(`<input type="hidden" name="idDetail[]" value="${detail.id}">`)
+            $(detailRowDiv).append(`<input type="hidden" name="" value="${detail.id}">`)
 
             materialOutDetailsParent.append(detailRowDiv);
         }

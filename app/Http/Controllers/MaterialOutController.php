@@ -38,33 +38,34 @@ class MaterialOutController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedInput = $request->validate([
-            'code' => 'nullable',
-            'type' => 'required',
-            'note' => 'nullable',
-            'desc' => 'required',
-            'at' => 'required',
-
-            'material_ids' => 'required|array',
-            'material_ids.*' => 'required|numeric|min:0|distinct',
+        $materialOutFromInput = $request->validate([
+            'code' => 'nullable|string|unique:mysql.material_outs',
+            'type' => 'required|string',
+            'note' => 'nullable|string',
+            'desc' => 'required|string',
+            'at' => 'required|date'
         ]);
 
-        $validatedInput['created_by_user_id'] = Auth::user()->id;
-        $validatedInput['last_updated_by_user_id'] = Auth::user()->id;
+        $materialOutDetailsFromInput = $request->validate([
+            'details' => 'required|array',
+            'details.*.id' => 'nullable',
+            'details.*.material_in_detail_id' => 'required|exists:mysql.material_in_details,id',
+            'details.*.qty' => 'required|integer',
+        ])['details'];
 
-        $materialIn = MaterialOut::create($validatedInput);
+        $materialOutFromInput['created_by_user_id'] = Auth::user()->id;
+        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
-        foreach($request->material_ids as $key => $materialId){
-            $MaterialOutDetail = new MaterialOutDetail();
-            $MaterialOutDetail->material_out_id = $materialIn->id;
-            $MaterialOutDetail->mat_in_detail_id = $materialId;
-            $MaterialOutDetail->qty = $request->qty[$key];
-            $MaterialOutDetail->save();
+        if ($materialOut = MaterialOut::create($materialOutFromInput)) {
+            foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+            }
+
+            MaterialOutDetail::insert($materialOutDetailsFromInput);
         }
 
-        return redirect(route('material-outs.index'))->with('message', [
-          'class' => 'success',
-          'text' => 'Berhasil menambah Material Insert'
+        return redirect(route('material-outs.index'))->with('notifications', [
+            ['Berhasil menambahkan bahan keluar', 'success']
         ]);
     }
 
@@ -97,40 +98,51 @@ class MaterialOutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, MaterialOut $MaterialOut)
     {
-        $validatedInput = $request->validate([
-            'code' => 'nullable',
-            'type' => 'required',
-            'note' => 'required',
-            'desc' => 'required',
-            'at' => 'required'
+        // dd($request->all());
+        $materialOutFromInput = $request->validate([
+            'code' => 'nullable|string|unique:mysql.material_outs,code,id,' . $MaterialOut->id,
+            'type' => 'required|string',
+            'note' => 'nullable|string',
+            'desc' => 'required|string',
+            'at' => 'required|date'
         ]);
 
-        $validatedInput['last_updated_by_user_id'] = Auth::user()->id;
-        $materialOut = MaterialOut::with('detail_outs')->find($id);
-        $materialOut->update($validatedInput);
+        $materialOutDetailsFromInput = $request->validate([
+            'details' => 'required|array',
+            'details.*.material_in_detail_id' => 'required|exists:mysql.material_in_details,id',
+            'details.*.qty' => 'required|integer',
+        ])['details'];
 
-        $materialIds = $materialOut->detail_outs->map(fn ($materialOut) => $materialOut->mat_in_detail_id);
-        $toBeDeletedIds = $materialIds->diff($request->mat_in_detail_id);
+        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
-        $materialOut->detail_outs()->whereIn('mat_in_detail_id', $toBeDeletedIds)->delete();
-
-        foreach($request->material_ids as $key => $materialId){
-            if ($materialOutDetail = MaterialOutDetail::find($materialId)) {
-                $materialOutDetail->mat_in_detail_id = $request->material_ids[$key];
-                $materialOutDetail->qty = $request->qty[$key];
-                $materialOutDetail->update();
-            } else {
-                $materialOutDetail = new MaterialOutDetail();
-                $materialOutDetail->material_out_id = $id;
-                $materialOutDetail->mat_in_detail_id = $request->material_ids[$key];
-                $materialOutDetail->qty = $request->qty[$key];
-                $materialOutDetail->save();
+        if ($MaterialOut->update($materialOutFromInput)) {
+            foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                $materialOutDetailFromInput['material_Out_id'] = $MaterialOut->id;
             }
+
+            $existsMaterialIds = $MaterialOut->details->pluck('material_in_detail_id');
+            $materialIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
+            $toBeDeletedMaterialIds = $existsMaterialIds->diff($materialIdsFromInput);
+
+            if ($toBeDeletedMaterialIds->isNotEmpty()) {
+                $MaterialOut
+                    ->details()
+                    ->whereIn('material_in_detail_id', $toBeDeletedMaterialIds)
+                    ->delete();
+            }
+
+            MaterialOutDetail::upsert(
+                $materialOutDetailsFromInput,
+                ['material_Out_id', 'material_in_detail_id'],
+                ['qty']
+            );
         }
 
-        return redirect(route('material-outs.index'))->with('notifications', [[__('Material out data added successfully'), 'success']]);
+        return redirect(route('material-outs.index'))->with('notifications', [
+            [__('Material out data updated successfully'), 'success']
+        ]);
     }
 
     /**

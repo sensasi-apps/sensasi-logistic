@@ -159,6 +159,7 @@
                 $(materialSelectParentDiv).append($selectDom)
 
                 initMaterialsSelect($selectDom);
+                console.log(detail.material_id)
                 $selectDom.val(detail.material_id).change();
 
                 return materialSelectParentDiv
