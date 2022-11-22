@@ -49,19 +49,18 @@ class MaterialInController extends Controller
             'at' => 'required|date'
         ]);
 
+        $materialInDetailsFromInput = $request->validate([
+            'details' => 'required|array',
+            'details.*.id' => 'nullable',
+            'details.*.material_id' => 'required|exists:mysql.materials,id',
+            'details.*.qty' => 'required|integer',
+            'details.*.price' => 'required|integer'
+        ])['details'];
+
         $materialInFromInput['created_by_user_id'] = Auth::user()->id;
         $materialInFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
         if ($materialIn = MaterialIn::create($materialInFromInput)) {
-
-            $materialInDetailsFromInput = $request->validate([
-                'details' => 'required|array',
-                'details.*.id' => 'nullable',
-                'details.*.material_id' => 'required|exists:mysql.materials,id',
-                'details.*.qty' => 'required|integer',
-                'details.*.price' => 'required|integer'
-            ])['details'];
-
             foreach ($materialInDetailsFromInput as &$materialInDetailFromInput) {
                 $materialInDetailFromInput['material_in_id'] = $materialIn->id;
             }
@@ -112,17 +111,17 @@ class MaterialInController extends Controller
             'desc' => 'required|string',
             'at' => 'required|date'
         ]);
+
+        $materialInDetailsFromInput = $request->validate([
+            'details' => 'required|array',
+            'details.*.material_id' => 'required|exists:mysql.materials,id',
+            'details.*.qty' => 'required|integer',
+            'details.*.price' => 'required|integer'
+        ])['details'];
+
         $materialInFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
         if ($materialIn->update($materialInFromInput)) {
-
-            $materialInDetailsFromInput = $request->validate([
-                'details' => 'required|array',
-                'details.*.material_id' => 'required|exists:mysql.materials,id',
-                'details.*.qty' => 'required|integer',
-                'details.*.price' => 'required|integer'
-            ])['details'];
-
             foreach ($materialInDetailsFromInput as &$materialInDetailFromInput) {
                 $materialInDetailFromInput['material_in_id'] = $materialIn->id;
             }
