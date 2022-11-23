@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->string('code', 10)->nullable()->unique();
             $table->string('name')->unique();
             $table->string('tags_json')->nullable();
-            $table->integer('detault_price');
+            $table->integer('default_price');
             $table->string('unit', 10);
             $table->timestamps();
             $table->softDeletes();
