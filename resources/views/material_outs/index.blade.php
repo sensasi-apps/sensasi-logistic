@@ -165,7 +165,7 @@
                 .addClass('form-control select2 listSelect')
                 .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
             $(materialSelectParentDiv).append($selectDom)
-
+            
             initMaterialSelects($selectDom);
             $selectDom.val(detail.material_in_detail_id).change();
 
@@ -183,7 +183,7 @@
             ))
 
             const detailRowDiv = document.createElement('div')
-            detailRowDiv.setAttribute('class', 'form-group row details mx-0 align-items-center')
+            detailRowDiv.setAttribute('class', 'form-group row details mx-0 align-items-center detailInputSetDiv')
             $(detailRowDiv).append(materialSelectParentDiv)
             $(detailRowDiv).append(qtyInputParentDiv)
             $(detailRowDiv).append(removeRowButtonParentDiv)
@@ -230,6 +230,7 @@
                 atInput.value = '{{ date('Y-m-d') }}'
             }
 
+            
             materialOut.details?.map(function(detail) {
                 addMaterialOutDetailRow(detail)
             })

@@ -157,9 +157,8 @@
                     .addClass('form-control materialSelect')
                     .attr('name', `details[${nDetailInputSet}][material_id]`)
                 $(materialSelectParentDiv).append($selectDom)
-
+                console.log(detail)
                 initMaterialsSelect($selectDom);
-                console.log(detail.material_id)
                 $selectDom.val(detail.material_id).change();
 
                 return materialSelectParentDiv
