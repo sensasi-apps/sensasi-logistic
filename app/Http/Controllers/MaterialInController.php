@@ -15,7 +15,7 @@ class MaterialInController extends Controller
     private function validateInput(Request $request, int $materialInId = null)
     {
         $materialInFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_ins,code,' . ($materialInId ? 'code,' . $materialInId : null),
+            'code' => 'nullable|string|unique:mysql.material_ins,code,' . ($materialInId ? ",$materialInId" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'desc' => 'required|string',

@@ -8,6 +8,17 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
+    private function validateInput(Request $request, int $productId = null)
+    {
+        return $request->validate([
+            'code' => 'nullable|string|unique:mysql.products,code' . ($productId ? ",$productId" : null),
+            'name' => 'required|string|unique:mysql.products,name' . ($productId ? ",$productId" : null),
+            'unit' => 'required|string',
+            'default_price' => 'required|numeric',
+            'tags' => 'nullable|array'
+        ]);
+
+    }
     /**
      * Display a listing of the resource.
      *
@@ -36,37 +47,25 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedInput = $request->validate([
-            'name' => 'required|unique:mysql.products',
-            'code' => 'nullable|unique:mysql.products',
-            'unit' => 'required',
-            'default_price' => 'required',
-            'tags' => 'nullable|array'
-        ]);
+        $productFromInput = $this->validateInput($request);
         
-        Product::create($validatedInput);
+        $product = Product::create($productFromInput);
 
-        return redirect(route('products.index'))->with('message', [
-          'class' => 'success',
-          'text' => 'Berhasil menambah riwayat pendidikan'
+        return redirect(route('products.index'))->with('notifications', [
+            [($product->code ?? $product->name) . ' ' . __('was added successfully'), 'success']
         ]);
+
+
     }
 
     public function update(Request $request, Product $product)
     {
-        $update = $request->validate([
-            'code' => 'nullable',
-            'name' => 'required',
-            'unit' => 'required',
-            'default_price' => 'required',
-            'tags' => 'nullable|array'
-        ]);
+        $productFromInput = $this->validateInput($request, $product->id);
 
-        $product->update($update);
+        $product->update($productFromInput);
 
-        return redirect(route('products.index'))->with('message', [
-          'class' => 'success',
-          'text' => __(($product->code ?? $product->name) . ' was updated successfully') . '.'
+        return redirect(route('products.index'))->with('notifications', [
+          [($product->code ?? $product->name) . ' ' . __('was updated successfully'), 'success']
         ]);
     }
 
@@ -78,11 +77,11 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        Product::find($id)->delete();
+        $product = Product::find($id);
+        $product->delete();
 
-        return redirect(route('products.index'))->with('message', [
-          'class' => 'warning',
-          'text' => __('Product was deleted successfully') . '.'
+        return redirect(route('products.index'))->with('notifications', [
+          [($product->code ?? $product->name) . ' ' . __('was deleted successfully'), 'warning']
         ]);
     }
 }

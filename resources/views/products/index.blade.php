@@ -45,12 +45,12 @@
                         <input type="hidden" name="id" id="idInput">
 
                         <div class="form-group">
-                            <label for="codeInput">{{ __('Code') }}</label>
+                            <label for="codeInput">{{ __('validation.attributes.code') }}</label>
                             <input type="text" class="form-control" name="code" id="codeInput">
                         </div>
 
                         <div class="form-group">
-                            <label for="nameInput">{{ __('Name') }}</label>
+                            <label for="nameInput">{{ __('validation.attributes.name') }}</label>
                             <input type="text" class="form-control" name="name" required id="nameInput">
                         </div>
 
@@ -60,8 +60,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="priceInput">{{ __('Price') }}</label>
-                            <input type="text" class="form-control" name="default_price" required id="priceInput">
+                            <label for="priceInput">{{ __('validation.attributes.default_price') }}</label>
+                            <input type="number" min="0" class="form-control" name="default_price" required id="priceInput">
                         </div>
 
                         <div class="form-group">
@@ -205,13 +205,16 @@
                 },
                 columns: [{
                     data: 'code',
-                    title: '{{ __('Code') }}'
+                    title: '{{ __('validation.attributes.code') }}'
                 }, {
                     data: 'name',
-                    title: '{{ __('Name') }}'
+                    title: '{{ __('validation.attributes.name') }}'
                 }, {
                     data: 'unit',
                     title: '{{ __('Unit') }}'
+                }, {
+                    data: 'default_price',
+                    title: '{{ __('validation.attributes.default_price') }}'
                 }, {
                     data: 'tags',
                     name: 'tags_json',
