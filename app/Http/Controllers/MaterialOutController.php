@@ -7,9 +7,32 @@ use Illuminate\Http\Request;
 use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MaterialOutController extends Controller
 {
+    private function validateInput(Request $request, int $materialOutId = null)
+    {
+        $materialOutFromInput = $request->validate([
+            'code' => 'nullable|string|unique:mysql.material_outs' . ($materialOutId ? 'code,' . $materialOutId : null),
+            'type' => 'required|string',
+            'note' => 'nullable|string',
+            'desc' => 'required|string',
+            'at' => 'required|date'
+        ]);
+
+        $materialOutDetailsFromInput = $request->validate([
+            'details' => 'required|array',
+            'details.*.material_in_detail_id' => 'required|exists:mysql.material_in_details,id',
+            'details.*.qty' => 'required|integer',
+        ])['details'];
+
+        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
+
+        return [$materialOutFromInput, $materialOutDetailsFromInput];
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +40,8 @@ class MaterialOutController extends Controller
      */
     public function index()
     {
-        return view('material_outs.index');
+        $types = DB::connection('mysql')->table('material_outs')->select('type')->distinct()->get()->pluck('type');
+        return view('material_outs.index', compact('types'));
     }
 
     /**
@@ -38,23 +62,9 @@ class MaterialOutController extends Controller
      */
     public function store(Request $request)
     {
-        $materialOutFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_outs',
-            'type' => 'required|string',
-            'note' => 'nullable|string',
-            'desc' => 'required|string',
-            'at' => 'required|date'
-        ]);
-
-        $materialOutDetailsFromInput = $request->validate([
-            'details' => 'required|array',
-            'details.*.id' => 'nullable',
-            'details.*.material_in_detail_id' => 'required|exists:mysql.material_in_details,id',
-            'details.*.qty' => 'required|integer',
-        ])['details'];
+        [$materialOutFromInput, $materialOutDetailsFromInput] = $this->validateInput($request);
 
         $materialOutFromInput['created_by_user_id'] = Auth::user()->id;
-        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
         if ($materialOut = MaterialOut::create($materialOutFromInput)) {
             foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
@@ -65,7 +75,8 @@ class MaterialOutController extends Controller
         }
 
         return redirect(route('material-outs.index'))->with('notifications', [
-            ['Berhasil menambahkan bahan keluar', 'success']
+            [__('Material out data has been added successfully'), 'success']
+
         ]);
     }
 
@@ -91,6 +102,14 @@ class MaterialOutController extends Controller
         //
     }
 
+    private function getToBeDeletedMaterialInDetailIds(MaterialOut $materialOut, Array $materialOutDetailsFromInput)
+    {
+        $existsMaterialInDetailIds = $materialOut->details->pluck('material_in_detail_id');
+        $materialInDetailIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
+        
+        return $existsMaterialInDetailIds->diff($materialInDetailIdsFromInput);
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -98,38 +117,22 @@ class MaterialOutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, MaterialOut $MaterialOut)
+    public function update(Request $request, MaterialOut $materialOut)
     {
-        // dd($request->all());
-        $materialOutFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_outs,code,id,' . $MaterialOut->id,
-            'type' => 'required|string',
-            'note' => 'nullable|string',
-            'desc' => 'required|string',
-            'at' => 'required|date'
-        ]);
+        [$materialOutFromInput, $materialOutDetailsFromInput] = $this->validateInput($request, $materialOut->id);
 
-        $materialOutDetailsFromInput = $request->validate([
-            'details' => 'required|array',
-            'details.*.material_in_detail_id' => 'required|exists:mysql.material_in_details,id',
-            'details.*.qty' => 'required|integer',
-        ])['details'];
 
-        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
-
-        if ($MaterialOut->update($materialOutFromInput)) {
+        if ($materialOut->update($materialOutFromInput)) {
             foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                $materialOutDetailFromInput['material_Out_id'] = $MaterialOut->id;
+                $materialOutDetailFromInput['material_Out_id'] = $materialOut->id;
             }
 
-            $existsMaterialIds = $MaterialOut->details->pluck('material_in_detail_id');
-            $materialIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
-            $toBeDeletedMaterialIds = $existsMaterialIds->diff($materialIdsFromInput);
+            $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($materialOut, $materialOutDetailsFromInput);
 
-            if ($toBeDeletedMaterialIds->isNotEmpty()) {
-                $MaterialOut
+            if ($toBeDeletedMaterialInDetailIds->isNotEmpty()) {
+                $materialOut
                     ->details()
-                    ->whereIn('material_in_detail_id', $toBeDeletedMaterialIds)
+                    ->whereIn('material_in_detail_id', $toBeDeletedMaterialInDetailIds)
                     ->delete();
             }
 
@@ -141,8 +144,12 @@ class MaterialOutController extends Controller
         }
 
         return redirect(route('material-outs.index'))->with('notifications', [
-            [__('Material out data updated successfully'), 'success']
+            [__('Material out data has been updated successfully'), 'success']
         ]);
+    }
+
+    private function validateUpdate(Request $request) {
+        
     }
 
     /**
