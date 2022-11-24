@@ -55,7 +55,11 @@
                             <div class="col form-group">
                                 <label for="typeSelect">{{ __('Type') }}</label>
                                 <select id="typeSelect" name="type" required class="form-control select2"
-                                    data-select2-opts='{"tags": "true"}'></select>
+                                    data-select2-opts='{"tags": "true"}'>
+                                    @foreach ($types as $type)
+                                        <option>{{ $type }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
@@ -166,6 +170,10 @@
                 .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
             $(materialSelectParentDiv).append($selectDom)
             
+            if (detail.material_in_detail_id) {
+                $selectDom.append(`<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`);
+            }
+            
             initMaterialSelects($selectDom);
             $selectDom.val(detail.material_in_detail_id).change();
 
@@ -244,6 +252,8 @@
 
             removeMaterialOutDetails()
 
+            addMaterialOutDetailRow({})
+            addMaterialOutDetailRow({})
             addMaterialOutDetailRow({})
 
             materiInsertForm.action = "{{ route('material-outs.store') }}";

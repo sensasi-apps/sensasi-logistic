@@ -17,7 +17,7 @@ class MaterialOutFactory extends Factory
         return [
             'code' => $this->faker->unique()->numerify('#####'),
             'at' => $this->faker->dateTimeThisYear(),
-            'type' => $this->faker->randomElement(['Pembelian', 'Hibah']),
+            'type' => $this->faker->randomElement([__('Stock Opname'), __('Return')]),
             'created_by_user_id' => $this->faker->randomElement($userIds),
             'last_updated_by_user_id' => $this->faker->randomElement($userIds),
             'note' => $this->faker->sentence(10),
