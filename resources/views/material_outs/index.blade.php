@@ -166,6 +166,10 @@
                 .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
             $(materialSelectParentDiv).append($selectDom)
             
+            if (detail.material_in_detail_id) {
+                $selectDom.append(`<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`);
+            }
+            
             initMaterialSelects($selectDom);
             $selectDom.val(detail.material_in_detail_id).change();
 
@@ -244,6 +248,8 @@
 
             removeMaterialOutDetails()
 
+            addMaterialOutDetailRow({})
+            addMaterialOutDetailRow({})
             addMaterialOutDetailRow({})
 
             materiInsertForm.action = "{{ route('material-outs.store') }}";
