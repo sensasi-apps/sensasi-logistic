@@ -145,5 +145,9 @@ return [
     |
     */
 
-	'attributes' => [],
+	'attributes' => [
+		'code' => 'Kode',
+		'name' => 'Nama',
+		'default_price' => 'Harga standar'
+	],
 ];
