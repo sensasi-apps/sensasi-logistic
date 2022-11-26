@@ -38,7 +38,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material">
+                <div class="modal-body" id="modal_body_product">
 
                     <form method="POST" id="productInForm" onsubmit="return validateInputs();">
                         @csrf
@@ -79,7 +79,7 @@
                         </div>
 
                         <div class="px-1" style="overflow-x: auto">
-                            <div id="materialInDetailsParent" style="width: 100%">
+                            <div id="productInDetailsParent" style="width: 100%">
                                 <div class="row m-0">
                                     <label class="col-7">{{ __('Name') }}</label>
                                     <label class="col-4">{{ __('Qty') }}</label>
@@ -125,18 +125,18 @@
         const renderTagButton = text =>
             `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
-        function addMaterialInDetailRow(detail) {
+        function addProductInDetailRow(detail) {
             const nDetailInputSet = $('.detailInputSetDiv').length
 
             const detailRowDiv = document.createElement('div')
             detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
-            materialInDetailsParent.append(detailRowDiv);
+            productInDetailsParent.append(detailRowDiv);
 
             function getProductSelect () {
                 const products = {{ Js::from(App\Models\Product::all()) }};
 
                 const initProductsSelect = $selectDom => $selectDom.select2({
-                    dropdownParent: $('#modal_body_material'),
+                    dropdownParent: $('#modal_body_product'),
                     placeholder: '{{ __('Product') }}',
                     data: [{
                         id: null,
@@ -149,17 +149,17 @@
                     }))
                 });
 
-                const materialSelectParentDiv = document.createElement('div')
-                materialSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
+                const productSelectParentDiv = document.createElement('div')
+                productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
                 const $selectDom = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
                     .addClass('form-control productSelect')
                     .attr('name', `details[${nDetailInputSet}][product_id]`)
-                $(materialSelectParentDiv).append($selectDom)
+                $(productSelectParentDiv).append($selectDom)
                 console.log(detail)
                 initProductsSelect($selectDom);
                 $selectDom.val(detail.product_id).change();
 
-                return materialSelectParentDiv
+                return productSelectParentDiv
             }
 
 
@@ -232,7 +232,7 @@
             }
 
             productIn.details?.map(function(detail) {
-                addMaterialInDetailRow(detail)
+                addProductInDetailRow(detail)
             })
         }
 
@@ -245,7 +245,7 @@
             $('.detailInputSetDiv').remove()
 
 
-            addMaterialInDetailRow({})
+            addProductInDetailRow({})
 
             productInForm.action = "{{ route('product-ins.store') }}";
         });
@@ -267,7 +267,7 @@
         })
 
         $(document).on('click', '#addProductButton', function() {
-            addMaterialInDetailRow({})
+            addProductInDetailRow({})
         })
 
         function validateInputs() {
@@ -279,7 +279,7 @@
             [...document.getElementsByClassName('productSelect')].map(selectEl => {
                 if (selectedProductIds.includes(selectEl.value)) {
                     const errorTextDiv = document.createElement('div');
-                    errorTextDiv.innerHTML = '{{ __('Material is duplicated') }}';
+                    errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
                     errorTextDiv.classList.add('text-danger')
 
                     selectEl.parentNode.append(errorTextDiv)
@@ -295,7 +295,7 @@
         $(document).ready(function() {
             $('#typeSelect').select2('destroy').select2({
                 tags: true,
-                dropdownParent: $('#modal_body_material')
+                dropdownParent: $('#modal_body_product')
             })
 
             productInDatatable = productInDatatable.dataTable({
