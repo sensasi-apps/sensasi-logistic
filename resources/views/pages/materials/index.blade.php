@@ -184,7 +184,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Material') }}',
+                    url: 'api/datatable/Material',
                     dataSrc: json => {
                         materials = json.data;
                         return json.data;
@@ -203,6 +203,9 @@
                 }, {
                     data: 'name',
                     title: '{{ __('Name') }}'
+                }, {
+                    data: 'qty',
+                    title: '{{ __('Qty') }}'
                 }, {
                     data: 'unit',
                     title: '{{ __('Unit') }}'
