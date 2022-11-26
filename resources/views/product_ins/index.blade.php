@@ -246,6 +246,8 @@
 
 
             addProductInDetailRow({})
+            addProductInDetailRow({})
+            addProductInDetailRow({})
 
             productInForm.action = "{{ route('product-ins.store') }}";
         });
