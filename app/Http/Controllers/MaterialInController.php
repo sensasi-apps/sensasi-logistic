@@ -15,7 +15,7 @@ class MaterialInController extends Controller
     private function validateInput(Request $request, int $materialInId = null)
     {
         $materialInFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_ins,code,' . ($materialInId ? ",$materialInId" : null),
+            'code' => 'nullable|string|unique:mysql.material_ins,code' . ($materialInId ? ",$materialInId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'desc' => 'required|string',
@@ -43,7 +43,7 @@ class MaterialInController extends Controller
     public function index()
     {
         $types = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->get()->pluck('type');
-        return view('material_ins.index', compact('types'));
+        return view('pages.material-ins.index', compact('types'));
     }
 
     /**

@@ -14,7 +14,7 @@ class MaterialOutController extends Controller
     private function validateInput(Request $request, int $materialOutId = null)
     {
         $materialOutFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_outs,code' . ($materialOutId ? ", $materialOutId" : null),
+            'code' => 'nullable|string|unique:mysql.material_outs,code' . ($materialOutId ? "$materialOutId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'desc' => 'required|string',
@@ -41,7 +41,7 @@ class MaterialOutController extends Controller
     public function index()
     {
         $types = DB::connection('mysql')->table('material_outs')->select('type')->distinct()->get()->pluck('type');
-        return view('material_outs.index', compact('types'));
+        return view('pages.material-outs.index', compact('types'));
     }
 
     /**

@@ -11,8 +11,8 @@ class ProductController extends Controller
     private function validateInput(Request $request, int $productId = null)
     {
         return $request->validate([
-            'code' => 'nullable|string|unique:mysql.products,code' . ($productId ? ",$productId" : null),
-            'name' => 'required|string|unique:mysql.products,name' . ($productId ? ",$productId" : null),
+            'code' => 'nullable|string|unique:mysql.products,code' . ($productId ? ",$productId,id" : null),
+            'name' => 'required|string|unique:mysql.products,name' . ($productId ? ",$productId,id" : null),
             'unit' => 'required|string',
             'default_price' => 'required|numeric',
             'tags' => 'nullable|array'
@@ -26,7 +26,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('products.index');
+        return view('pages.products.index');
     }
 
     /**
