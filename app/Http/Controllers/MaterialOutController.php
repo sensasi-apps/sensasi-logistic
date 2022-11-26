@@ -41,7 +41,7 @@ class MaterialOutController extends Controller
     public function index()
     {
         $types = DB::connection('mysql')->table('material_outs')->select('type')->distinct()->get()->pluck('type');
-        return view('material_outs.index', compact('types'));
+        return view('pages.material-outs.index', compact('types'));
     }
 
     /**

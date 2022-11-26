@@ -43,7 +43,7 @@ class MaterialInController extends Controller
     public function index()
     {
         $types = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->get()->pluck('type');
-        return view('material_ins.index', compact('types'));
+        return view('pages.material-ins.index', compact('types'));
     }
 
     /**

@@ -41,7 +41,7 @@ class ProductInController extends Controller
     public function index()
     {
         $types = DB::connection('mysql')->table('product_ins')->select('type')->distinct()->get()->pluck('type');
-        return view('product_ins.index', compact('types'));
+        return view('pages.product-ins.index', compact('types'));
     }
 
     /**
