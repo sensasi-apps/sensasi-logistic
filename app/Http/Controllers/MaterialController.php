@@ -7,6 +7,16 @@ use App\Models\Material;
 
 class MaterialController extends Controller
 {
+    private function validateInput(Request $request, int $materialId = null)
+    {
+        return $request->validate([
+            'name' => 'required|unique:mysql.materials,name'  . ($materialId ? "$materialId,id" : null),
+            'code' => 'nullable|unique:mysql.materials,code'  . ($materialId ? "$materialId,id" : null),
+            'unit' => 'required',
+            'tags' => 'nullable|array'
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -25,18 +35,12 @@ class MaterialController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedInput = $request->validate([
-            'name' => 'required|unique:mysql.materials',
-            'code' => 'nullable|unique:mysql.materials',
-            'unit' => 'required',
-            'tags' => 'nullable|array'
-        ]);
+        $materialFromInput = $this->validateInput($request);
         
-        Material::create($validatedInput);
+        $material = Material::create($materialFromInput);
 
-        return redirect(route('materials.index'))->with('message', [
-          'class' => 'success',
-          'text' => 'Berhasil menambah riwayat pendidikan'
+        return redirect(route('materials.index'))->with('notifications', [
+            [($material->code ?? $material->name) . __(' has been added successfully'), 'success']
         ]);
     }
 
@@ -49,18 +53,12 @@ class MaterialController extends Controller
      */
     public function update(Request $request, Material $material)
     {
-        $update = $request->validate([
-            'code' => 'nullable',
-            'name' => 'required',
-            'unit' => 'required',
-            'tags' => 'nullable|array'
-        ]);
+        $materialFromInput = $this->validateInput($request, $material->id);
 
-        $material->update($update);
+        $material->update($materialFromInput);
 
-        return redirect(route('materials.index'))->with('message', [
-          'class' => 'success',
-          'text' => __(($material->code ?? $material->name) . ' was updated successfully') . '.'
+        return redirect(route('materials.index'))->with('notifications', [
+            [($material->code ?? $material->name) . __(' has been updated successfully'), 'success']
         ]);
     }
 
@@ -72,14 +70,10 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
-        try {
-            $material->delete();
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+        $material->delete();
 
-        return redirect(route('materials.index'))->with('message', [
-            [__('Material has been deleted successfully'), 'warning']
+        return redirect(route('materials.index'))->with('notifications', [
+            [($material->code ?? $material->name) . __(' has been deleted successfully'), 'warning']
         ]);
     }
 }

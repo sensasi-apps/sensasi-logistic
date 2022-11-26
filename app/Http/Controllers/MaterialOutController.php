@@ -14,7 +14,7 @@ class MaterialOutController extends Controller
     private function validateInput(Request $request, int $materialOutId = null)
     {
         $materialOutFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_outs,code' . ($materialOutId ? ", $materialOutId" : null),
+            'code' => 'nullable|string|unique:mysql.material_outs,code' . ($materialOutId ? "$materialOutId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'desc' => 'required|string',

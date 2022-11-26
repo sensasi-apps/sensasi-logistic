@@ -16,7 +16,7 @@ class ProductInController extends Controller
     private function validateInput(Request $request, int $productInId = null)
     {
         $productInFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.product_ins,code,' . ($productInId ? ",$productInId" : null),
+            'code' => 'nullable|string|unique:mysql.product_ins,code,' . ($productInId ? ",$productInId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'desc' => 'required|string',
