@@ -19,7 +19,6 @@ class ProductInController extends Controller
             'code' => 'nullable|string|unique:mysql.product_ins,code,' . ($productInId ? ",$productInId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
-            'desc' => 'required|string',
             'at' => 'required|date'
         ]);
 

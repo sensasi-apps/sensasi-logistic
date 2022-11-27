@@ -8,7 +8,6 @@ use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use stdClass;
 
 class MaterialInController extends Controller
 {
@@ -18,7 +17,6 @@ class MaterialInController extends Controller
             'code' => 'nullable|string|unique:mysql.material_ins,code' . ($materialInId ? ",$materialInId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
-            'desc' => 'required|string',
             'at' => 'required|date'
         ]);
 
@@ -42,7 +40,7 @@ class MaterialInController extends Controller
      */
     public function index()
     {
-        $types = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->get()->pluck('type');
+        $types = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
         return view('pages.material-ins.index', compact('types'));
     }
 

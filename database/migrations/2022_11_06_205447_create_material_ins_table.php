@@ -33,7 +33,6 @@ class CreateMaterialInsTable extends Migration
                 ->restrictOnDelete();
 
             $table->text('note')->nullable();
-            $table->string('desc')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -17,7 +17,6 @@ class MaterialOutController extends Controller
             'code' => 'nullable|string|unique:mysql.material_outs,code' . ($materialOutId ? "$materialOutId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
-            'desc' => 'required|string',
             'at' => 'required|date'
         ]);
 

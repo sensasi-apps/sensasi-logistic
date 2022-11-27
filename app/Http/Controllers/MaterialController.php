@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Material;
+use Illuminate\Support\Facades\DB;
 
 class MaterialController extends Controller
 {
@@ -24,7 +25,8 @@ class MaterialController extends Controller
      */
     public function index()
     {
-        return view('pages.materials.index');
+        $materialInTypes = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
+        return view('pages.materials.index', compact('materialInTypes'));
     }
 
     /**
