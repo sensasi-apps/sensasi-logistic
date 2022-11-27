@@ -47,6 +47,10 @@
         @endswitch
     </div>
 
+    <script>
+        window.innerWidth <= 1024 ? window.document.body.classList.add('sidebar-gone') : false
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"
         integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"

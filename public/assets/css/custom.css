@@ -7,9 +7,9 @@
 
 /*# sourceMappingURL=custom.css.map */
 
-.main-content
- {
-  transition: unset;
+.main-content,
+.main-footer {
+	transition: unset;
 }
 
 #select2-tagsSelect-results {
