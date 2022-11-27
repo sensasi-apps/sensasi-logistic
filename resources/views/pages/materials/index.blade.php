@@ -2,234 +2,52 @@
 
 @section('title', __('Material'))
 
-@include('components.assets._datatable')
-@include('components.assets._select2')
-
 @section('main-content')
     <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Material List') }}
-            <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
-                data-target="#materialFormModal">
-                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-            </button>
-        </h2>
+        <ul class="nav nav-pills nav-fill" id="myTab4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active py-1" id="list-tab" data-toggle="tab" href="#list" role="tab"
+                    aria-controls="{{ __('list') }}" aria-selected="true"><i class="fas fa-list"></i>
+                    {{ __('Material List') }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link  py-1" id="in-tab" data-toggle="tab" href="#in" role="tab"
+                    aria-controls="{{ __('in') }}" aria-selected="false"><i class="fas fa-arrow-down"></i>
+                    {{ __('Material In') }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link  py-1" id="out-tab" data-toggle="tab" href="#out" role="tab"
+                    aria-controls="{{ __('out') }}" aria-selected="false"><i class="fas fa-arrow-up"></i>
+                    {{ __('Material Out') }}</a>
+            </li>
+        </ul>
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="materialDatatable" style="width:100%">
-                    </table>
-                </div>
+        <div class="tab-content" id="myTab2Content">
+            <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+                @include('pages.materials._material-list')
+            </div>
+            <div class="tab-pane fade" id="in" role="tabpanel" aria-labelledby="in-tab">
+                @include('pages.materials._material-ins')
+            </div>
+            <div class="tab-pane fade" id="out" role="tabpanel" aria-labelledby="out-tab">
+                @include('pages.materials._material-outs')
             </div>
         </div>
     </div>
 @endsection
 
 @push('js')
-    <div class="modal fade" id="materialFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material') }}</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="modal_body_material">
-
-                    <form method="POST" id="materialForm">
-                        @csrf
-
-                        <input type="hidden" name="id" id="idInput">
-
-                        <div class="form-group">
-                            <label for="codeInput">{{ __('Code') }}</label>
-                            <input type="text" class="form-control" name="code" id="codeInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="nameInput">{{ __('Name') }}</label>
-                            <input type="text" class="form-control" name="name" required id="nameInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="unitInput">{{ __('Unit') }}</label>
-                            <input type="text" class="form-control" name="unit" required id="unitInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="tagsSelect">{{ __('Tags') }}</label>
-                            <select id="tagsSelect" name="tags[]" class="form-control select2" multiple
-                                data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
-                            </select>
-                        </div>
-                    </form>
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" form="materialForm" class="btn btn-primary">{{ __('Save') }}</button>
-
-                        <button id="deleteFormModalButtonToggle" type="submit" class="btn btn-icon btn-outline-danger"
-                            data-toggle="tooltip" title="{{ __('Delete') }}"
-                            onclick="$('#materialDeleteConfirmationModal').modal('show');">
-                            <i class="fas fa-trash" style="font-size: 1rem !important"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="materialDeleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Are you sure') }}?</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="modal_body_material" style="font-size: 1.1rem">
-                    {{ __('This action can not be undone') }}.
-                    {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
-                    <form method="post" id="deleteForm">
-                        @csrf
-                        @method('delete')
-                        <input type="hidden" name="id" id="deleteId">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" form="deleteForm" class="btn btn-danger"
-                        id="">{{ __('Yes') }}</button>
-                    <button data-dismiss="modal" class="btn btn-secondary" id="">{{ __('Cancel') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let materials
-        const tagsSelect = $('#tagsSelect')
-        let materialDatatable = $('#materialDatatable')
+        // Javascript to enable link to tab
+        var hash = location.hash.replace(/^#/, ''); // ^ means starting, meaning only match the first hash
 
-        const deletePutMethodInput = () => {
-            $('[name="_method"][value="put"]').remove()
+        if (hash) {
+            $(`a[href="#${hash}"].nav-link`).tab('show');
         }
 
-        const addPutMethodInput = () => {
-            $('#materialForm').append($('@method('put')'))
-        }
-
-        const setFormValue = material => {
-            const selectOpts = tagsSelect.find('option');
-            const optValues = selectOpts.map((i, select) => select.innerHTML);
-
-            material.tags?.map(tag => {
-                if ($.inArray(tag, optValues) === -1) {
-                    tagsSelect.append(`<option>${tag}</option>`);
-                };
-            })
-
-            tagsSelect.val(material.tags || []).change();
-            idInput.value = material.id || null
-            nameInput.value = material.name || null
-            unitInput.value = material.unit || null
-            codeInput.value = material.code || null
-            deleteId.value = material.id
-        }
-
-
-        const datatableSearch = tag =>
-            materialDatatable.DataTable().search(tag).draw()
-
-
-        $(document).on('click', '.addMaterialButton', function() {
-            materialFormModalLabel.innerHTML = '{{ __('Add new material') }}';
-
-
-            deletePutMethodInput();
-            setFormValue({});
-
-            deleteFormModalButtonToggle.style.display = "none";
-            materialForm.action = "{{ route('materials.store') }}";
+        // Change hash for page-reload
+        $('.nav-link').on('shown.bs.tab', function(e) {
+            window.location.hash = e.target.hash
         })
-
-        $(document).on('click', '.editMaterialButton', function() {
-            materialFormModalLabel.innerHTML = '{{ __('Edit material') }}';
-
-            const materialId = $(this).data('material-id');
-            const material = materials.find(material => material.id === materialId);
-
-            setFormValue(material);
-            deletePutMethodInput();
-            addPutMethodInput();
-
-            deleteFormModalButtonToggle.style.display = "block";
-
-            materialForm.action = "{{ route('materials.update', '') }}/" +
-                material
-                .id;
-
-            deleteMaterialName.innerHTML = material.name
-            deleteForm.action = "{{ route('materials.destroy', '') }}/" + material
-                .id;
-        });
-
-        $(document).ready(function() {
-            materialDatatable = materialDatatable.dataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-                ajax: {
-                    url: 'api/datatable/Material',
-                    dataSrc: json => {
-                        materials = json.data;
-                        return json.data;
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    cache: true
-                },
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('Code') }}'
-                }, {
-                    data: 'name',
-                    title: '{{ __('Name') }}'
-                }, {
-                    data: 'qty',
-                    title: '{{ __('Qty') }}'
-                }, {
-                    data: 'unit',
-                    title: '{{ __('Unit') }}'
-                }, {
-                    data: 'tags',
-                    name: 'tags_json',
-                    title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag =>
-                        `<a href="#" onclick="datatableSearch('${tag}')" class="m-1 badge badge-success">${tag}</a>`
-                    ).join('') || null,
-                }, {
-                    render: function(data, type, row) {
-                        const editButton = $(
-                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                        )
-                        editButton.attr('data-toggle', 'modal')
-                        editButton.attr('data-target', '#materialFormModal')
-                        editButton.addClass('editMaterialButton');
-                        editButton.attr('data-material-id', row.id)
-                        return editButton.prop('outerHTML')
-                    },
-                    orderable: false
-                }]
-            });
-        });
     </script>
 @endpush

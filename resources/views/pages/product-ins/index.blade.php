@@ -69,11 +69,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="descInsInput">{{ __('Description') }}</label>
-                            <input type="text" class="form-control" name="desc" required id="descInsInput">
-                        </div>
-
-                        <div class="form-group">
                             <label for="noteInsInput">{{ __('Note') }}</label>
                             <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
                         </div>
@@ -216,7 +211,6 @@
             idIns.value = productIn.id || null
             codeInsInput.value = productIn.code || null
             noteInsInput.value = productIn.note || null
-            descInsInput.value = productIn.desc || null
             deleteInsId.value = productIn.id || null
 
             if (productIn.at) {
