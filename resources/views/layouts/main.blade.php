@@ -47,6 +47,8 @@
         @endswitch
     </div>
 
+    @stack('modal')
+
     <script>
         window.innerWidth <= 1024 ? window.document.body.classList.add('sidebar-gone') : false
     </script>
