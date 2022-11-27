@@ -37,6 +37,7 @@ class MaterialInDetail extends Model
     public static function search($q)
     {
         return self::with(['material', 'materialIn', 'stock'])
+            ->has('materialIn')
             ->whereRelation('material', 'name', 'LIKE', "%${q}%")
             ->orWhereRelation('materialIn', 'at', 'LIKE', "%${q}%");
     }
