@@ -95,7 +95,7 @@ class CreateProductInDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('product_in_details');
+        Schema::connection('mysql')->dropIfExists('product_in_details');
         DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `product_in_details__product_monthly_movements_procedure`');
         DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_in_details_after_insert_trigger');
         DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_in_details_after_update_trigger');
