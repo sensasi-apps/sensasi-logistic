@@ -33,9 +33,9 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material">
+                <div class="modal-body" id="materialOutFormModalBody">
 
-                    <form method="POST" id="materiInsertForm">
+                    <form method="POST" id="materialOutForm">
                         @csrf
 
                         <input type="hidden" name="id" id="idOuts">
@@ -48,8 +48,8 @@
                             </div>
 
                             <div class="col form-group">
-                                <label for="typeSelect">{{ __('Type') }}</label>
-                                <select id="typeSelect" name="type" required class="form-control select2"
+                                <label for="materialOutTypeSelect">{{ __('Type') }}</label>
+                                <select id="materialOutTypeSelect" name="type" required class="form-control select2"
                                     data-select2-opts='{"tags": "true"}'>
                                     @foreach ($materialOutTypes as $type)
                                         <option>{{ $type }}</option>
@@ -79,7 +79,7 @@
 
 
                         <div class="">
-                            <a href="#" id="addMaterialButton" class="btn btn-success btn-sm mr-2"><i
+                            <a href="#" id="addMaterialOutDetailButton" class="btn btn-success btn-sm mr-2"><i
                                     class="fas fa-plus"></i> {{ __('More') }}</a>
                             <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
                         </div>
@@ -87,13 +87,12 @@
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <div>
-                        <button type="submit" form="materiInsertForm"
+                        <button type="submit" form="materialOutForm"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
                     <form action="" method="post" id="deleteForm">
                         @csrf
                         @method('delete')
-                        <input type="hidden" name="id" id="deleteInsId">
                         <button type="submit" class="btn btn-icon btn-outline-danger">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -106,177 +105,161 @@
 
 @push('js')
     <script>
-        if (materialOutsCrudDiv) {
-            const typeSelect = $('#typeSelect')
-            const materialOutFormModalLabel = $('#materialOutFormModalLabel')
+        {
+            if (materialOutsCrudDiv) {
+                const materialOutFormModalLabel = $('#materialOutFormModalLabel')
 
-            const datatableSearch = tag => materialOutsCrudDiv.materialOutDatatable.DataTable().search(tag).draw()
-            const renderTagButton = text =>
-                `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
+                $(function() {
+                    $('#materialOutTypeSelect').select2({
+                        tags: true,
+                        dropdownParent: $('#materialOutFormModalBody')
+                    })
+                })
 
-            const initMaterialSelects = $selectDom => $selectDom.select2({
-                dropdownParent: $('#modal_body_material'),
-                placeholder: '{{ __('Material') }}',
-                ajax: {
-                    url: '/api/select2/MaterialInDetail',
-                    dataType: 'json',
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    processResults: function(data) {
-                        const theResults = data.map(materialInDetail => {
+                const renderTagButton = text =>
+                    `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
+
+                const initMaterialSelects = $selectDom => $selectDom.select2({
+                    dropdownParent: $('#materialOutFormModalBody'),
+                    placeholder: '{{ __('Material') }}',
+                    ajax: {
+                        url: '/api/select2/MaterialInDetail',
+                        dataType: 'json',
+                        beforeSend: function(request) {
+                            request.setRequestHeader(
+                                "Authorization",
+                                'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            )
+                        },
+                        processResults: function(data) {
+                            const theResults = data.map(materialInDetail => {
+
+                                return {
+                                    id: materialInDetail.id,
+                                    text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${moment(materialInDetail.material_in.at).format('DD-MM-YYYY')}`
+                                }
+                            })
 
                             return {
-                                id: materialInDetail.id,
-                                text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${moment(materialInDetail.material_in.at).format('DD-MM-YYYY')}`
-                            }
-                        })
+                                results: theResults
+                            };
+                        }
+                    },
+                    minimumInputLength: 3
+                });
 
-                        return {
-                            results: theResults
-                        };
+                function removeMaterialOutDetails() {
+                }
+
+                function addMaterialOutDetailRow(detail) {
+                    const nDetailInputSet = $('.detailInputSetDiv').length
+                    const materialSelectParentDiv = document.createElement('div')
+                    materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
+                    const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
+                        .addClass('form-control select2 listSelect')
+                        .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
+                    $(materialSelectParentDiv).append($selectDom)
+
+                    if (detail.material_in_detail_id) {
+                        $selectDom.append(
+                            `<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`
+                        );
                     }
-                },
-                minimumInputLength: 3
-            });
 
-            function removeMaterialOutDetails() {
-                $('div .details').remove()
-            }
-
-            function removeMaterialOutDetailRow(dom) {
-                dom.parentNode.parentNode.remove();
-            }
-
-            function addMaterialOutDetailRow(detail) {
-                const nDetailInputSet = $('.detailInputSetDiv').length
-                const materialSelectParentDiv = document.createElement('div')
-                materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
-                const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
-                    .addClass('form-control select2 listSelect')
-                    .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
-                $(materialSelectParentDiv).append($selectDom)
-
-                if (detail.material_in_detail_id) {
-                    $selectDom.append(
-                        `<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`
-                    );
-                }
-
-                initMaterialSelects($selectDom);
-                $selectDom.val(detail.material_in_detail_id).change();
+                    initMaterialSelects($selectDom);
+                    $selectDom.val(detail.material_in_detail_id).change();
 
 
-                const qtyInputParentDiv = document.createElement('div')
-                qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
-                $(qtyInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-                )
+                    const qtyInputParentDiv = document.createElement('div')
+                    qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
+                    $(qtyInputParentDiv).append(
+                        `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                    )
 
-                const removeRowButtonParentDiv = document.createElement('div')
-                removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
-                $(removeRowButtonParentDiv).append($(
-                    '<button class="btn btn-outline-danger btn-icon" onclick="removeMaterialOutDetailRow(this)"><i class="fas fa-trash"></i></button>'
-                ))
+                    const removeRowButtonParentDiv = document.createElement('div')
+                    removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
+                    $(removeRowButtonParentDiv).append($(
+                        '<button class="btn btn-outline-danger btn-icon" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>'
+                    ))
 
-                const detailRowDiv = document.createElement('div')
-                detailRowDiv.setAttribute('class', 'form-group row details mx-0 align-items-center detailInputSetDiv')
-                $(detailRowDiv).append(materialSelectParentDiv)
-                $(detailRowDiv).append(qtyInputParentDiv)
-                $(detailRowDiv).append(removeRowButtonParentDiv)
-                $(detailRowDiv).append(`<input type="hidden" name="" value="${detail.id}">`)
+                    const detailRowDiv = document.createElement('div')
+                    detailRowDiv.setAttribute('class', 'form-group row materialOutDetailRowDiv mx-0 align-items-center detailInputSetDiv')
+                    $(detailRowDiv).append(materialSelectParentDiv)
+                    $(detailRowDiv).append(qtyInputParentDiv)
+                    $(detailRowDiv).append(removeRowButtonParentDiv)
+                    $(detailRowDiv).append(`<input type="hidden" name="" value="${detail.id}">`)
 
-                materialOutDetailsParent.append(detailRowDiv);
-            }
-
-            const deletePutMethodInput = () => {
-                $('[name="_method"][value="put"]').remove()
-            }
-
-            const addPutMethodInputInsert = () => {
-                $('#materiInsertForm').append($('@method('put')'))
-            }
-
-
-            const setMaterialOutFormValue = materialOut => {
-
-                if (materialOut.type) {
-                    const selectOpts = typeSelect.find('option');
-                    const optValues = selectOpts.map((i, select) => select.innerHTML);
-                    if ($.inArray(materialOut.type, optValues) === -1) {
-                        typeSelect.append(`<option>${materialOut.type}</option>`);
-                    };
-                }
-
-                typeSelect.val(materialOut.type || null).change();
-                idOuts.value = materialOut.id || null
-                codeInsInput.value = materialOut.code || null
-                noteInsInput.value = materialOut.note || null
-                deleteInsId.value = materialOut.id || null
-
-                if (materialOut.at) {
-                    const dateObj = new Date(materialOut.at);
-
-                    const month = dateObj.getMonth() + 1; //months from 1-12
-                    const day = dateObj.getDate();
-                    const year = dateObj.getFullYear();
-
-                    atInput.value = `${year}-${month}-${day}`
-                } else {
-                    atInput.value = '{{ date('Y-m-d') }}'
+                    materialOutDetailsParent.append(detailRowDiv);
                 }
 
 
-                materialOut.details?.map(function(detail) {
-                    addMaterialOutDetailRow(detail)
+                const setMaterialOutFormValue = materialOut => {
+                    const materialOutTypeSelect = $('#materialOutTypeSelect');
+                    materialOutTypeSelect.val(materialOut.type || null).change();
+                    idOuts.value = materialOut.id || null
+                    codeInsInput.value = materialOut.code || null
+                    noteInsInput.value = materialOut.note || null
+
+                    if (materialOut.at) {
+                        const dateObj = new Date(materialOut.at);
+
+                        const month = dateObj.getMonth() + 1; //months from 1-12
+                        const day = dateObj.getDate();
+                        const year = dateObj.getFullYear();
+
+                        atInput.value = `${year}-${month}-${day}`
+                    } else {
+                        atInput.value = '{{ date('Y-m-d') }}'
+                    }
+
+
+                    materialOut.details?.map(function(detail) {
+                        addMaterialOutDetailRow(detail)
+                    })
+                }
+
+
+                $(document).on('click', '.addMaterialOutsButton', function() {
+                    $('[name="_method"][value="put"]').remove()
+
+                    setMaterialOutFormValue({});
+                    deleteForm.style.display = "none";
+
+                    $('div .materialOutDetailRowDiv').remove()
+
+
+                    addMaterialOutDetailRow({})
+                    addMaterialOutDetailRow({})
+                    addMaterialOutDetailRow({})
+
+                    materialOutForm.action = "{{ route('material-outs.store') }}";
+                });
+
+                $(document).on('click', '.editMaterialOutButton', function() {
+                    const materialOutId = $(this).data('material-id');
+                    const materialOut = materialOutsCrudDiv.materialOuts.find(materialOut => materialOut.id ===
+                        materialOutId);
+                    deleteForm.style.display = "block";
+
+                    $('div .materialOutDetailRowDiv').remove()
+
+
+                    $('#materialOutForm').append($('@method('put')'))
+
+                    setMaterialOutFormValue(materialOut);
+
+                    materialOutForm.action = `{{ route('material-outs.update', '') }}/${materialOut.id}`;
+                    deleteForm.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`;
                 })
-            }
 
-
-            $(document).on('click', '.addMaterialOutsButton', function() {
-                deletePutMethodInput();
-                setMaterialOutFormValue({});
-                deleteForm.style.display = "none";
-
-                removeMaterialOutDetails()
-
-                addMaterialOutDetailRow({})
-                addMaterialOutDetailRow({})
-                addMaterialOutDetailRow({})
-
-                materiInsertForm.action = "{{ route('material-outs.store') }}";
-            });
-
-            $(document).on('click', '.editMaterialOutButton', function() {
-                const materialOutId = $(this).data('material-id');
-                const materialOut = materialOutsCrudDiv.materialOuts.find(materialOut => materialOut.id === materialOutId);
-                deleteForm.style.display = "block";
-
-                removeMaterialOutDetails();
-
-                addPutMethodInputInsert();
-                setMaterialOutFormValue(materialOut);
-
-                materiInsertForm.action = "{{ route('material-outs.update', '') }}/" + materialOut.id;
-
-                deleteForm.action = "{{ route('material-outs.destroy', '') }}/" + materialOut
-                    .id;
-            })
-
-            $(document).on('click', '#addMaterialButton', function() {
-                addMaterialOutDetailRow({})
-            })
-
-
-
-            $(document).ready(function() {
-                $('#typeSelect').select2('destroy').select2({
-                    tags: true,
-                    dropdownParent: $('#modal_body_material')
+                $(document).on('click', '#addMaterialOutDetailButton', function() {
+                    addMaterialOutDetailRow({})
                 })
+
+
+                // ################## DATATABLE SECTION
+
+                const datatableSearch = tag => materialOutsCrudDiv.materialOutDatatable.DataTable().search(tag).draw()
 
                 materialOutsCrudDiv.materialOutDatatable = $(materialOutDatatable).dataTable({
                     processing: true,
@@ -319,7 +302,8 @@
                         name: 'detail.materialDetailIn.material.name',
                         width: '20%',
                         render: details => details.map(detail => renderTagButton(
-                                `${detail.material_in_detail?.material.name} (${detail.qty})`))
+                                `${detail.material_in_detail?.material.name} (${detail.qty})`
+                            ))
                             .join('')
                     }, {
                         render: function(data, type, row) {
@@ -334,8 +318,8 @@
                         },
                         orderable: false
                     }]
-                });
-            });
+                })
+            }
         }
     </script>
 @endpush

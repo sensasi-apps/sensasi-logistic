@@ -81,12 +81,12 @@ Route::middleware('auth')->group(function () {
         'create', 'show', 'edit'
     ]);
 
-    Route::resource('material-ins', MaterialInController::class)->except([
-        'create', 'show', 'edit'
+    Route::resource('material-ins', MaterialInController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
-    Route::resource('material-outs', MaterialOutController::class)->except([
-        'create', 'show', 'edit'
+    Route::resource('material-outs', MaterialOutController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
     Route::resource('products', ProductController::class)->except([

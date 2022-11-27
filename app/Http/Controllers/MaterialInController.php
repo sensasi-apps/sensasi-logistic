@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class MaterialInController extends Controller
 {
@@ -32,28 +31,6 @@ class MaterialInController extends Controller
         return [$materialInFromInput, $materialInDetailsFromInput];
     }
 
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $types = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
-        return view('pages.material-ins.index', compact('types'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -74,31 +51,9 @@ class MaterialInController extends Controller
             MaterialInDetail::insert($materialInDetailsFromInput);
         }
 
-        return redirect(route('material-ins.index'))->with('notifications', [
+        return redirect()->route('materials.index', '#in')->with('notifications', [
             [__('Material in data has been added successfully'), 'success']
         ]);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     private function getToBeDeletedMaterialIds(MaterialIn $materialIn, array $materialInDetailsFromInput)
@@ -142,7 +97,7 @@ class MaterialInController extends Controller
             );
         }
 
-        return redirect(route('material-ins.index'))->with('notifications', [
+        return redirect()->route('materials.index', '#in')->with('notifications', [
             [__('Material in data has been updated successfully'), 'success']
         ]);
     }
@@ -156,7 +111,7 @@ class MaterialInController extends Controller
     public function destroy(MaterialIn $materialIn)
     {
         $materialIn->delete();
-        return redirect(route('material-ins.index'))->with('notifications', [
+        return redirect()->route('materials.index', '#in')->with('notifications', [
             [__('Material in data has been deleted'), 'warning']
         ]);
     }
