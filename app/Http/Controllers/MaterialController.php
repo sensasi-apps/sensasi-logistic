@@ -11,8 +11,8 @@ class MaterialController extends Controller
     private function validateInput(Request $request, int $materialId = null)
     {
         return $request->validate([
-            'name' => 'required|unique:mysql.materials,name'  . ($materialId ? "$materialId,id" : null),
-            'code' => 'nullable|unique:mysql.materials,code'  . ($materialId ? "$materialId,id" : null),
+            'name' => 'required|unique:mysql.materials,name'  . ($materialId ? ",$materialId,id" : null),
+            'code' => 'nullable|unique:mysql.materials,code'  . ($materialId ? ",$materialId,id" : null),
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
@@ -26,7 +26,8 @@ class MaterialController extends Controller
     public function index()
     {
         $materialInTypes = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
-        return view('pages.materials.index', compact('materialInTypes'));
+        $materialOutTypes = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
+        return view('pages.materials.index', compact('materialInTypes', 'materialOutTypes'));
     }
 
     /**
