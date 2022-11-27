@@ -52,7 +52,7 @@ class MaterialInController extends Controller
         }
 
         return redirect()->route('materials.index', '#in')->with('notifications', [
-            [__('Material in data has been added successfully'), 'success']
+            [__('Material in data') . " $materialIn->at " . __('has been added successfully'), 'success']
         ]);
     }
 
@@ -98,7 +98,7 @@ class MaterialInController extends Controller
         }
 
         return redirect()->route('materials.index', '#in')->with('notifications', [
-            [__('Material in data has been updated successfully'), 'success']
+            [__('Material in data ') . " $materialIn->at " . __('has been updated successfully'), 'success']
         ]);
     }
 
@@ -112,7 +112,7 @@ class MaterialInController extends Controller
     {
         $materialIn->delete();
         return redirect()->route('materials.index', '#in')->with('notifications', [
-            [__('Material in data has been deleted'), 'warning']
+            [__('Material in data') . " $materialIn->at " . __('has been deleted successfully'), 'warning']
         ]);
     }
 }

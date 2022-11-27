@@ -26,7 +26,7 @@ class MaterialController extends Controller
     public function index()
     {
         $materialInTypes = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
-        $materialOutTypes = DB::connection('mysql')->table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
+        $materialOutTypes = DB::connection('mysql')->table('material_outs')->select('type')->distinct()->cursor()->pluck('type');
         return view('pages.materials.index', compact('materialInTypes', 'materialOutTypes'));
     }
 
@@ -43,7 +43,7 @@ class MaterialController extends Controller
         $material = Material::create($materialFromInput);
 
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been added successfully'), 'success']
+            [($material->code ?? $material->name) . ' ' . __('has been added successfully'), 'success']
         ]);
     }
 
@@ -61,7 +61,7 @@ class MaterialController extends Controller
         $material->update($materialFromInput);
 
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been updated successfully'), 'success']
+            [$material->code ?? $material->name . ' ' . __('has been updated successfully'), 'success']
         ]);
     }
 
@@ -76,7 +76,7 @@ class MaterialController extends Controller
         $material->delete();
 
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been deleted successfully'), 'warning']
+            [($material->code ?? $material->name) . ' ' . __('has been deleted successfully'), 'warning']
         ]);
     }
 }

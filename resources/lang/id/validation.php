@@ -148,6 +148,12 @@ return [
 	'attributes' => [
 		'code' => 'Kode',
 		'name' => 'Nama',
-		'default_price' => 'Harga standar'
+		'default_price' => 'Harga standar',
+		'unit' => 'Satuan',
+		'tags' => 'Penanda',
+		'note' => 'Catatan',
+		'type' => 'Jenis',
+		'at' => 'Pada'
+
 	],
 ];

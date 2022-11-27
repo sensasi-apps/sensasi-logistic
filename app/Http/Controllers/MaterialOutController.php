@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Material;
 use Illuminate\Http\Request;
 
 use App\Models\MaterialOut;
@@ -51,15 +52,16 @@ class MaterialOutController extends Controller
         }
 
         return redirect()->route('materials.index', '#out')->with('notifications', [
-            [__('Material out data has been added successfully'), 'success']
+            [__('Material out data ') . " $materialOut->at->format('d-M-Y') " . __('has been added successfully'), 'success']
+
         ]);
     }
 
-    private function getToBeDeletedMaterialInDetailIds(MaterialOut $materialOut, Array $materialOutDetailsFromInput)
+    private function getToBeDeletedMaterialInDetailIds(MaterialOut $materialOut, array $materialOutDetailsFromInput)
     {
         $existsMaterialInDetailIds = $materialOut->details->pluck('material_in_detail_id');
         $materialInDetailIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
-        
+
         return $existsMaterialInDetailIds->diff($materialInDetailIdsFromInput);
     }
 
@@ -97,7 +99,8 @@ class MaterialOutController extends Controller
         }
 
         return redirect()->route('materials.index', '#out')->with('notifications', [
-            [__('Material out data has been updated successfully'), 'success']
+            [__('Material out data ') . " $materialOut->at " . __('has been updated successfully'), 'success']
+
         ]);
     }
 
@@ -107,9 +110,12 @@ class MaterialOutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(MaterialOut $materialOut)
     {
-        MaterialOut::find($id)->delete();
-        return redirect()->route('materials.index', '#out')->with('notifications', [[__('Material out data has been deleted'), 'warning']]);
+        $materialOut->delete();
+        return redirect()->route('materials.index', '#out')->with('notifications', [
+            [__('Material out data') . " $materialOut->at " . __('has been deleted successfully'), 'warning']
+
+        ]);
     }
 }
