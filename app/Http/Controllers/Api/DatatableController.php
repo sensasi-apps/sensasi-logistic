@@ -14,10 +14,14 @@ class DatatableController extends Controller
 		if (request()->ajax()) {
 			$modelClass = "App\Models\\$modelName";
 			
-			if ($request->with) {
+			if ($request->with) {				
 				$queryBuilder = $modelClass::with($request->with);
 			} else {
 				$queryBuilder = $modelClass::query();
+			}
+
+			if (!$request->order) {
+				$queryBuilder->orderByDesc('id');
 			}
 			
 			return DataTables::eloquent($queryBuilder)->make();
