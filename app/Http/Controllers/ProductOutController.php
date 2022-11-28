@@ -110,9 +110,7 @@ class ProductOutController extends Controller
 
     public function update(Request $request, ProductOut $productOut)
     {
-        // dd($request->all());
         [$productOutFromInput, $productOutDetailsFromInput] = $this->validateInput($request, $productOut->id);
-
         if ($productOut->update($productOutFromInput)) {
             foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {
                 $productOutDetailFromInput['product_out_id'] = $productOut->id;

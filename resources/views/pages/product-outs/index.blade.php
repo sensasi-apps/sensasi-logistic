@@ -170,7 +170,7 @@
                 console.log(detail.product_in_detail)
                 if (detail.product_in_detail_id) {
                     $selectDom.append(
-                        `<option value="${detail.product_in_detail_id}">${detail.product_in_detail?.product.name} (${detail.product_in_detail.stock?.qty}) ${moment(detail.at).format('DD-MM-YYYY')}</option>`
+                        `<option value="${detail.product_in_detail_id}">${detail.product_in_detail?.product.name}</option>`
                     );
                 }
 
