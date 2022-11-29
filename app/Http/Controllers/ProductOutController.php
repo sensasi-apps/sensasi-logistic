@@ -18,7 +18,7 @@ class ProductOutController extends Controller
     private function validateInput(Request $request, int $productOutId = null)
     {
         $productOutFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.product_outs,code,' . ($productOutId ? ",$productOutId,id" : null),
+            'code' => 'nullable|string|unique:mysql.product_outs,code' . ($productOutId ? ",$productOutId,id" : null),
             'type' => 'required|string',
             'note' => 'nullable|string',
             'at' => 'required|date',
@@ -60,7 +60,6 @@ class ProductOutController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         [$productOutFromInput, $productOutDetailsFromInput] = $this->validateInput($request);
 
         $productOutFromInput['created_by_user_id'] = Auth::user()->id;

@@ -56,7 +56,7 @@
                                 <label for="typeSelect">{{ __('Type') }}</label>
                                 <select id="typeSelect" name="type" required class="form-control select2"
                                     data-select2-opts='{"tags": "true"}'>
-                                    @foreach ($types as $type)
+                                    @foreach ($productOutTypes as $type)
                                         <option>{{ $type }}</option>
                                     @endforeach
                                 </select>
