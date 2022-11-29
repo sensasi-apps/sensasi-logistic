@@ -24,6 +24,11 @@ class MaterialInDetail extends Model
         return $this->belongsTo(MaterialIn::class);
     }
 
+    public function outDetails()
+    {
+        return $this->belongsTo(MaterialOutDetail::class);
+    }
+
     public function getQtyRemainAttribute()
     {
         return $this->stock->qty;
@@ -38,7 +43,11 @@ class MaterialInDetail extends Model
     {
         return self::with(['material', 'materialIn', 'stock'])
             ->has('materialIn')
-            ->whereRelation('material', 'name', 'LIKE', "%${q}%")
-            ->orWhereRelation('materialIn', 'at', 'LIKE', "%${q}%");
+            ->whereRelation('stock', 'qty', '>', 0)
+            ->where(fn ($query) => $query
+                ->whereRelation('material', 'name', 'LIKE', "%${q}%")
+                ->orWhereRelation('materialIn', 'at', 'LIKE', "%${q}%")
+            )
+            ->orderBy('material_in_id')->limit(25);
     }
 }

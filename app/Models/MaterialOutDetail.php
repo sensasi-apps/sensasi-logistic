@@ -17,4 +17,9 @@ class MaterialOutDetail extends Model
     {
         return $this->belongsTo(MaterialInDetail::class);
     }
+
+    public function materialOut()
+    {
+        return $this->belongsTo(MaterialOut::class);
+    }
 }

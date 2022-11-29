@@ -52,7 +52,7 @@ class MaterialOutController extends Controller
         }
 
         return redirect()->route('materials.index', '#out')->with('notifications', [
-            [__('Material out data ') . " $materialOut->at->format('d-M-Y') " . __('has been added successfully'), 'success']
+            [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
 
         ]);
     }
@@ -79,7 +79,7 @@ class MaterialOutController extends Controller
 
         if ($materialOut->update($materialOutFromInput)) {
             foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                $materialOutDetailFromInput['material_Out_id'] = $materialOut->id;
+                $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
             }
 
             $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($materialOut, $materialOutDetailsFromInput);
@@ -93,13 +93,13 @@ class MaterialOutController extends Controller
 
             MaterialOutDetail::upsert(
                 $materialOutDetailsFromInput,
-                ['material_Out_id', 'material_in_detail_id'],
+                ['material_out_id', 'material_in_detail_id'],
                 ['qty']
             );
         }
 
         return redirect()->route('materials.index', '#out')->with('notifications', [
-            [__('Material out data ') . " $materialOut->at " . __('has been updated successfully'), 'success']
+            [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been updated successfully'), 'success']
 
         ]);
     }
@@ -114,7 +114,7 @@ class MaterialOutController extends Controller
     {
         $materialOut->delete();
         return redirect()->route('materials.index', '#out')->with('notifications', [
-            [__('Material out data') . " $materialOut->at " . __('has been deleted successfully'), 'warning']
+            [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been deleted successfully'), 'warning']
 
         ]);
     }

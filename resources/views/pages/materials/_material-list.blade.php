@@ -4,7 +4,7 @@
 <div id="materialsCrudDiv">
     <h2 class="section-title">
         {{ __('Material List') }}
-        <button id="addMaterialButton" type="button" class="ml-2 btn btn-success" data-toggle="modal"
+        <button id="addMaterialButton" type="button" class="ml-2 btn btn-primary" data-toggle="modal"
             data-target="#materialFormModal">
             <i class="fas fa-plus-circle"></i> {{ __('Add') }}
         </button>
@@ -199,10 +199,8 @@
                     data: 'qty',
                     title: '{{ __('Qty') }}',
                     orderable: false,
-                    searchable: false
-                }, {
-                    data: 'unit',
-                    title: '{{ __('Unit') }}'
+                    searchable: false,
+                    render: (data, type, row) => `${data} ${row.unit}`
                 }, {
                     data: 'tags',
                     name: 'tags_json',

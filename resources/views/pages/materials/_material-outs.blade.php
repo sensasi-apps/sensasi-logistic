@@ -5,7 +5,7 @@
     <div class="section-body">
         <h2 class="section-title">
             {{ __('Material Out List') }}
-            <button type="button" id="addMaterialOutsButton" class="ml-2 btn btn-success" data-toggle="modal"
+            <button type="button" id="addMaterialOutsButton" class="ml-2 btn btn-danger" data-toggle="modal"
                 data-target="#materialOutFormModal">
                 <i class="fas fa-plus-circle"></i> Tambah
             </button>
@@ -179,7 +179,10 @@
                         'form-group row materialOutDetailRowDiv mx-0 align-items-center detailInputSetDiv')
                     $(detailRowDiv).append(materialSelectParentDiv)
                     $(detailRowDiv).append(qtyInputParentDiv)
-                    $(detailRowDiv).append(removeRowButtonParentDiv)
+
+                    if (nDetailInputSet > 0) {
+                        $(detailRowDiv).append(removeRowButtonParentDiv)
+                    }
 
                     materialOutDetailsParent.append(detailRowDiv)
                 }
@@ -193,13 +196,7 @@
                     materialOutNoteInput.value = materialOut.note || null
 
                     if (materialOut.at) {
-                        const dateObj = new Date(materialOut.at)
-
-                        const month = dateObj.getMonth() + 1
-                        const day = dateObj.getDate()
-                        const year = dateObj.getFullYear()
-
-                        materialOutAtInput.value = `${year}-${month}-${day}`
+                        materialOutAtInput.value = `${moment(materialOut.at).format('YYYY-MM-DD')}`
                     } else {
                         materialOutAtInput.value = '{{ date('Y-m-d') }}'
                     }

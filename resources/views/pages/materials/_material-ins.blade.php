@@ -236,13 +236,7 @@
                 materialInNoteInput.value = materialIn.note || null
 
                 if (materialIn.at) {
-                    const dateObj = new Date(materialIn.at);
-
-                    const month = dateObj.getMonth() + 1;
-                    const day = dateObj.getDate();
-                    const year = dateObj.getFullYear();
-
-                    materialInAtInput.value = `${year}-${month}-${day}`
+                    materialInAtInput.value = `${moment(materialIn.at).format('YYYY-MM-DD')}`
                 } else {
                     materialInAtInput.value = '{{ date('Y-m-d') }}'
                 }
@@ -310,7 +304,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'MaterialIn') }}?with=details.material',
+                    url: '/api/datatable/MaterialIn?with=details.material,details.stock',
                     dataSrc: json => {
                         materialInsCrudDiv.materialIns = json.data;
                         return json.data;
@@ -344,7 +338,7 @@
                     name: 'details.material.name',
                     width: '20%',
                     render: details => details.map(detail => renderTagButton(
-                        `${detail.material?.name} (${detail.qty})`)).join('')
+                        `${detail.material?.name} (${detail.stock?.qty}/${detail.qty})`)).join('')
                 }, {
                     render: function(data, type, row) {
                         const editButton = $(
