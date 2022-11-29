@@ -37,11 +37,6 @@ class ProductInController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $types = DB::connection('mysql')->table('product_ins')->select('type')->distinct()->get()->pluck('type');
-        return view('pages.product-ins.index', compact('types'));
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -73,7 +68,7 @@ class ProductInController extends Controller
             ProductInDetail::insert($productInDetailsFromInput);
         }
 
-        return redirect(route('product-ins.index'))->with('notifications', [
+        return redirect(route('products.index', '#in'))->with('notifications', [
             [__('Product in data has been added successfully'), 'success']
         ]);
     }
@@ -140,7 +135,7 @@ class ProductInController extends Controller
             );
         }
 
-        return redirect(route('product-ins.index'))->with('notifications', [
+        return redirect(route('products.index', '#in'))->with('notifications', [
             [__('Product in data has been updated successfully'), 'success']
         ]);
     }
@@ -154,7 +149,7 @@ class ProductInController extends Controller
     public function destroy(ProductIn $productIn)
     {
         $productIn->delete();
-        return redirect(route('product-ins.index'))->with('notifications', [
+        return redirect(route('products.index', '#in'))->with('notifications', [
             [__('Product in data has been deleted'), 'warning']
         ]);
     }

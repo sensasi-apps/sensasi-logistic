@@ -36,13 +36,13 @@
                     <form method="POST" id="productOutForm" onsubmit="return validateInputs();">
                         @csrf
 
-                        <input type="hidden" name="id" id="idIns">
+                        <input type="hidden" name="id" id="idouts">
 
 
                         <div class="row">
                             <div class="col form-group">
-                                <label for="codeInsInput">{{ __('Code') }}</label>
-                                <input type="text" class="form-control" name="code" id="codeInsInput">
+                                <label for="codeOutsInput">{{ __('Code') }}</label>
+                                <input type="text" class="form-control" name="code" id="codeOutsInput">
                             </div>
 
                             <div class="col form-group">
@@ -57,13 +57,13 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="atInput">{{ __('Date') }}</label>
-                            <input type="date" class="form-control" name="at" required id="atInput">
+                            <label for="atProductOutInput">{{ __('Date') }}</label>
+                            <input type="date" class="form-control" name="at" required id="atProductOutInput">
                         </div>
 
                         <div class="form-group">
-                            <label for="noteInsInput">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
+                            <label for="noteOutsInput">{{ __('Note') }}</label>
+                            <textarea class="form-control" name="note" id="noteOutsInput" rows="3" style="height:100%;"></textarea>
                         </div>
 
                         <div class="px-1" style="overflow-x: auto">
@@ -79,7 +79,7 @@
 
 
                         <div class="">
-                            <a href="#" id="addProductButton" class="btn btn-success btn-sm mr-2"><i
+                            <a href="#" id="addProductOutsButton" class="btn btn-success btn-sm mr-2"><i
                                     class="fas fa-plus"></i> {{ __('More') }}</a>
                             <a href="{{ route('products.index') }}">{{ __('New product out') }}?</a>
                         </div>
@@ -90,10 +90,10 @@
                         <button type="submit" form="productOutForm"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
-                    <form action="" method="post" id="deleteForm">
+                    <form action="" method="post" id="deleteFormOuts">
                         @csrf
                         @method('delete')
-                        <input type="hidden" name="id" id="deleteInsId">
+                        <input type="hidden" name="id" id="deleteOutsId">
                         <button type="submit" class="btn btn-icon btn-outline-danger">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -113,9 +113,9 @@
 
         const datatableSearchProductOuts = tag => productOutDatatable.DataTable().search(tag).draw()
         const renderTagProductOutButton = text =>
-            `<a href="#" onclick="datatableSearchProductOuts('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+            `<a href="#" onclick="datatableSearchProductOuts('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
 
-        function addProductInDetailRow(detail) {
+        function addProductOutDetailRow(detail) {
             const nDetailInputSet = $('.detailInputSetDiv').length
 
             const detailRowDiv = document.createElement('div')
@@ -248,10 +248,10 @@
             }
 
             typeProductOutSelect.val(productOut.type || null).trigger('change');
-            idIns.value = productOut.id || null
-            codeInsInput.value = productOut.code || null
-            noteInsInput.value = productOut.note || null
-            deleteInsId.value = productOut.id || null
+            idouts.value = productOut.id || null
+            codeOutsInput.value = productOut.code || null
+            noteOutsInput.value = productOut.note || null
+            deleteOutsId.value = productOut.id || null
 
             if (productOut.at) {
                 const dateObj = new Date(productOut.at);
@@ -260,13 +260,13 @@
                 const day = dateObj.getDate();
                 const year = dateObj.getFullYear();
 
-                atInput.value = `${year}-${month}-${day}`
+                atProductOutInput.value = `${year}-${month}-${day}`
             } else {
-                atInput.value = '{{ date('Y-m-d') }}'
+                atProductOutInput.value = '{{ date('Y-m-d') }}'
             }
 
             productOut.details?.map(function(detail) {
-                addProductInDetailRow(detail)
+                addProductOutDetailRow(detail)
             })
         }
 
@@ -274,13 +274,13 @@
         $(document).on('click', '.addProductOutsButton', function() {
             deletePutMethodInputProductOuts();
             setProductOutFormValue({});
-            deleteForm.style.display = "none";
+            deleteFormOuts.style.display = "none";
 
             $('.detailInputSetDiv').remove()
 
 
             for (let i = 0; i < 3; i++) {
-                addProductInDetailRow({})
+                addProductOutDetailRow({})
             }
 
             productOutForm.action = "{{ route('product-outs.store') }}";
@@ -289,7 +289,7 @@
         $(document).on('click', '.editProductOutButton', function() {
             const productOutId = $(this).data('product-id');
             const productOut = productOuts.find(productOut => productOut.id === productOutId);
-            deleteForm.style.display = "block";
+            deleteFormOuts.style.display = "block";
 
             $('.detailInputSetDiv').remove()
 
@@ -298,12 +298,12 @@
 
             productOutForm.action = "{{ route('product-outs.update', '') }}/" + productOut.id;
 
-            deleteForm.action = "{{ route('product-outs.destroy', '') }}/" + productOut
+            deleteFormOuts.action = "{{ route('product-outs.destroy', '') }}/" + productOut
                 .id;
         })
 
-        $(document).on('click', '#addProductButton', function() {
-            addProductInDetailRow({})
+        $(document).on('click', '#addProductOutsButton', function() {
+            addProductOutDetailRow({})
         })
 
         function validateInputs() {

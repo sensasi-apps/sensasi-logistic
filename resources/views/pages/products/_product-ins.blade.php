@@ -77,7 +77,7 @@
 
 
                         <div class="">
-                            <a href="#" id="addProductButton" class="btn btn-success btn-sm mr-2"><i
+                            <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i
                                     class="fas fa-plus"></i> {{ __('More') }}</a>
                             <a href="{{ route('products.index') }}">{{ __('New product') }}?</a>
                         </div>
@@ -88,7 +88,7 @@
                         <button type="submit" form="productInForm"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
-                    <form action="" method="post" id="deleteForm">
+                    <form action="" method="post" id="deleteFormIns">
                         @csrf
                         @method('delete')
                         <input type="hidden" name="id" id="deleteInsId">
@@ -227,7 +227,7 @@
         $(document).on('click', '.addProductInsButton', function() {
             deletePutMethodInputProductIns();
             setProductInFormValue({});
-            deleteForm.style.display = "none";
+            deleteFormIns.style.display = "none";
 
             $('.detailInputSetDiv').remove()
 
@@ -242,7 +242,7 @@
         $(document).on('click', '.editProductInsertButton', function() {
             const productInId = $(this).data('product-id');
             const productIn = productIns.find(productIn => productIn.id === productInId);
-            deleteForm.style.display = "block";
+            deleteFormIns.style.display = "block";
 
             $('.detailInputSetDiv').remove()
 
@@ -251,11 +251,11 @@
 
             productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
 
-            deleteForm.action = "{{ route('product-ins.destroy', '') }}/" + productIn
+            deleteFormIns.action = "{{ route('product-ins.destroy', '') }}/" + productIn
                 .id;
         })
 
-        $(document).on('click', '#addProductButton', function() {
+        $(document).on('click', '#addProductInsButton', function() {
             addProductInDetailRow({})
         })
 
