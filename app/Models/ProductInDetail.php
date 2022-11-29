@@ -38,7 +38,10 @@ class ProductInDetail extends Model
     public static function search($q)
     {
         return self::with(['product', 'productIn', 'stock'])
+            ->has('materialIn')
+            ->whereRelation('stock', 'qty', '>', 0)
             ->whereRelation('product', 'name', 'LIKE', "%${q}%")
-            ->orWhereRelation('productIn', 'at', 'LIKE', "%${q}%");
+            ->orWhereRelation('productIn', 'at', 'LIKE', "%${q}%")
+            ->orderBy('product_in_id')->limit(25);;
     }
 }
