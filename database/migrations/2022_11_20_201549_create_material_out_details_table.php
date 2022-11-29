@@ -30,72 +30,100 @@ class CreateMaterialOutDetailsTable extends Migration
             $table->unique(['material_in_detail_id', 'material_out_id'], 'material_out_details_unique');
         });
 
-        DB::connection('mysql')->unprepared('CREATE PROCEDURE
-            material_out_details__material_monthly_movements_procedure (
-                IN materialOutId int,
-                IN materialInDetailId int
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE material_monthly_movements_upsert_out_procedure (
+                IN materialID int,
+                IN yearAt int,
+                IN monthAt int
             )
             BEGIN
-                DECLARE year_at int;
-                DECLARE month_at int;
-
-                SELECT YEAR(`at`), MONTH(`at`) INTO year_at, month_at
-                FROM material_outs
-                WHERE id = materialOutId;
-
                 INSERT INTO
-                    material_monthly_movements (material_id, year, month, `out`)
+                    material_monthly_movements (`material_id`, `year`, `month`, `out`)
                 SELECT
-                    mid.material_id,
-                    YEAR(mo.at),
-                    MONTH(mo.at),
-                    @total_qty := SUM(`mod`.qty)
-                FROM material_out_details `mod`
-                LEFT JOIN material_in_details as mid ON mid.id = `mod`.material_in_detail_id
-                LEFT JOIN material_outs as mo ON mo.id = `mod`.material_out_id
-                WHERE
-                    `mod`.material_in_detail_id = materialInDetailId AND
-                    YEAR(mo.at) = year_at AND
-                    MONTH(mo.at) = month_at 
-                GROUP BY mid.material_id, YEAR(mo.at), MONTH(mo.at)
+                    material_id,
+                    yearAt,
+                    monthAt,
+                    @total_qty := SUM(qty)
+                FROM (SELECT materialID as material_id, `mod`.qty
+                    FROM material_in_details AS mid
+                    LEFT JOIN material_out_details AS `mod` ON mid.id = `mod`.material_in_detail_id
+                    LEFT JOIN material_outs AS mo ON `mod`.material_out_id = mo.id
+                    WHERE
+                        `mid`.material_id = materialID AND
+                        `mo`.`deleted_at` IS NULL AND
+                        YEAR(`mo`.`at`) = yearAt AND
+                        MONTH(`mo`.`at`) = monthAt
+                    UNION SELECT materialID, 0) AS qty_temp
+                GROUP BY material_id
                 ON DUPLICATE KEY UPDATE `out` = @total_qty;
             END;
         ');
 
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE material_out_details__material_monthly_movements_procedure (
+                IN materialOutId int,
+                IN materialInDetailId int
+            )
+            BEGIN
+                DECLARE yearAt int;
+                DECLARE monthAt int;
+                DECLARE materialID int;
 
-        // DB::connection('mysql')->unprepared('CREATE PROCEDURE
-        //     mod_stock_check_procedure (
-        //         IN materialInDetailId int,
-        //         IN newQty int
-        //     )
-        //     BEGIN
-        //         SELECT
-        //             @qty_in := mid.qty,
-        //             @qty_out := COALESCE(SUM(`mod`.qty), 0)
-        //         FROM material_out_details `mod`
-        //         LEFT JOIN material_in_details mid ON mid.id = `mod`.material_in_detail_id
-        //         WHERE `mod`.material_in_detail_id = materialInDetailId
-        //         GROUP BY mid.id;
+                SELECT YEAR(`at`), MONTH(`at`) INTO yearAt, monthAt
+                FROM material_outs
+                WHERE id = materialOutId;
 
-        //         IF newQty > (@qty_in - @qty_out)
-        //             SIGNAL SQLSTATE \'45000\'
-        //                 SET MESSAGE_TEXT = \'Material is not enough\';
-        //         END IF;
-        //     END;
-        // ');
+                SELECT `mid`.`material_id` INTO materialID
+                FROM material_in_details AS mid
+                WHERE id = materialInDetailId;
 
-        // DB::connection('mysql')->unprepared('CREATE TRIGGER
-        //     material_out_details_before_insert_trigger
-        //         AFTER INSERT
-        //         ON material_in_details
-        //         FOR EACH ROW
-        //     BEGIN
-        //         CALL mod_stock_check_procedure(NEW.material_in_detail_id, NEW.qty)
-        //     END;
-        // ');
+                CALL material_monthly_movements_upsert_out_procedure(
+                    materialID,
+                    yearAt,
+                    monthAt
+                );
+            END;
+        ');
 
-        DB::connection('mysql')->unprepared('CREATE TRIGGER
-            material_out_details_after_insert_trigger
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER material_outs_after_update_trigger
+            AFTER UPDATE
+            ON material_outs
+            FOR EACH ROW
+            BEGIN
+                -- TODO: optimize this IF
+                IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
+                    CALL material_out_details__material_monthly_movements_procedure(
+                        OLD.id,
+                        (
+                            SELECT material_in_detail_id
+                            FROM material_out_details
+                            WHERE material_out_id = OLD.id
+                        )
+                    );
+                END IF;
+
+                IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
+                    CALL material_monthly_movements_upsert_out_procedure(
+                        (
+                            SELECT material_in_detail_id
+                            FROM material_out_details
+                            WHERE material_out_id = OLD.id
+                        ),
+                        YEAR(OLD.at),
+                        MONTH(OLD.at)
+                    );
+
+                    CALL material_out_details__material_monthly_movements_procedure(
+                        OLD.id,
+                        (
+                            SELECT material_in_detail_id
+                            FROM material_out_details
+                            WHERE material_out_id = OLD.id
+                        )
+                    );
+                END IF;
+            END;
+        ');
+
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_insert_trigger
                 AFTER INSERT
                 ON material_out_details
                 FOR EACH ROW
@@ -104,35 +132,29 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        // DB::connection('mysql')->unprepared('CREATE TRIGGER
-        //     material_out_details_before_update_trigger
-        //         BEFORE UPDATE
-        //         ON material_out_details
-        //         FOR EACH ROW
-        //     BEGIN
-        //         CALL mod_stock_check_procedure(NEW.material_in_detail_id, NEW.qty - OLD.qty)
-        //     END;
-        // ');
-
-        DB::connection('mysql')->unprepared('CREATE TRIGGER
-            material_out_details_after_update_trigger
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_update_trigger
                 AFTER UPDATE
                 ON material_out_details
                 FOR EACH ROW
             BEGIN
-                IF NEW.qty <> OLD.qty THEN               
+                IF NEW.qty <> OLD.qty AND NEW.material_in_detail_id = OLD.material_in_detail_id THEN
+                    CALL material_out_details__material_monthly_movements_procedure(NEW.material_out_id, NEW.material_in_detail_id);
+                END IF;
+
+                IF NEW.material_in_detail_id <> OLD.material_in_detail_id THEN
+                    CALL material_out_details__material_monthly_movements_procedure(NEW.material_out_id, OLD.material_in_detail_id);
                     CALL material_out_details__material_monthly_movements_procedure(NEW.material_out_id, NEW.material_in_detail_id);
                 END IF;
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE
-            TRIGGER material_out_details_after_delete_trigger
+        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_delete_trigger
                 AFTER DELETE
                 ON material_out_details
                 FOR EACH ROW
             BEGIN
-                CALL material_out_details__material_monthly_movements_procedure(old.material_out_id, old.material_in_detail_id);
+                CALL material_out_details__material_monthly_movements_procedure(OLD.material_out_id, OLD.material_in_detail_id);
+
             END;
         ');
     }
@@ -145,11 +167,10 @@ class CreateMaterialOutDetailsTable extends Migration
     public function down()
     {
         Schema::connection('mysql')->dropIfExists('material_out_details');
+        DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `material_monthly_movements_upsert_out_procedure`');
         DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `material_out_details__material_monthly_movements_procedure`');
-        // DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `mod_stock_check_procedure`');
-        // DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_out_details_before_insert_trigger');
+        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_outs_after_update_trigger');
         DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_out_details_after_insert_trigger');
-        // DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_out_details_before_update_trigger');
         DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_out_details_after_update_trigger');
         DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS material_out_details_after_delete_trigger');
     }

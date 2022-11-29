@@ -15,14 +15,14 @@ class Select2Controller extends Controller
      */
     public function __invoke(Request $request, $modelName)
     {
-        // if ($request->ajax()) {
-        $modelClass = "App\Models\\$modelName";
+        if ($request->ajax()) {
+            $modelClass = "App\Models\\$modelName";
 
-        $term = trim($request->q);
+            $term = trim($request->q);
 
-        $results = $modelClass::search($term)->get();
+            $results = $modelClass::search($term)->get();
 
-        return response()->json($results);
-        // }
+            return response()->json($results);
+        }
     }
 }

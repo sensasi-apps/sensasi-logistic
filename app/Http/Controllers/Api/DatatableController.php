@@ -14,8 +14,9 @@ class DatatableController extends Controller
 		if (request()->ajax()) {
 			$modelClass = "App\Models\\$modelName";
 			
-			if ($request->with) {				
-				$queryBuilder = $modelClass::with($request->with);
+			if ($request->with) {
+				$withs = explode(',', $request->with);
+				$queryBuilder = $modelClass::with($withs);
 			} else {
 				$queryBuilder = $modelClass::query();
 			}
