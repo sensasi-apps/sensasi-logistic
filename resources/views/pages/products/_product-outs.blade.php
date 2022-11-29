@@ -1,11 +1,5 @@
-@extends('layouts.main')
-
-@section('title', __('Product Out'))
-
 @include('components.assets._datatable')
 @include('components.assets._select2')
-
-@section('main-content')
 
     <div class="section-body">
         <h2 class="section-title">
@@ -25,7 +19,6 @@
             </div>
         </div>
     </div>
-@endsection
 
 @push('js')
     <div class="modal fade" id="productOutFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
@@ -33,7 +26,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="productFormModalLabel">{{ __('Add new product out') }}</h5>
+                    <h5 class="modal-title" id="productOutsFormModalLabel">{{ __('Add new product out') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -53,8 +46,8 @@
                             </div>
 
                             <div class="col form-group">
-                                <label for="typeSelect">{{ __('Type') }}</label>
-                                <select id="typeSelect" name="type" required class="form-control select2"
+                                <label for="typeProductOutSelect">{{ __('Type') }}</label>
+                                <select id="typeProductOutSelect" name="type" required class="form-control select2"
                                     data-select2-opts='{"tags": "true"}'>
                                     @foreach ($productOutTypes as $type)
                                         <option>{{ $type }}</option>
@@ -113,14 +106,14 @@
     <script>
         let productOuts
         let productOutDatatable = $('#productOutDatatable')
-        let selectedProductIds = [];
+        let selectedProductOutsIds = [];
 
-        const typeSelect = $('#typeSelect')
-        const productFormModalLabel = $('#productFormModalLabel')
+        const typeProductOutSelect = $('#typeProductOutSelect')
+        const productOutsFormModalLabel = $('#productOutsFormModalLabel')
 
-        const datatableSearch = tag => productOutDatatable.DataTable().search(tag).draw()
-        const renderTagButton = text =>
-            `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+        const datatableSearchProductOuts = tag => productOutDatatable.DataTable().search(tag).draw()
+        const renderTagProductOutButton = text =>
+            `<a href="#" onclick="datatableSearchProductOuts('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
         function addProductInDetailRow(detail) {
             const nDetailInputSet = $('.detailInputSetDiv').length
@@ -235,11 +228,11 @@
             }
         }
 
-        const deletePutMethodInput = () => {
+        const deletePutMethodInputProductOuts = () => {
             $('[name="_method"][value="put"]').remove()
         }
 
-        const addPutMethodInputInsert = () => {
+        const addPutMethodProductOutsInputInsert = () => {
             $('#productOutForm').append($('@method('put')'))
         }
 
@@ -247,14 +240,14 @@
         const setProductOutFormValue = productOut => {
 
             if (productOut.type) {
-                const selectOpts = typeSelect.find('option');
+                const selectOpts = typeProductOutSelect.find('option');
                 const optValues = selectOpts.map((i, select) => select.innerHTML);
                 if ($.inArray(productOut.type, optValues) === -1) {
-                    typeSelect.append(`<option>${productOut.type}</option>`);
+                    typeProductOutSelect.append(`<option>${productOut.type}</option>`);
                 };
             }
 
-            typeSelect.val(productOut.type || null).trigger('change');
+            typeProductOutSelect.val(productOut.type || null).trigger('change');
             idIns.value = productOut.id || null
             codeInsInput.value = productOut.code || null
             noteInsInput.value = productOut.note || null
@@ -279,7 +272,7 @@
 
 
         $(document).on('click', '.addProductOutsButton', function() {
-            deletePutMethodInput();
+            deletePutMethodInputProductOuts();
             setProductOutFormValue({});
             deleteForm.style.display = "none";
 
@@ -300,7 +293,7 @@
 
             $('.detailInputSetDiv').remove()
 
-            addPutMethodInputInsert();
+            addPutMethodProductOutsInputInsert();
             setProductOutFormValue(productOut);
 
             productOutForm.action = "{{ route('product-outs.update', '') }}/" + productOut.id;
@@ -314,13 +307,13 @@
         })
 
         function validateInputs() {
-            const selectedProductIds = []
+            const selectedProductOutsIds = []
             let isValid = true;
 
             $('.text-danger').remove();
 
             [...document.getElementsByClassName('productSelect')].map(selectEl => {
-                if (selectedProductIds.includes(selectEl.value)) {
+                if (selectedProductOutsIds.includes(selectEl.value)) {
                     const errorTextDiv = document.createElement('div');
                     errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
                     errorTextDiv.classList.add('text-danger')
@@ -328,7 +321,7 @@
                     selectEl.parentNode.append(errorTextDiv)
                     isValid = false;
                 } else {
-                    selectedProductIds.push(selectEl.value)
+                    selectedProductOutsIds.push(selectEl.value)
                 }
             })
             
@@ -336,7 +329,7 @@
         }
 
         $(document).ready(function() {
-            $('#typeSelect').select2('destroy').select2({
+            $('#typeProductOutSelect').select2('destroy').select2({
                 tags: true,
                 dropdownParent: $('#modal_body_product')
             })
@@ -381,7 +374,7 @@
                     data: 'details',
                     name: 'details.productInDetail.product.name',
                     width: '20%',
-                    render: details => details.map(detail => renderTagButton(
+                    render: details => details.map(detail => renderTagProductOutButton(
                         `${detail.product_in_detail?.product.name} (${detail.qty})`)).join('')
                 }, {
                     render: function(data, type, row) {

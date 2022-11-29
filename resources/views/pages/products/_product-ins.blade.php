@@ -1,11 +1,5 @@
-@extends('layouts.main')
-
-@section('title', __('Product In'))
-
 @include('components.assets._datatable')
 @include('components.assets._select2')
-
-@section('main-content')
 
     <div class="section-body">
         <h2 class="section-title">
@@ -25,7 +19,6 @@
             </div>
         </div>
     </div>
-@endsection
 
 @push('js')
     <div class="modal fade" id="productInsertFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
@@ -33,7 +26,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="productFormModalLabel">{{ __('Add new Product in') }}</h5>
+                    <h5 class="modal-title" id="productInsFormModalLabel">{{ __('Add new Product in') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -53,8 +46,8 @@
                             </div>
 
                             <div class="col form-group">
-                                <label for="typeSelect">{{ __('Type') }}</label>
-                                <select id="typeSelect" name="type" required class="form-control select2"
+                                <label for="typeProductInsSelect">{{ __('Type') }}</label>
+                                <select id="typeProductInsSelect" name="type" required class="form-control select2"
                                     data-select2-opts='{"tags": "true"}'>
                                     @foreach ($productInTypes as $type)
                                         <option>{{ $type }}</option>
@@ -111,14 +104,14 @@
     <script>
         let productIns
         let productInDatatable = $('#productInDatatable')
-        let selectedProductIds = [];
+        let selectedProductInsIds = [];
 
-        const typeSelect = $('#typeSelect')
-        const productFormModalLabel = $('#productFormModalLabel')
+        const typeProductInsSelect = $('#typeProductInsSelect')
+        const productInsFormModalLabel = $('#productInsFormModalLabel')
 
-        const datatableSearch = tag => productInDatatable.DataTable().search(tag).draw()
-        const renderTagButton = text =>
-            `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+        const datatableSearchProductIns = tag => productInDatatable.DataTable().search(tag).draw()
+        const renderTagProductInsButton = text =>
+            `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
         function addProductInDetailRow(detail) {
             const nDetailInputSet = $('.detailInputSetDiv').length
@@ -188,11 +181,11 @@
             }
         }
 
-        const deletePutMethodInput = () => {
+        const deletePutMethodInputProductIns = () => {
             $('[name="_method"][value="put"]').remove()
         }
 
-        const addPutMethodInputInsert = () => {
+        const addPutMethodProductInsInputInsert = () => {
             $('#productInForm').append($('@method('put')'))
         }
 
@@ -200,14 +193,14 @@
         const setProductInFormValue = productIn => {
 
             if (productIn.type) {
-                const selectOpts = typeSelect.find('option');
+                const selectOpts = typeProductInsSelect.find('option');
                 const optValues = selectOpts.map((i, select) => select.innerHTML);
                 if ($.inArray(productIn.type, optValues) === -1) {
-                    typeSelect.append(`<option>${productIn.type}</option>`);
+                    typeProductInsSelect.append(`<option>${productIn.type}</option>`);
                 };
             }
 
-            typeSelect.val(productIn.type || null).trigger('change');
+            typeProductInsSelect.val(productIn.type || null).trigger('change');
             idIns.value = productIn.id || null
             codeInsInput.value = productIn.code || null
             noteInsInput.value = productIn.note || null
@@ -232,7 +225,7 @@
 
 
         $(document).on('click', '.addProductInsButton', function() {
-            deletePutMethodInput();
+            deletePutMethodInputProductIns();
             setProductInFormValue({});
             deleteForm.style.display = "none";
 
@@ -253,7 +246,7 @@
 
             $('.detailInputSetDiv').remove()
 
-            addPutMethodInputInsert();
+            addPutMethodProductInsInputInsert();
             setProductInFormValue(productIn);
 
             productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
@@ -267,13 +260,13 @@
         })
 
         function validateInputs() {
-            const selectedProductIds = []
+            const selectedProductInsIds = []
             let isValid = true;
 
             $('.text-danger').remove();
 
             [...document.getElementsByClassName('productSelect')].map(selectEl => {
-                if (selectedProductIds.includes(selectEl.value)) {
+                if (selectedProductInsIds.includes(selectEl.value)) {
                     const errorTextDiv = document.createElement('div');
                     errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
                     errorTextDiv.classList.add('text-danger')
@@ -281,7 +274,7 @@
                     selectEl.parentNode.append(errorTextDiv)
                     isValid = false;
                 } else {
-                    selectedProductIds.push(selectEl.value)
+                    selectedProductInsIds.push(selectEl.value)
                 }
             })
             
@@ -289,7 +282,7 @@
         }
 
         $(document).ready(function() {
-            $('#typeSelect').select2('destroy').select2({
+            $('#typeProductInsSelect').select2('destroy').select2({
                 tags: true,
                 dropdownParent: $('#modal_body_product')
             })
@@ -334,7 +327,7 @@
                     data: 'details',
                     name: 'details.product.name',
                     width: '20%',
-                    render: details => details.map(detail => renderTagButton(
+                    render: details => details.map(detail => renderTagProductInsButton(
                         `${detail.product?.name} (${detail.qty})`)).join('')
                 }, {
                     render: function(data, type, row) {

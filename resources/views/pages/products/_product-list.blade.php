@@ -1,30 +1,23 @@
-@extends('layouts.main')
-
-@section('title', __('Product'))
-
 @include('components.assets._datatable')
 @include('components.assets._select2')
 
-@section('main-content')
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Product List') }}
-            <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
+<div class="section-body">
+    <h2 class="section-title">
+        {{ __('Product List') }}
+        <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
                 data-target="#productFormModal">
-                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-            </button>
-        </h2>
+            <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+        </button>
+    </h2>
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="materialDatatable" style="width:100%">
-                    </table>
-                </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+               <table class="table table-striped" id="materialDatatable" style="width:100%"></table>
             </div>
         </div>
     </div>
-@endsection
+</div>
 
 @push('js')
     <div class="modal fade" id="productFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
