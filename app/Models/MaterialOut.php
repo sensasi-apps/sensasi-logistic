@@ -14,6 +14,10 @@ class MaterialOut extends Model
     protected $connection = 'mysql';
     protected $fillable = ['code', 'at', 'type', 'created_by_user_id', 'last_updated_by_user_id', 'note', 'history_json'];
 
+    protected $dates = [
+        'at'
+    ];
+
     public function details()
     {
         return $this->hasMany(MaterialOutDetail::class);

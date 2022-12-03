@@ -3,7 +3,6 @@
   "IP Addresses": "Alamat IP",
   "Share": "Bagikan",
   "Something went wrong, please refresh this page": "Terjadi kesalahan, silahkan muat ulang halaman",
-  ":data was updated successfully": ":data telah berhasil diperbaharui",
   "Save": "Simpan",
   "Delete": "Hapus",
   "Add": "Tambah",
@@ -12,12 +11,15 @@
   "Are you sure": "Apa anda yakin",
   "Yes": "Ya",
   "Cancel": "Batal",
-  "Add new material": "Tambah bahan baru",
-
+  "Add New Material": "Tambah Bahan Baru",
+  "Edit Material": "Ubah Bahan",
 
   "Material": "Bahan",
   "Material List": "Daftar Bahan",
   "Tags": "Penanda",
+  "has been added successfully": "telah berhasil ditambahkan",
+  "has been deleted successfully": "telah berhasil dihapus",
+  "has been updated successfully": "telah berhasil diperbaharui",
 
   
   "Material in": "Bahan masuk",
@@ -34,10 +36,15 @@
   "Price": "Harga",
   "New material": "Bahan baru",
   "More": "Lebih banyak",
-  "Add new material in": "Tambah bahan masuk",
+  "Add New Material In": "Tambah bahan masuk",
 
   "Material out": "Bahan keluar",
   "Material Out": "Bahan keluar",
+  "Edit Material Out": "Ubah Bahan Keluar",
+  "Edit Material In": "Ubah Bahan Masuk",
   "Material Out List": "Daftar Bahan Keluar",
-  "Add new material out": "Tambah bahan keluar"
+  "Add New Material Out": "Tambah bahan keluar",
+  "Material in data": "Data bahan masuk",
+  "Material out data": "Data bahan keluar",
+  "cannot be deleted. Material(s) has been used": "tidak dapat dihapus. Bahan telah digunakan."
 }

@@ -43,7 +43,7 @@ class MaterialController extends Controller
         $material = Material::create($materialFromInput);
 
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been added successfully'), 'success']
+            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been added successfully'), 'success']
         ]);
     }
 
@@ -61,7 +61,7 @@ class MaterialController extends Controller
         $material->update($materialFromInput);
 
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been updated successfully'), 'success']
+            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been updated successfully'), 'success']
         ]);
     }
 
@@ -73,10 +73,18 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
+
+        if ($material->inDetails()->count() > 0) {
+            return redirect(route('materials.index'))->with('notifications', [
+                ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('cannot be deleted. Material(s) has been used'), 'danger']
+            ]);
+        }
+
         $material->delete();
 
+
         return redirect(route('materials.index'))->with('notifications', [
-            [($material->code ?? $material->name) . __(' has been deleted successfully'), 'warning']
+            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been deleted successfully'), 'warning']
         ]);
     }
 }
