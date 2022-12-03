@@ -372,7 +372,7 @@
                     orderable: false,
                     title: '{{ __('Items') }}',
                     data: 'details',
-                    name: 'details.productInDetail.product.name',
+                    name: 'details',
                     width: '20%',
                     render: details => details.map(detail => renderTagProductOutButton(
                         `${detail.product_in_detail?.product.name} (${detail.qty})`)).join('')

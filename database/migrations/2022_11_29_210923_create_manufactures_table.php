@@ -23,6 +23,14 @@ class CreateManufacturesTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->text('note')->nullable();
+            $table->foreignId('material_out_id')
+                ->constrained('material_outs')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+            $table->foreignId('product_in_id')
+                ->constrained('product_ins')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

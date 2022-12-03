@@ -33,11 +33,12 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="materialOutFormModalBody">
+                <div class="modal-body" id="manufactureModalBody">
 
-                    <form method="POST" id="materialOutForm">
+                    <form method="POST" id="manufacture">
                         @csrf
-
+                        <h4 class="text-center">Manufacture</h4>
+                        <hr>
                         <input type="hidden" name="id" id="idOuts">
 
 
@@ -47,50 +48,24 @@
                                 <input type="text" class="form-control" name="code" id="codeInsInput">
                             </div>
 
-                            <div class="col form-group">
-                                <label for="materialOutTypeSelect">{{ __('Type') }}</label>
-                                <select id="materialOutTypeSelect" name="type" required class="form-control select2"
-                                    data-select2-opts='{"tags": "true"}'>
-                                    @foreach ($materialOutTypes as $type)
-                                        <option>{{ $type }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="form-group">
+                                <label for="atInput">{{ __('Date') }}</label>
+                                <input type="date" class="form-control" name="at" required id="atInput">
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="atInput">{{ __('Date') }}</label>
-                            <input type="date" class="form-control" name="at" required id="atInput">
                         </div>
 
                         <div class="form-group">
                             <label for="noteInsInput">{{ __('Note') }}</label>
                             <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
-                        </div>
-
-                        <div class="px-1" style="overflow-x: auto">
-                            <div id="materialOutDetailsParent" style="width: 100%">
-                                <div class="row m-0">
-                                    <label class="col-6">{{ __('Name') }}</label>
-                                    <label class="col-5">{{ __('Qty') }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="">
-                            <a href="#" id="addMaterialOutDetailButton" class="btn btn-success btn-sm mr-2"><i
-                                    class="fas fa-plus"></i> {{ __('More') }}</a>
-                            <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
-                        </div>
+                        </div><hr>
                     </form>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <div>
-                        <button type="submit" form="materialOutForm"
+                        <button type="submit" form="manufacture"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
-                    <form action="" method="post" id="deleteForm">
+                    <form action="" method="post" id="deleteManufacture">
                         @csrf
                         @method('delete')
                         <button type="submit" class="btn btn-icon btn-outline-danger">
@@ -112,15 +87,18 @@
                 $(function() {
                     $('#materialOutTypeSelect').select2({
                         tags: true,
-                        dropdownParent: $('#materialOutFormModalBody')
+                        dropdownParent: $('#manufactureModalBody')
                     })
                 })
 
-                const renderTagButton = text =>
+                const renderTagMaterialOutButton = text =>
                     `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
 
+                const renderTagProductInButton = text =>
+                    `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+
                 const initMaterialSelects = $selectDom => $selectDom.select2({
-                    dropdownParent: $('#materialOutFormModalBody'),
+                    dropdownParent: $('#manufactureModalBody'),
                     placeholder: '{{ __('Material') }}',
                     ajax: {
                         url: '/api/select2/MaterialInDetail',
@@ -223,7 +201,7 @@
                     $('[name="_method"][value="put"]').remove()
 
                     setMaterialOutFormValue({});
-                    deleteForm.style.display = "none";
+                    deleteManufacture.style.display = "none";
 
                     $('div .materialOutDetailRowDiv').remove()
 
@@ -232,24 +210,24 @@
                     addMaterialOutDetailRow({})
                     addMaterialOutDetailRow({})
 
-                    materialOutForm.action = "{{ route('material-outs.store') }}";
+                    manufacture.action = "{{ route('material-outs.store') }}";
                 });
 
                 $(document).on('click', '.editMaterialOutButton', function() {
                     const materialOutId = $(this).data('material-id');
                     const materialOut = materialOutsCrudDiv.materialOuts.find(materialOut => materialOut.id ===
                         materialOutId);
-                    deleteForm.style.display = "block";
+                    deleteManufacture.style.display = "block";
 
                     $('div .materialOutDetailRowDiv').remove()
 
 
-                    $('#materialOutForm').append($('@method('put')'))
+                    $('#manufacture').append($('@method('put')'))
 
                     setMaterialOutFormValue(materialOut);
 
-                    materialOutForm.action = `{{ route('material-outs.update', '') }}/${materialOut.id}`;
-                    deleteForm.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`;
+                    manufacture.action = `{{ route('material-outs.update', '') }}/${materialOut.id}`;
+                    deleteManufacture.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`;
                 })
 
                 $(document).on('click', '#addMaterialOutDetailButton', function() {
@@ -271,7 +249,7 @@
                     },
                     serverSide: true,
                     ajax: {
-                        url: '/api/datatable/MaterialOut?with=details.materialInDetail.material',
+                        url: "/api/datatable/manufacture?with=productIn.details.product,materialOut.details.materialInDetail.material",
                         dataSrc: json => {
                             materialOutsCrudDiv.materialOuts = json.data;
                             return json.data;
@@ -292,20 +270,23 @@
                         data: 'at',
                         title: '{{ __('At') }}',
                         render: at => moment(at).format('DD-MM-YYYY')
-                    }, {
-                        data: 'type',
-                        title: '{{ __('Type') }}',
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Items') }}',
-                        data: 'details',
-                        name: 'details',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagButton(
-                                `${detail.material_in_detail?.material.name} (${detail.qty})`
-                            ))
-                            .join('')
-                    }, {
+                    },{
+                    orderable: false,
+                    title: '{{ __('Material Out') }}',
+                    data: 'material_out.details',
+                    name: 'details',
+                    width: '20%',
+                    render: details => details.map(detail => renderTagMaterialOutButton(
+                        `${detail.material_in_detail.material.name} (${detail.qty})`)).join('')
+                    },{
+                    orderable: false,
+                    title: '{{ __('Product In') }}',
+                    data: 'product_in.details',
+                    name: 'details',
+                    width: '20%',
+                    render: details => details.map(detail => renderTagProductInButton(
+                        `${detail.product.name} (${detail.qty})`)).join('')
+                    },{
                         render: function(data, type, row) {
                             const editButton = $(
                                 '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'

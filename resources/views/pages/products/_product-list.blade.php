@@ -67,7 +67,7 @@
                     <div class="d-flex justify-content-between">
                         <button type="submit" form="productForm" class="btn btn-primary">{{ __('Save') }}</button>
 
-                        <button id="deleteFormModalButtonToggle" type="submit" class="btn btn-icon btn-outline-danger"
+                        <button id="deleteFormManufacture" type="submit" class="btn btn-icon btn-outline-danger"
                             data-toggle="tooltip" title="{{ __('Delete') }}"
                             onclick="$('#productDeleteConfirmationModal').modal('show');">
                             <i class="fas fa-trash" style="font-size: 1rem !important"></i>
@@ -150,7 +150,7 @@
             deletePutMethodInput();
             setFormValue({});
 
-            deleteFormModalButtonToggle.style.display = "none";
+            deleteFormManufacture.style.display = "none";
             productForm.action = "{{ route('products.store') }}";
         })
 
@@ -164,7 +164,7 @@
             deletePutMethodInput();
             addPutMethodInput();
 
-            deleteFormModalButtonToggle.style.display = "block";
+            deleteFormManufacture.style.display = "block";
 
             productForm.action = "{{ route('products.update', '') }}/" +
                 material
