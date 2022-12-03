@@ -29,6 +29,11 @@ class Material extends Model
         return $this->hasMany(MaterialMonthlyMovement::class)->orderByDesc('year')->orderByDesc('month');
     }
 
+    public function inDetails()
+    {
+        return $this->hasMany(MaterialInDetail::class);
+    }
+
     public function getQtyAttribute()
     {
         $qty = 0;
