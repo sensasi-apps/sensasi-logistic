@@ -242,9 +242,6 @@
                     deleteMaterialOutForm.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`
                 })
 
-
-                // ################## DATATABLE SECTION
-
                 const renderTagButton = text =>
                     `<a href="#" class="m-1 badge badge-danger materialOutDetailTag">${text}</a>`
 

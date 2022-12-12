@@ -1,19 +1,21 @@
 @include('components.assets._datatable')
 @include('components.assets._select2')
 
-<div class="section-body">
-    <h2 class="section-title">
-        {{ __('Product List') }}
-        <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
-                data-target="#productFormModal">
-            <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-        </button>
-    </h2>
+<div id="productsCrudDiv">
+    <div class="section-body">
+        <h2 class="section-title">
+            {{ __('Product List') }}
+            <button type="button" class="ml-2 btn btn-success addProductButton" data-toggle="modal"
+                    data-target="#productFormModal">
+                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+            </button>
+        </h2>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-               <table class="table table-striped" id="materialDatatable" style="width:100%"></table>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                   <table class="table table-striped" id="productDatatable" style="width:100%"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -30,7 +32,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material">
+                <div class="modal-body" id="modal_body_product">
 
                     <form method="POST" id="productForm">
                         @csrf
@@ -67,7 +69,7 @@
                     <div class="d-flex justify-content-between">
                         <button type="submit" form="productForm" class="btn btn-primary">{{ __('Save') }}</button>
 
-                        <button id="deleteFormModalButtonToggle" type="submit" class="btn btn-icon btn-outline-danger"
+                        <button id="deleteFormManufacture" type="submit" class="btn btn-icon btn-outline-danger"
                             data-toggle="tooltip" title="{{ __('Delete') }}"
                             onclick="$('#productDeleteConfirmationModal').modal('show');">
                             <i class="fas fa-trash" style="font-size: 1rem !important"></i>
@@ -88,9 +90,9 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material" style="font-size: 1.1rem">
+                <div class="modal-body" id="modal_body_product" style="font-size: 1.1rem">
                     {{ __('This action can not be undone') }}.
-                    {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
+                    {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteProductName"></b>
                     <form method="post" id="deleteForm">
                         @csrf
                         @method('delete')
@@ -107,9 +109,9 @@
     </div>
 
     <script>
-        let materials
+        let products
         const tagsSelect = $('#tagsSelect')
-        let materialDatatable = $('#materialDatatable')
+        let productDatatable = $('#productDatatable')
 
         const deletePutMethodInput = () => {
             $('[name="_method"][value="put"]').remove()
@@ -119,64 +121,64 @@
             $('#productForm').append($('@method('put')'))
         }
 
-        const setFormValue = material => {
+        const setFormValue = product => {
             const selectOpts = tagsSelect.find('option');
             const optValues = selectOpts.map((i, select) => select.innerHTML);
 
-            material.tags?.map(tag => {
+            product.tags?.map(tag => {
                 if ($.inArray(tag, optValues) === -1) {
                     tagsSelect.append(`<option>${tag}</option>`);
                 };
             })
 
-            tagsSelect.val(material.tags || []).change();
-            idInput.value = material.id || null
-            nameInput.value = material.name || null
-            unitInput.value = material.unit || null
-            priceInput.value = material.default_price || null
-            codeInput.value = material.code || null
-            deleteId.value = material.id
+            tagsSelect.val(product.tags || []).change();
+            idInput.value = product.id || null
+            nameInput.value = product.name || null
+            unitInput.value = product.unit || null
+            priceInput.value = product.default_price || null
+            codeInput.value = product.code || null
+            deleteId.value = product.id
         }
 
 
         const datatableSearch = tag =>
-            materialDatatable.DataTable().search(tag).draw()
+            productDatatable.DataTable().search(tag).draw()
 
 
-        $(document).on('click', '.addMaterialButton', function() {
-            productFormModalLabel.innerHTML = '{{ __('Add new material') }}';
+        $(document).on('click', '.addProductButton', function() {
+            productFormModalLabel.innerHTML = '{{ __('Add new product') }}';
 
 
             deletePutMethodInput();
             setFormValue({});
 
-            deleteFormModalButtonToggle.style.display = "none";
+            deleteFormManufacture.style.display = "none";
             productForm.action = "{{ route('products.store') }}";
         })
 
         $(document).on('click', '.editProductButton', function() {
-            productFormModalLabel.innerHTML = '{{ __('Edit material') }}';
+            productFormModalLabel.innerHTML = '{{ __('Edit Product') }}';
 
-            const materialId = $(this).data('product-id');
-            const material = materials.find(material => material.id === materialId);
+            const productId = $(this).data('product-id');
+            const product = productsCrudDiv.products.find(product => product.id === productId);
 
-            setFormValue(material);
+            setFormValue(product);
             deletePutMethodInput();
             addPutMethodInput();
 
-            deleteFormModalButtonToggle.style.display = "block";
+            deleteFormManufacture.style.display = "block";
 
             productForm.action = "{{ route('products.update', '') }}/" +
-                material
+                product
                 .id;
 
-            deleteMaterialName.innerHTML = material.name
-            deleteForm.action = "{{ route('products.destroy', '') }}/" + material
+            deleteProductName.innerHTML = product.name
+            deleteForm.action = "{{ route('products.destroy', '') }}/" + product
                 .id;
         });
 
         $(document).ready(function() {
-            materialDatatable = materialDatatable.dataTable({
+            productsCrudDiv.productDatatable = $(productDatatable).dataTable({
                 processing: true,
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
@@ -185,7 +187,7 @@
                 ajax: {
                     url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Product') }}',
                     dataSrc: json => {
-                        materials = json.data;
+                        productsCrudDiv.products = json.data;
                         return json.data;
                     },
                     beforeSend: function(request) {

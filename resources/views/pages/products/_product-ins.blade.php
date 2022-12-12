@@ -1,6 +1,7 @@
 @include('components.assets._datatable')
 @include('components.assets._select2')
 
+<div id="productInsCrudDiv">
     <div class="section-body">
         <h2 class="section-title">
             {{ __('Product In List') }}
@@ -19,6 +20,7 @@
             </div>
         </div>
     </div>
+</div>
 
 @push('js')
     <div class="modal fade" id="productInsertFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
@@ -102,247 +104,251 @@
     </div>
 
     <script>
-        let productIns
-        let productInDatatable = $('#productInDatatable')
-        let selectedProductInsIds = [];
+        if(productInsCrudDiv){
+            let productIns
+            let productInDatatable = $('#productInDatatable')
+            let selectedProductInsIds = [];
 
-        const typeProductInsSelect = $('#typeProductInsSelect')
-        const productInsFormModalLabel = $('#productInsFormModalLabel')
+            const typeProductInsSelect = $('#typeProductInsSelect')
+            const productInsFormModalLabel = $('#productInsFormModalLabel')
 
-        const datatableSearchProductIns = tag => productInDatatable.DataTable().search(tag).draw()
-        const renderTagProductInsButton = text =>
-            `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+            const renderTagProductInsButton = text =>
+                `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
 
-        function addProductInDetailRow(detail) {
-            const nDetailInputSet = $('.detailInputSetDiv').length
+            function addProductInDetailRow(detail) {
+                const nDetailInputSet = $('.detailInputSetDiv').length
 
-            const detailRowDiv = document.createElement('div')
-            detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
-            productInDetailsParent.append(detailRowDiv);
+                const detailRowDiv = document.createElement('div')
+                detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
+                productInDetailsParent.append(detailRowDiv);
 
-            function getProductSelect () {
-                const products = {{ Js::from(App\Models\Product::all()) }};
+                function getProductSelect () {
+                    const products = {{ Js::from(App\Models\Product::all()) }};
 
-                const initProductsSelect = $selectDom => $selectDom.select2({
-                    dropdownParent: $('#modal_body_product'),
-                    placeholder: '{{ __('Product') }}',
-                    data: [{
-                        id: null,
-                        text: null
-                    }].concat(products.map(product => {
-                        return {
-                            id: product.id,
-                            text: product.name
-                        }
-                    }))
-                });
+                    const initProductsSelect = $selectDom => $selectDom.select2({
+                        dropdownParent: $('#productInForm'),
+                        placeholder: '{{ __('Product') }}',
+                        data: [{
+                            id: null,
+                            text: null
+                        }].concat(products.map(product => {
+                            return {
+                                id: product.id,
+                                text: product.name
+                            }
+                        }))
+                    });
 
-                const productSelectParentDiv = document.createElement('div')
-                productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
-                const $selectDom = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
-                    .addClass('form-control productSelect')
-                    .attr('name', `details[${nDetailInputSet}][product_id]`)
-                $(productSelectParentDiv).append($selectDom)
-                console.log(detail)
-                initProductsSelect($selectDom);
-                $selectDom.val(detail.product_id).change();
+                    const productSelectParentDiv = document.createElement('div')
+                    productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
+                    const $selectDom = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
+                        .addClass('form-control productSelect')
+                        .attr('name', `details[${nDetailInputSet}][product_id]`)
+                    $(productSelectParentDiv).append($selectDom)
+                    console.log(detail)
+                    initProductsSelect($selectDom);
+                    $selectDom.val(detail.product_id).change();
 
-                return productSelectParentDiv
-            }
-
-
-            $(detailRowDiv).append(getProductSelect())
-
-
-            const qtyInputParentDiv = document.createElement('div')
-            qtyInputParentDiv.setAttribute('class', 'col-4 px-2')
-            $(qtyInputParentDiv).append(
-                `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-            )
-
-            
-
-
-            const getRemoveRowButtonParentDiv = () => {
-                const temp = document.createElement('div')
-                temp.setAttribute('class', 'col-1 pl-2 pr-0')
-                $(temp).append($(
-                    `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
-                ))
-
-                return temp;
-            }
-
-
-            $(detailRowDiv).append(qtyInputParentDiv)
-
-            if (nDetailInputSet !== 0) {
-                $(detailRowDiv).append(getRemoveRowButtonParentDiv())
-            }
-        }
-
-        const deletePutMethodInputProductIns = () => {
-            $('[name="_method"][value="put"]').remove()
-        }
-
-        const addPutMethodProductInsInputInsert = () => {
-            $('#productInForm').append($('@method('put')'))
-        }
-
-
-        const setProductInFormValue = productIn => {
-
-            if (productIn.type) {
-                const selectOpts = typeProductInsSelect.find('option');
-                const optValues = selectOpts.map((i, select) => select.innerHTML);
-                if ($.inArray(productIn.type, optValues) === -1) {
-                    typeProductInsSelect.append(`<option>${productIn.type}</option>`);
-                };
-            }
-
-            typeProductInsSelect.val(productIn.type || null).trigger('change');
-            idIns.value = productIn.id || null
-            codeInsInput.value = productIn.code || null
-            noteInsInput.value = productIn.note || null
-            deleteInsId.value = productIn.id || null
-
-            if (productIn.at) {
-                const dateObj = new Date(productIn.at);
-
-                const month = dateObj.getMonth() + 1; //months from 1-12
-                const day = dateObj.getDate();
-                const year = dateObj.getFullYear();
-
-                atInput.value = `${year}-${month}-${day}`
-            } else {
-                atInput.value = '{{ date('Y-m-d') }}'
-            }
-
-            productIn.details?.map(function(detail) {
-                addProductInDetailRow(detail)
-            })
-        }
-
-
-        $(document).on('click', '.addProductInsButton', function() {
-            deletePutMethodInputProductIns();
-            setProductInFormValue({});
-            deleteFormIns.style.display = "none";
-
-            $('.detailInputSetDiv').remove()
-
-
-            addProductInDetailRow({})
-            addProductInDetailRow({})
-            addProductInDetailRow({})
-
-            productInForm.action = "{{ route('product-ins.store') }}";
-        });
-
-        $(document).on('click', '.editProductInsertButton', function() {
-            const productInId = $(this).data('product-id');
-            const productIn = productIns.find(productIn => productIn.id === productInId);
-            deleteFormIns.style.display = "block";
-
-            $('.detailInputSetDiv').remove()
-
-            addPutMethodProductInsInputInsert();
-            setProductInFormValue(productIn);
-
-            productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
-
-            deleteFormIns.action = "{{ route('product-ins.destroy', '') }}/" + productIn
-                .id;
-        })
-
-        $(document).on('click', '#addProductInsButton', function() {
-            addProductInDetailRow({})
-        })
-
-        function validateInputs() {
-            const selectedProductInsIds = []
-            let isValid = true;
-
-            $('.text-danger').remove();
-
-            [...document.getElementsByClassName('productSelect')].map(selectEl => {
-                if (selectedProductInsIds.includes(selectEl.value)) {
-                    const errorTextDiv = document.createElement('div');
-                    errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
-                    errorTextDiv.classList.add('text-danger')
-
-                    selectEl.parentNode.append(errorTextDiv)
-                    isValid = false;
-                } else {
-                    selectedProductInsIds.push(selectEl.value)
+                    return productSelectParentDiv
                 }
-            })
-            
-            return isValid;
-        }
 
-        $(document).ready(function() {
-            $('#typeProductInsSelect').select2('destroy').select2({
-                tags: true,
-                dropdownParent: $('#modal_body_product')
-            })
 
-            productInDatatable = productInDatatable.dataTable({
-                processing: true,
-                search: {
-                    return: true,
-                },
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-                ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductIn') }}?with=details.product',
-                    dataSrc: json => {
-                        productIns = json.data;
-                        return json.data;
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    cache: true
-                },
-                order: [1, 'desc'],
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('Code') }}'
-                }, {
-                    data: 'at',
-                    title: '{{ __('At') }}',
-                    render: at => moment(at).format('DD-MM-YYYY')
-                }, {
-                    data: 'type',
-                    title: '{{ __('Type') }}',
-                }, {
-                    orderable: false,
-                    title: '{{ __('Items') }}',
-                    data: 'details',
-                    name: 'details.product.name',
-                    width: '20%',
-                    render: details => details.map(detail => renderTagProductInsButton(
-                        `${detail.product?.name} (${detail.qty})`)).join('')
-                }, {
-                    render: function(data, type, row) {
-                        const editButton = $(
-                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                        )
-                        editButton.attr('data-toggle', 'modal')
-                        editButton.attr('data-target', '#productInsertFormModal')
-                        editButton.addClass('editProductInsertButton');
-                        editButton.attr('data-product-id', row.id)
-                        return editButton.prop('outerHTML')
-                    },
-                    orderable: false
-                }]
+                $(detailRowDiv).append(getProductSelect())
+
+
+                const qtyInputParentDiv = document.createElement('div')
+                qtyInputParentDiv.setAttribute('class', 'col-4 px-2')
+                $(qtyInputParentDiv).append(
+                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                )
+
+                
+
+
+                const getRemoveRowButtonParentDiv = () => {
+                    const temp = document.createElement('div')
+                    temp.setAttribute('class', 'col-1 pl-2 pr-0')
+                    $(temp).append($(
+                        `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
+                    ))
+
+                    return temp;
+                }
+
+
+                $(detailRowDiv).append(qtyInputParentDiv)
+
+                if (nDetailInputSet !== 0) {
+                    $(detailRowDiv).append(getRemoveRowButtonParentDiv())
+                }
+            }
+
+            const deletePutMethodInputProductIns = () => {
+                $('[name="_method"][value="put"]').remove()
+            }
+
+            const addPutMethodProductInsInputInsert = () => {
+                $('#productInForm').append($('@method('put')'))
+            }
+
+
+            const setProductInFormValue = productIn => {
+
+                if (productIn.type) {
+                    const selectOpts = typeProductInsSelect.find('option');
+                    const optValues = selectOpts.map((i, select) => select.innerHTML);
+                    if ($.inArray(productIn.type, optValues) === -1) {
+                        typeProductInsSelect.append(`<option>${productIn.type}</option>`);
+                    };
+                }
+
+                typeProductInsSelect.val(productIn.type || null).trigger('change');
+                idIns.value = productIn.id || null
+                codeInsInput.value = productIn.code || null
+                noteInsInput.value = productIn.note || null
+                deleteInsId.value = productIn.id || null
+
+                if (productIn.at) {
+                    const dateObj = new Date(productIn.at);
+
+                    const month = dateObj.getMonth() + 1; //months from 1-12
+                    const day = dateObj.getDate();
+                    const year = dateObj.getFullYear();
+
+                    atInput.value = `${year}-${month}-${day}`
+                } else {
+                    atInput.value = '{{ date('Y-m-d') }}'
+                }
+
+                productIn.details?.map(function(detail) {
+                    addProductInDetailRow(detail)
+                })
+            }
+
+
+            $(document).on('click', '.addProductInsButton', function() {
+                deletePutMethodInputProductIns();
+                setProductInFormValue({});
+                deleteFormIns.style.display = "none";
+
+                $('.detailInputSetDiv').remove()
+
+
+                addProductInDetailRow({})
+                addProductInDetailRow({})
+                addProductInDetailRow({})
+
+                productInForm.action = "{{ route('product-ins.store') }}";
             });
-        });
+
+            $(document).on('click', '.editProductInsertButton', function() {
+                const productInId = $(this).data('product-id');
+                const productIn = productInsCrudDiv.productIns.find(productIn => productIn.id === productInId);
+                deleteFormIns.style.display = "block";
+
+                $('.detailInputSetDiv').remove()
+
+                addPutMethodProductInsInputInsert();
+                setProductInFormValue(productIn);
+
+                productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
+
+                deleteFormIns.action = "{{ route('product-ins.destroy', '') }}/" + productIn
+                    .id;
+            })
+
+            $(document).on('click', '#addProductInsButton', function() {
+                addProductInDetailRow({})
+            })
+
+            function validateInputs() {
+                const selectedProductInsIds = []
+                let isValid = true;
+
+                $('.text-danger').remove();
+
+                [...document.getElementsByClassName('productSelect')].map(selectEl => {
+                    if (selectedProductInsIds.includes(selectEl.value)) {
+                        const errorTextDiv = document.createElement('div');
+                        errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
+                        errorTextDiv.classList.add('text-danger')
+
+                        selectEl.parentNode.append(errorTextDiv)
+                        isValid = false;
+                    } else {
+                        selectedProductInsIds.push(selectEl.value)
+                    }
+                })
+                
+                return isValid;
+            }
+
+            const datatableSearchProductIns = tag => productInDatatable.DataTable().search(tag).draw()
+
+            $(document).ready(function() {
+                $('#typeProductInsSelect').select2('destroy').select2({
+                    tags: true,
+                    dropdownParent: $('#productInForm')
+                })
+
+                productInsCrudDiv.productInDatatable = $(productInDatatable).dataTable({
+                    processing: true,
+                    search: {
+                        return: true,
+                    },
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
+                    },
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductIn') }}?with=details.product',
+                        dataSrc: json => {
+                            productInsCrudDiv.productIns = json.data;
+                            return json.data;
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader(
+                                "Authorization",
+                                'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            )
+                        },
+                        cache: true
+                    },
+                    order: [1, 'desc'],
+                    columns: [{
+                        data: 'code',
+                        title: '{{ __('Code') }}'
+                    }, {
+                        data: 'at',
+                        title: '{{ __('At') }}',
+                        render: at => moment(at).format('DD-MM-YYYY')
+                    }, {
+                        data: 'type',
+                        title: '{{ __('Type') }}',
+                    }, {
+                        orderable: false,
+                        title: '{{ __('Items') }}',
+                        data: 'details',
+                        name: 'details.product.name',
+                        width: '20%',
+                        render: details => details.map(detail => renderTagProductInsButton(
+                            `${detail.product?.name} (${detail.qty})`)).join('')
+                    }, {
+                        render: function(data, type, row) {
+                            const editButton = $(
+                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
+                            )
+                            editButton.attr('data-toggle', 'modal')
+                            editButton.attr('data-target', '#productInsertFormModal')
+                            editButton.addClass('editProductInsertButton');
+                            editButton.attr('data-product-id', row.id)
+                            return editButton.prop('outerHTML')
+                        },
+                        orderable: false
+                    }]
+                });
+            });
+        }
+        
     </script>
 @endpush
