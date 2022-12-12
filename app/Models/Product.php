@@ -12,7 +12,7 @@ class Product extends Model
     use SoftDeletes;
     protected $connection = 'mysql';
     protected $fillable = ['code', 'name', 'tags', 'default_price','unit'];
-    protected $appends = ['tags'];
+    protected $appends = ['tags', 'qty'];
 
     public function setTagsAttribute(Array $tags)
     {
@@ -22,5 +22,22 @@ class Product extends Model
     public function getTagsAttribute()
     {
         return json_decode($this->tags_json);
+    }
+
+    public function monthlyMovements()
+    {
+        return $this->hasMany(ProductMonthlyMovement::class)->orderByDesc('year')->orderByDesc('month');
+    }
+
+    public function getQtyAttribute()
+    {
+        $qty = 0;
+        $this->load('monthlyMovements');
+
+        foreach ($this->monthlyMovements as $monthlyMovement) {
+            $qty += $monthlyMovement->in - $monthlyMovement->out;
+        }
+
+        return $qty;
     }
 }

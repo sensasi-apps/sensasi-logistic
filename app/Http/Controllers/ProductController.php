@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -26,7 +27,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('pages.products.index');
+        $productInTypes = DB::connection('mysql')->table('product_ins')->select('type')->distinct()->cursor()->pluck('type');
+        $productOutTypes = DB::connection('mysql')->table('product_ins')->select('type')->distinct()->cursor()->pluck('type');
+        return view('pages.products.index', compact('productInTypes', 'productOutTypes'));
     }
 
     /**

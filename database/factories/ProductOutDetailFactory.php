@@ -4,9 +4,10 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MaterialInDetailFactory extends Factory
+class ProductOutDetailFactory extends Factory
 {
     private $usedNumbers = [];
+
     /**
      * Define the model's default state.
      *
@@ -14,23 +15,21 @@ class MaterialInDetailFactory extends Factory
      */
     public function definition()
     {
-        $materialIds = \App\Models\Material::all()->pluck('id');
-        $materialInIds = \App\Models\MaterialIn::all()->pluck('id');
-        
-        
-        do {
-            $materialInId = $this->faker->randomElement($materialInIds);
-            $materialId = $this->faker->randomElement($materialIds);
+        $productOutIds = \App\Models\MaterialOut::all()->pluck('id');
+        $productInDetailIds = \App\Models\MaterialInDetail::all()->pluck('id');
 
-            $uniqueIds = $materialInId . $materialId;
-            
+        do {
+            $productOutId = $this->faker->randomElement($productOutIds);
+            $productInDetailId = $this->faker->randomElement($productInDetailIds);
+
+            $uniqueIds = $productOutId . $productInDetailId;
         } while (in_array($uniqueIds, $this->usedNumbers));
 
         array_push($this->usedNumbers, $uniqueIds);
 
         return [
-            'material_in_id' => $materialInId,
-            'material_id' => $materialId,
+            'product_out_id' => $productOutId,
+            'product_in_detail_id' => $productInDetailId,
             'qty' => $this->faker->randomNumber(3, true),
             'price' => $this->faker->randomNumber(2, true) . '000'
         ];

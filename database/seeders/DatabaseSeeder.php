@@ -22,11 +22,18 @@ class DatabaseSeeder extends Seeder
         }
 
         \App\Models\User::factory(10)->create();
+        
         \App\Models\Material::factory(25)->create();
         \App\Models\MaterialIn::factory(50)->create();
         \App\Models\MaterialInDetail::factory(300)->create();
         \App\Models\MaterialOut::factory(50)->create();
         \App\Models\MaterialOutDetail::factory(100)->create();
+
+        \App\Models\Product::factory(25)->create();
+        \App\Models\ProductIn::factory(50)->create();
+        \App\Models\ProductInDetail::factory(300)->create();
+        \App\Models\ProductOut::factory(50)->create();
+        \App\Models\ProductOutDetail::factory(100)->create();
 
         $this->call([
             UserRoleSeeder::class

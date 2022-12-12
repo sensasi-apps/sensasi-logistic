@@ -8,6 +8,7 @@ use App\Http\Controllers\MaterialInController;
 use App\Http\Controllers\MaterialOutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
+use App\Http\Controllers\ProductOutController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -92,7 +93,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class)->except([
         'create', 'show', 'edit'
     ]);
+
     Route::resource('product-ins', ProductInController::class)->except([
+        'create', 'show', 'edit'
+    ]);
+
+    Route::resource('product-outs', ProductOutController::class)->except([
         'create', 'show', 'edit'
     ]);
 
