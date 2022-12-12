@@ -38,16 +38,15 @@
 
 @push('js')
     <script>
-        // Javascript to enable link to tab
-        var hash = location.hash.replace(/^#/, ''); // ^ means starting, meaning only match the first hash
-
-        if (hash) {
-            $(`a[href="#${hash}"].nav-link`).tab('show');
+        window.onhashchange = function () {
+            const activeTab = location.hash.replace(/^#/, '') || 'list'
+            $(`#pageTab a[href="#${activeTab}"].nav-link`).tab('show')
         }
 
-        // Change hash for page-reload
-        $('.nav-link').on('shown.bs.tab', function(e) {
-            window.location.hash = e.target.hash
+        window.onhashchange()
+        
+        $('#pageTab a.nav-link').on('click', function(e) {
+            window.history.pushState(null, null, `materials${e.target.hash}`)
         })
     </script>
 @endpush
