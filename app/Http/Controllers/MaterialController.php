@@ -18,6 +18,31 @@ class MaterialController extends Controller
         ]);
     }
 
+    private function getResponse(string $name, string $type)
+    {
+        $message = [
+            'store' => __('has been added successfully'),
+            'update' => __('has been updated successfully'),
+            'delete' => __('has been deleted successfully')
+        ];
+
+        $color = $type == 'delete' ? 'warning' : 'success';
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'notifications' => [[
+                    'message' => "$name $message[$type]",
+                    'messageHtml' => "<b>$name</b> $message[$type]",
+                    'color' => $color
+                ]]
+            ]);
+        }
+
+        return redirect(route('materials.index'))->with('notifications', [
+            ["<b>$name</b> $message[$type]", $color]
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -39,12 +64,10 @@ class MaterialController extends Controller
     public function store(Request $request)
     {
         $materialFromInput = $this->validateInput($request);
-        
+
         $material = Material::create($materialFromInput);
 
-        return redirect(route('materials.index'))->with('notifications', [
-            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been added successfully'), 'success']
-        ]);
+        return $this->getResponse($material->code ?? $material->name, 'store');
     }
 
     /**
@@ -60,9 +83,7 @@ class MaterialController extends Controller
 
         $material->update($materialFromInput);
 
-        return redirect(route('materials.index'))->with('notifications', [
-            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been updated successfully'), 'success']
-        ]);
+        return $this->getResponse($material->code ?? $material->name, 'update');
     }
 
     /**
@@ -82,9 +103,6 @@ class MaterialController extends Controller
 
         $material->delete();
 
-
-        return redirect(route('materials.index'))->with('notifications', [
-            ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('has been deleted successfully'), 'warning']
-        ]);
+        return $this->getResponse($material->code ?? $material->name, 'delete');
     }
 }

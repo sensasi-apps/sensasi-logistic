@@ -42,3 +42,7 @@
 	margin: 3.5px !important;
 	font-size: 1.5rem !important;
 }
+
+.alert .close {
+	line-height: unset;
+}
