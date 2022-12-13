@@ -22,8 +22,5 @@ class Manufacture extends Model
     public function materialOut(){
         return $this->belongsTo(materialOut::class, 'material_out_id', 'id');
     }
-    public function manufactureMaterialOutProductIn(){
-        return $this->belongsToMany(materialOut::class,productIn::class, 'product_in_id', 'material_out_id',  'id', 'id');
-    }
 }
 
