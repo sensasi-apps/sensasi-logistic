@@ -15,6 +15,10 @@ class Manufacture extends Model
 
     protected $fillable = ['code', 'at', 'created_at', 'created_by_user_id', 'material_out_id', 'product_in_id','note'];
 
+    protected $dates = [
+        'at'
+    ];
+
     public function productIn(){
         return $this->belongsTo(productIn::class, 'product_in_id', 'id');
     }
