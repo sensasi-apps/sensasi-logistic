@@ -5,9 +5,9 @@
     <div class="section-body">
         <h2 class="section-title">
             {{ __('Product Out List') }}
-            <button type="button" class="ml-2 btn btn-success addProductOutsButton" data-toggle="modal"
+            <button type="button" class="ml-2 btn btn-danger addProductOutsButton" data-toggle="modal"
                 data-target="#productOutFormModal">
-                <i class="fas fa-plus-circle"></i> Tambah
+                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
             </button>
         </h2>
 
@@ -23,93 +23,77 @@
 </div>
 
 @push('modal')
-    <div class="modal fade" id="productOutFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="productOutsFormModalLabel">{{ __('Add new product out') }}</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <x-_modal size="lg" id="productOutFormModal" centered>
+        <form method="POST" id="productOutForm" onsubmit="return validateInputs();">
+            @csrf
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="codeOutsInput">{{ __('Code') }}</label>
+                    <input type="text" class="form-control" name="code" id="codeOutsInput">
                 </div>
-                <div class="modal-body" id="modal_body_product">
 
-                    <form method="POST" id="productOutForm" onsubmit="return validateInputs();">
-                        @csrf
-
-                        <input type="hidden" name="id" id="idouts">
-
-
-                        <div class="row">
-                            <div class="col form-group">
-                                <label for="codeOutsInput">{{ __('Code') }}</label>
-                                <input type="text" class="form-control" name="code" id="codeOutsInput">
-                            </div>
-
-                            <div class="col form-group">
-                                <label for="typeProductOutSelect">{{ __('Type') }}</label>
-                                <select id="typeProductOutSelect" name="type" required class="form-control select2"
-                                    data-select2-opts='{"tags": "true"}'>
-                                    @foreach ($productOutTypes as $type)
-                                        <option>{{ $type }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="atProductOutInput">{{ __('Date') }}</label>
-                            <input type="date" class="form-control" name="at" required id="atProductOutInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="noteOutsInput">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" id="noteOutsInput" rows="3" style="height:100%;"></textarea>
-                        </div>
-
-                        <div class="px-1" style="overflow-x: auto">
-                            <div id="productOutDetailsParent" style="width: 100%">
-                                <div class="row m-0">
-                                    <label class="col-4">{{ __('Name') }}</label>
-                                    <label class="col-2">{{ __('Qty') }}</label>
-                                    <label class="col-3">{{ __('Price') }}</label>
-                                    <label class="col-2">{{ __('Subtotal') }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="">
-                            <a href="#" id="addProductOutsButton" class="btn btn-success btn-sm mr-2"><i
-                                    class="fas fa-plus"></i> {{ __('More') }}</a>
-                            <a href="{{ route('products.index') }}">{{ __('New product out') }}?</a>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <div>
-                        <button type="submit" form="productOutForm"
-                            class="btn btn-outline-success">{{ __('Save') }}</button>
-                    </div>
-                    <form action="" method="post" id="deleteFormOuts">
-                        @csrf
-                        @method('delete')
-                        <input type="hidden" name="id" id="deleteOutsId">
-                        <button type="submit" class="btn btn-icon btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                <div class="col form-group">
+                    <label for="typeProductOutSelect">{{ __('Type') }}</label>
+                    <select id="typeProductOutSelect" name="type" required class="form-control select2"
+                        data-select2-opts='{"tags": "true"}'>
+                        @foreach ($productOutTypes as $type)
+                            <option>{{ $type }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <div class="form-group">
+                <label for="atProductOutInput">{{ __('Date') }}</label>
+                <input type="date" class="form-control" name="at" required id="atProductOutInput">
+            </div>
+
+            <div class="form-group">
+                <label for="noteOutsInput">{{ __('Note') }}</label>
+                <textarea class="form-control" name="note" id="noteOutsInput" rows="3" style="height:100%;"></textarea>
+            </div>
+
+            <div class="px-1" style="overflow-x: auto">
+                <div id="productOutDetailsParent" style="width: 100%">
+                    <div class="row m-0">
+                        <label class="col-4">{{ __('Name') }}</label>
+                        <label class="col-2">{{ __('Qty') }}</label>
+                        <label class="col-3">{{ __('Price') }}</label>
+                        <label class="col-2">{{ __('Subtotal') }}</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="">
+                <a href="#" id="addProductOutsButton" class="btn btn-success btn-sm mr-2"><i class="fas fa-plus"></i>
+                    {{ __('More') }}</a>
+                <a href="#" data-toggle="modal" data-target="#productInFormModal">{{ __('New product in') }}?</a>
+            </div>
+        </form>
+
+        @slot('footer')
+            <div>
+                <button type="submit" form="productOutForm" class="btn btn-outline-success">{{ __('Save') }}</button>
+            </div>
+            <form action="" method="post" id="deleteFormOuts">
+                @csrf
+                @method('delete')
+                <input type="hidden" name="id" id="deleteOutsId">
+                <button type="submit" class="btn btn-icon btn-outline-danger">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
+        @endslot
+    </x-_modal>
 @endpush
 
 @push('js')
     <script>
-        if(productOutCrudDiv){
+        if (productOutCrudDiv) {
             let productOuts
+            let productInDetails
             let productOutDatatable = $('#productOutDatatable')
             let selectedProductOutsIds = [];
 
@@ -127,7 +111,7 @@
                 detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
                 productOutDetailsParent.append(detailRowDiv);
 
-                function getProductSelect () {
+                function getProductSelect() {
 
                     const initProductsSelect = $selectDom => $selectDom.select2({
                         dropdownParent: $('#productOutForm'),
@@ -142,6 +126,7 @@
                                 )
                             },
                             processResults: function(data) {
+                                productInDetails = data;
                                 const theResults = data.map(productInDetail => {
 
                                     return {
@@ -164,8 +149,7 @@
                         .addClass('form-control productSelect')
                         .attr('name', `details[${nDetailInputSet}][product_in_detail_id]`)
                     $(productSelectParentDiv).append($selectDom)
-                    
-                    console.log(detail.product_in_detail)
+
                     if (detail.product_in_detail_id) {
                         $selectDom.append(
                             `<option value="${detail.product_in_detail_id}">${detail.product_in_detail?.product.name}</option>`
@@ -175,22 +159,29 @@
                     initProductsSelect($selectDom);
                     $selectDom.val(detail.product_in_detail_id).change();
 
+                    $selectDom.on('select2:select', function() {
+                        const i = parseInt(this.getAttribute('name').replace('details[','').replace('][product_in_detail_id]',''))
+                        const productInDetail = productInDetails.find(productInDetail => productInDetail.id === parseInt(this.value))
+
+                        document.querySelector(`input[name="details[${i}][price]"]`).value = productInDetail.product?.default_price
+                    })
+
                     return productSelectParentDiv
                 }
 
                 function getSubtotalDiv() {
                     const temp = document.createElement('div')
                     temp.setAttribute('class', 'col-2 px-2')
-                    
+
                     const subtotal = detail.qty * detail.price
                     if (subtotal) {
                         temp.innerHTML = subtotal.toLocaleString('id', {
                             style: 'currency',
                             currency: 'IDR',
-                            maximumFractionDigits: 0 
+                            maximumFractionDigits: 0
                         })
                     }
-                    
+
                     return temp;
                 }
 
@@ -207,11 +198,8 @@
                 const priceInputParentDiv = document.createElement('div')
                 priceInputParentDiv.setAttribute('class', 'col-3 px-2')
                 $(priceInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][price]" min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price || ''}">`
+                    `<input class="form-control" name="details[${nDetailInputSet}][price]" min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price || detail.productInDetail?.product.default_price || ''}">`
                 )
-
-                
-
 
                 const getRemoveRowButtonParentDiv = () => {
                     const temp = document.createElement('div')
@@ -253,22 +241,11 @@
                 }
 
                 typeProductOutSelect.val(productOut.type || null).trigger('change');
-                idouts.value = productOut.id || null
                 codeOutsInput.value = productOut.code || null
                 noteOutsInput.value = productOut.note || null
                 deleteOutsId.value = productOut.id || null
 
-                if (productOut.at) {
-                    const dateObj = new Date(productOut.at);
-
-                    const month = dateObj.getMonth() + 1; //months from 1-12
-                    const day = dateObj.getDate();
-                    const year = dateObj.getFullYear();
-
-                    atProductOutInput.value = `${year}-${month}-${day}`
-                } else {
-                    atProductOutInput.value = '{{ date('Y-m-d') }}'
-                }
+                atProductOutInput.value = moment(productOut.at).format('YYYY-MM-DD')
 
                 productOut.details?.map(function(detail) {
                     addProductOutDetailRow(detail)
@@ -288,7 +265,9 @@
                     addProductOutDetailRow({})
                 }
 
-                productOutForm.action = "{{ route('product-outs.store') }}";
+                productOutFormModal.setTitle('{{ __('Add product out') }}')
+
+                productOutForm.action = "{{ route('product-outs.store') }}"
             });
 
             $(document).on('click', '.editProductOutButton', function() {
@@ -301,6 +280,9 @@
 
                 addPutMethodProductOutsInputInsert();
                 setProductOutFormValue(productOut);
+
+                productOutFormModal.setTitle(
+                    `{{ __('Edit product out') }}: ${moment(productOut.at).format('DD-MM-YYYY')}`)
 
                 productOutForm.action = "{{ route('product-outs.update', '') }}/" + productOut.id;
 
@@ -330,7 +312,7 @@
                         selectedProductOutsIds.push(selectEl.value)
                     }
                 })
-                
+
                 return isValid;
             }
 
@@ -381,7 +363,8 @@
                         name: 'details',
                         width: '20%',
                         render: details => details.map(detail => renderTagProductOutButton(
-                            `${detail.product_in_detail?.product.name} (${detail.qty})`)).join('')
+                            `${detail.product_in_detail?.product.name} (${detail.qty})`)).join(
+                            '')
                     }, {
                         render: function(data, type, row) {
                             const editButton = $(

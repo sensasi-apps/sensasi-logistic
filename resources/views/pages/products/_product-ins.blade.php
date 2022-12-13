@@ -6,7 +6,7 @@
         <h2 class="section-title">
             {{ __('Product In List') }}
             <button type="button" class="ml-2 btn btn-success addProductInsButton" data-toggle="modal"
-                data-target="#productInsertFormModal">
+                data-target="#productInFormModal">
                 <i class="fas fa-plus-circle"></i> Tambah
             </button>
         </h2>
@@ -22,89 +22,77 @@
     </div>
 </div>
 
-@push('js')
-    <div class="modal fade" id="productInsertFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="productInsFormModalLabel">{{ __('Add new Product in') }}</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+@push('modal')
+    <x-_modal id="productInFormModal" size="lg" centered>
+        <form method="POST" id="productInForm" onsubmit="return validateInputs();">
+            @csrf
+
+            <input type="hidden" name="id" id="idIns">
+
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="codeInsInput">{{ __('Code') }}</label>
+                    <input type="text" class="form-control" name="code" id="codeInsInput">
                 </div>
-                <div class="modal-body" id="modal_body_product">
 
-                    <form method="POST" id="productInForm" onsubmit="return validateInputs();">
-                        @csrf
-
-                        <input type="hidden" name="id" id="idIns">
-
-
-                        <div class="row">
-                            <div class="col form-group">
-                                <label for="codeInsInput">{{ __('Code') }}</label>
-                                <input type="text" class="form-control" name="code" id="codeInsInput">
-                            </div>
-
-                            <div class="col form-group">
-                                <label for="typeProductInsSelect">{{ __('Type') }}</label>
-                                <select id="typeProductInsSelect" name="type" required class="form-control select2"
-                                    data-select2-opts='{"tags": "true"}'>
-                                    @foreach ($productInTypes as $type)
-                                        <option>{{ $type }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="atInput">{{ __('Date') }}</label>
-                            <input type="date" class="form-control" name="at" required id="atInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="noteInsInput">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
-                        </div>
-
-                        <div class="px-1" style="overflow-x: auto">
-                            <div id="productInDetailsParent" style="width: 100%">
-                                <div class="row m-0">
-                                    <label class="col-7">{{ __('Name') }}</label>
-                                    <label class="col-4">{{ __('Qty') }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="">
-                            <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i
-                                    class="fas fa-plus"></i> {{ __('More') }}</a>
-                            <a href="{{ route('products.index') }}">{{ __('New product') }}?</a>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <div>
-                        <button type="submit" form="productInForm"
-                            class="btn btn-outline-success">{{ __('Save') }}</button>
-                    </div>
-                    <form action="" method="post" id="deleteFormIns">
-                        @csrf
-                        @method('delete')
-                        <input type="hidden" name="id" id="deleteInsId">
-                        <button type="submit" class="btn btn-icon btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
+                <div class="col form-group">
+                    <label for="typeProductInsSelect">{{ __('Type') }}</label>
+                    <select id="typeProductInsSelect" name="type" required class="form-control select2"
+                        data-select2-opts='{"tags": "true"}'>
+                        @foreach ($productInTypes as $type)
+                            <option>{{ $type }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-        </div>
-    </div>
 
+            <div class="form-group">
+                <label for="atInput">{{ __('Date') }}</label>
+                <input type="date" class="form-control" name="at" required id="atInput">
+            </div>
+
+            <div class="form-group">
+                <label for="noteInsInput">{{ __('Note') }}</label>
+                <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
+            </div>
+
+            <div class="px-1" style="overflow-x: auto">
+                <div id="productInDetailsParent" style="width: 100%">
+                    <div class="row m-0">
+                        <label class="col-7">{{ __('Name') }}</label>
+                        <label class="col-4">{{ __('Qty') }}</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="">
+                <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i class="fas fa-plus"></i>
+                    {{ __('More') }}</a>
+                <a href="#" data-toggle="modal" data-target="#productFormModal">{{ __('New product') }}?</a>
+            </div>
+        </form>
+
+        @slot('footer')
+            <div>
+                <button type="submit" form="productInForm" class="btn btn-outline-success">{{ __('Save') }}</button>
+            </div>
+            <form action="" method="post" id="deleteFormIns">
+                @csrf
+                @method('delete')
+                <input type="hidden" name="id" id="deleteInsId">
+                <button type="submit" class="btn btn-icon btn-outline-danger">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
+        @endslot
+    </x-_modal>
+@endpush
+
+@push('js')
     <script>
-        if(productInsCrudDiv){
+        if (productInsCrudDiv) {
             let productIns
             let productInDatatable = $('#productInDatatable')
             let selectedProductInsIds = [];
@@ -113,7 +101,7 @@
             const productInsFormModalLabel = $('#productInsFormModalLabel')
 
             const renderTagProductInsButton = text =>
-                `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-primary">${text}</a>`
+                `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-success">${text}</a>`
 
             function addProductInDetailRow(detail) {
                 const nDetailInputSet = $('.detailInputSetDiv').length
@@ -122,21 +110,18 @@
                 detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
                 productInDetailsParent.append(detailRowDiv);
 
-                function getProductSelect () {
+                function getProductSelect() {
                     const products = {{ Js::from(App\Models\Product::all()) }};
 
                     const initProductsSelect = $selectDom => $selectDom.select2({
                         dropdownParent: $('#productInForm'),
                         placeholder: '{{ __('Product') }}',
-                        data: [{
-                            id: null,
-                            text: null
-                        }].concat(products.map(product => {
+                        data: products.map(product => {
                             return {
                                 id: product.id,
                                 text: product.name
                             }
-                        }))
+                        })
                     });
 
                     const productSelectParentDiv = document.createElement('div')
@@ -145,7 +130,6 @@
                         .addClass('form-control productSelect')
                         .attr('name', `details[${nDetailInputSet}][product_id]`)
                     $(productSelectParentDiv).append($selectDom)
-                    console.log(detail)
                     initProductsSelect($selectDom);
                     $selectDom.val(detail.product_id).change();
 
@@ -162,7 +146,7 @@
                     `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
                 )
 
-                
+
 
 
                 const getRemoveRowButtonParentDiv = () => {
@@ -183,14 +167,6 @@
                 }
             }
 
-            const deletePutMethodInputProductIns = () => {
-                $('[name="_method"][value="put"]').remove()
-            }
-
-            const addPutMethodProductInsInputInsert = () => {
-                $('#productInForm').append($('@method('put')'))
-            }
-
 
             const setProductInFormValue = productIn => {
 
@@ -207,52 +183,45 @@
                 codeInsInput.value = productIn.code || null
                 noteInsInput.value = productIn.note || null
                 deleteInsId.value = productIn.id || null
+                atInput.value = moment(productIn.at).format('YYYY-MM-DD')
 
-                if (productIn.at) {
-                    const dateObj = new Date(productIn.at);
 
-                    const month = dateObj.getMonth() + 1; //months from 1-12
-                    const day = dateObj.getDate();
-                    const year = dateObj.getFullYear();
-
-                    atInput.value = `${year}-${month}-${day}`
+                if (productIn.details) {
+                    productIn.details?.map(function(detail) {
+                        addProductInDetailRow(detail)
+                    })
                 } else {
-                    atInput.value = '{{ date('Y-m-d') }}'
+                    addProductInDetailRow({})
                 }
 
-                productIn.details?.map(function(detail) {
-                    addProductInDetailRow(detail)
-                })
             }
 
 
             $(document).on('click', '.addProductInsButton', function() {
-                deletePutMethodInputProductIns();
+                $('[name="_method"][value="put"]').remove()
+
                 setProductInFormValue({});
-                deleteFormIns.style.display = "none";
+                deleteFormIns.style.display = "none"
 
                 $('.detailInputSetDiv').remove()
 
-
-                addProductInDetailRow({})
-                addProductInDetailRow({})
-                addProductInDetailRow({})
-
+                productInFormModal.setTitle(`{{ __('Add new product in') }}`)
                 productInForm.action = "{{ route('product-ins.store') }}";
             });
 
-            $(document).on('click', '.editProductInsertButton', function() {
+            $(document).on('click', '.editProductInButton', function() {
                 const productInId = $(this).data('product-id');
                 const productIn = productInsCrudDiv.productIns.find(productIn => productIn.id === productInId);
                 deleteFormIns.style.display = "block";
 
                 $('.detailInputSetDiv').remove()
 
-                addPutMethodProductInsInputInsert();
+                $('[name="_method"][value="put"]').remove()
+                $('#productInForm').append($('@method('put')'))
                 setProductInFormValue(productIn);
 
+                productInFormModal.setTitle(`{{ __('Edit product in') }}: ${moment(productIn.at).format('DD-MM-YYYY')}`)
                 productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
-
                 deleteFormIns.action = "{{ route('product-ins.destroy', '') }}/" + productIn
                     .id;
             })
@@ -279,7 +248,7 @@
                         selectedProductInsIds.push(selectEl.value)
                     }
                 })
-                
+
                 return isValid;
             }
 
@@ -339,8 +308,8 @@
                                 '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
                             )
                             editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#productInsertFormModal')
-                            editButton.addClass('editProductInsertButton');
+                            editButton.attr('data-target', '#productInFormModal')
+                            editButton.addClass('editProductInButton');
                             editButton.attr('data-product-id', row.id)
                             return editButton.prop('outerHTML')
                         },
@@ -349,6 +318,5 @@
                 });
             });
         }
-        
     </script>
 @endpush
