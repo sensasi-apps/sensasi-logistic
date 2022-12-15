@@ -1,12 +1,12 @@
 @include('components.assets._datatable')
 @include('components.assets._select2')
 
-<div id="materialOutsCrudDiv">
+<div id="manufactureCrudDiv">
     <div class="section-body">
         <h2 class="section-title">
             {{ __('Material Out List') }}
-            <button type="button" class="ml-2 btn btn-success addMaterialOutsButton" data-toggle="modal"
-                data-target="#materialOutFormModal">
+            <button type="button" class="ml-2 btn btn-success addManufactureButton" data-toggle="modal"
+                data-target="#manufactureFormModal">
                 <i class="fas fa-plus-circle"></i> Tambah
             </button>
         </h2>
@@ -23,46 +23,136 @@
 </div>
 
 @push('modal')
-    <div class="modal fade" id="materialOutFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+    <div class="modal fade" id="manufactureFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
         aria-hidden="">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialOutFormModalLabel">{{ __('Add new material out') }}</h5>
+                    <h5 class="modal-title" id="manufactureFormModalLabel">{{ __('Add new manufacture') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body" id="manufactureModalBody">
 
-                    <form method="POST" id="manufacture">
+                    <form method="POST" id="manufactureform">
                         @csrf
-                        <h4 class="text-center">Manufacture</h4>
+                        <h4 class="text-center">{{__('Manufacture')}}</h4>
                         <hr>
-                        <input type="hidden" name="id" id="idOuts">
+                        <input type="hidden" name="manufacture[id]" id="manufactureId">
+
+
+                        <div class="row">
+                            <div class="col form-group">
+                                <label for="codeManufactureInput">{{ __('Code') }}</label>
+                                <input type="text" class="form-control" name="manufacture[code]" id="codeManufactureInput">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="atManufactureInput">{{ __('Date') }}</label>
+                                <input type="date" class="form-control" name="manufacture[at]" required id="atManufactureInput">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="noteManufactureInput">{{ __('Note') }}</label>
+                            <textarea class="form-control" name="manufacture[note]" id="noteManufactureInput" rows="3" style="height:100%;"></textarea>
+                        </div><hr>
+
+                        <h4 class="text-center">{{__('Material Out')}}</h4>
+
+                        <input type="hidden" name="materialOut[id]" id="materialOutIdInput">
+
+
+                        <div class="row">
+                            <div class="col form-group">
+                                <label for="materialOutCodeInput">{{ __('Code') }}</label>
+                                <input type="text" class="form-control" name="materialOut[code]" id="materialOutCodeInput">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="materialOutAtInput">{{ __('Date') }}</label>
+                            <input type="date" class="form-control" name="materialOut[at]" required id="materialOutAtInput">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="materialOutNoteInput">{{ __('Note') }}</label>
+                            <textarea class="form-control" name="materialOut[note]" id="materialOutNoteInput" rows="3" style="height:100%;"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col form-group">
+                                <label for="materialOutDescInput">{{ __('Desc') }}</label>
+                                <input type="text" class="form-control" name="materialOut[desc]" id="materialOutDescInput">
+                            </div>
+                        </div>
+
+                        <div class="px-1" style="overflow-x: auto">
+                            <div id="materialOutDetailsParent" style="width: 100%">
+                                <div class="row m-0">
+                                    <label class="col-6">{{ __('Name') }}</label>
+                                    <label class="col-5">{{ __('Qty') }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="">
+                            <a href="#" id="addMaterialOutDetailButton" class="btn btn-success btn-sm mr-2"><i
+                                    class="fas fa-plus"></i> {{ __('More') }}</a>
+                            <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
+                        </div><hr>
+
+                        <h4 class="text-center">{{__('Product In')}}</h4>
+
+                        <input type="hidden" name="productIn[id]" id="idIns">
 
 
                         <div class="row">
                             <div class="col form-group">
                                 <label for="codeInsInput">{{ __('Code') }}</label>
-                                <input type="text" class="form-control" name="code" id="codeInsInput">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="atInput">{{ __('Date') }}</label>
-                                <input type="date" class="form-control" name="at" required id="atInput">
+                                <input type="text" class="form-control" name="productIn[code]" id="codeInsInput">
                             </div>
                         </div>
 
                         <div class="form-group">
+                            <label for="atInput">{{ __('Date') }}</label>
+                            <input type="date" class="form-control" name="productIn[at]" required id="atInput">
+                        </div>
+
+                        <div class="form-group">
                             <label for="noteInsInput">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
-                        </div><hr>
+                            <textarea class="form-control" name="productIn[note]" id="noteInsInput" rows="3" style="height:100%;"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col form-group">
+                                <label for="descInsInput">{{ __('Desc') }}</label>
+                                <input type="text" class="form-control" name="productIn[desc]" id="descInsInput">
+                            </div>
+                        </div>
+
+                        <div class="px-1" style="overflow-x: auto">
+                            <div id="productInDetailsParent" style="width: 100%">
+                                <div class="row m-0">
+                                    <label class="col-7">{{ __('Name') }}</label>
+                                    <label class="col-4">{{ __('Qty') }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="">
+                            <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i
+                                    class="fas fa-plus"></i> {{ __('More') }}</a>
+                            <a href="{{ route('products.index') }}">{{ __('New product') }}?</a>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <div>
-                        <button type="submit" form="manufacture"
+                        <button type="submit" form="manufactureform"
                             class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
                     <form action="" method="post" id="deleteManufacture">
@@ -81,8 +171,8 @@
 @push('js')
     <script>
         {
-            if (materialOutsCrudDiv) {
-                const materialOutFormModalLabel = $('#materialOutFormModalLabel')
+            if (manufactureCrudDiv) {
+                const manufactureFormModalLabel = $('#manufactureFormModalLabel')
 
                 $(function() {
                     $('#materialOutTypeSelect').select2({
@@ -130,28 +220,28 @@
                 }
 
                 function addMaterialOutDetailRow(detail) {
-                    const nDetailInputSet = $('.detailInputSetDiv').length
+                    const nDetailInputSetMaterialOut = $('.detailInputSetMaterialOutDiv').length
                     const materialSelectParentDiv = document.createElement('div')
                     materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
-                    const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
+                    const $selectDomMaterialOut = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
                         .addClass('form-control select2 listSelect')
-                        .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
-                    $(materialSelectParentDiv).append($selectDom)
+                        .attr('name', `detailsMaterialOut[${nDetailInputSetMaterialOut}][material_in_detail_id]`)
+                    $(materialSelectParentDiv).append($selectDomMaterialOut)
 
                     if (detail.material_in_detail_id) {
-                        $selectDom.append(
+                        $selectDomMaterialOut.append(
                             `<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`
                         );
                     }
 
-                    initMaterialSelects($selectDom);
-                    $selectDom.val(detail.material_in_detail_id).change();
+                    initMaterialSelects($selectDomMaterialOut);
+                    $selectDomMaterialOut.val(detail.material_in_detail_id).change();
 
 
                     const qtyInputParentDiv = document.createElement('div')
                     qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
                     $(qtyInputParentDiv).append(
-                        `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                        `<input class="form-control" name="detailsMaterialOut[${nDetailInputSetMaterialOut}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
                     )
 
                     const removeRowButtonParentDiv = document.createElement('div')
@@ -161,85 +251,219 @@
                     ))
 
                     const detailRowDiv = document.createElement('div')
-                    detailRowDiv.setAttribute('class', 'form-group row materialOutDetailRowDiv mx-0 align-items-center detailInputSetDiv')
+                    detailRowDiv.setAttribute('class', 'form-group row materialOutDetailRowDiv mx-0 align-items-center detailInputSetMaterialOutDiv')
                     $(detailRowDiv).append(materialSelectParentDiv)
                     $(detailRowDiv).append(qtyInputParentDiv)
-                    $(detailRowDiv).append(removeRowButtonParentDiv)
+                    // $(detailRowDiv).append(removeRowButtonParentDiv)
                     $(detailRowDiv).append(`<input type="hidden" name="" value="${detail.id}">`)
 
                     materialOutDetailsParent.append(detailRowDiv);
+                    if (nDetailInputSetMaterialOut !== 0) {
+                        $(detailRowDiv).append(removeRowButtonParentDiv)
+                    }
                 }
 
 
-                const setMaterialOutFormValue = materialOut => {
-                    const materialOutTypeSelect = $('#materialOutTypeSelect');
-                    materialOutTypeSelect.val(materialOut.type || null).change();
-                    idOuts.value = materialOut.id || null
-                    codeInsInput.value = materialOut.code || null
-                    noteInsInput.value = materialOut.note || null
+                const setmanufactureFormValue = manufacture => {
+                    // const materialOutTypeSelect = $('#materialOutTypeSelect');
+                    // materialOutTypeSelect.val(manufacture.type || null).change();
 
-                    if (materialOut.at) {
-                        const dateObj = new Date(materialOut.at);
+                    manufactureId.value = manufacture.id || null
+                    codeManufactureInput.value = manufacture.code || null
+                    noteManufactureInput.value = manufacture.note || null
 
-                        const month = dateObj.getMonth() + 1; //months from 1-12
-                        const day = dateObj.getDate();
-                        const year = dateObj.getFullYear();
+                    if (manufacture.at) {
+                        let dateObjManufacture = new Date(manufacture.at);
 
-                        atInput.value = `${year}-${month}-${day}`
+                        let monthManufacture = dateObjManufacture.getMonth() + 1; //months from 1-12
+                        let dayManufacture = dateObjManufacture.getDate();
+                        let yearManufacture = dateObjManufacture.getFullYear();
+
+                        if (dayManufacture < 10) {
+                            dayManufacture = '0'+ dayManufacture
+                        }
+
+                        atManufactureInput.value = `${yearManufacture}-${monthManufacture}-${dayManufacture}`
+                    } else {
+                        atManufactureInput.value = '{{ date('Y-m-d') }}'
+                    }
+
+                    materialOutIdInput.value = manufacture.material_out.id
+                    materialOutNoteInput.value = manufacture.material_out.note
+                    materialOutCodeInput.value = manufacture.material_out.code
+                    materialOutAtInput.value = manufacture.material_out.at
+                    materialOutDescInput.value = manufacture.material_out.desc
+                    
+                    if (manufacture.material_out.at) {
+                        let dateObjMaterialOut = new Date(manufacture.material_out.at);
+
+                        let monthMaterialOut = dateObjMaterialOut.getMonth() + 1; //months from 1-12
+                        let dayMaterialOut = dateObjMaterialOut.getDate();
+                        let yearMaterialOut = dateObjMaterialOut.getFullYear();
+
+                        if (dayMaterialOut < 10) {
+                            dayMaterialOut = '0' + dayMaterialOut
+                        }
+
+                        materialOutAtInput.value = `${yearMaterialOut}-${monthMaterialOut}-${dayMaterialOut}`
+                    } else {
+                        materialOutAtInput.value = '{{ date('Y-m-d') }}'
+                    }
+
+                    idIns.value = manufacture.product_in.id
+                    codeInsInput.value = manufacture.product_in.code
+                    atInput.value = manufacture.product_in.at
+                    noteInsInput.value = manufacture.product_in.note
+                    descInsInput.value = manufacture.product_in.desc
+
+                    if (manufacture.material_out.at) {
+                        let dateObjProductIn = new Date(manufacture.material_out.at);
+
+                        let monthProductIn = dateObjProductIn.getMonth() + 1; //months from 1-12
+                        let dayProductIn = dateObjProductIn.getDate();
+                        let yearProductIn = dateObjProductIn.getFullYear();
+
+                        if (dayProductIn < 10) {
+                            dayProductIn = '0' + dayProductIn
+                        }
+
+                        atInput.value = `${yearProductIn}-${monthProductIn}-${dayProductIn}`
                     } else {
                         atInput.value = '{{ date('Y-m-d') }}'
                     }
 
-
-                    materialOut.details?.map(function(detail) {
+                    manufacture.material_out.details?.map(function(detail) {
                         addMaterialOutDetailRow(detail)
+                    })
+
+                    manufacture.product_in.details?.map(function(detail) {
+                        addProductInDetailRow(detail)
                     })
                 }
 
+                function addProductInDetailRow(detail) {
+                    const nDetailInputSetProductIn = $('.detailInputSetProductInDiv').length
 
-                $(document).on('click', '.addMaterialOutsButton', function() {
+                    const detailRowDiv = document.createElement('div')
+                    detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetProductInDiv')
+                    productInDetailsParent.append(detailRowDiv);
+
+                    function getProductSelect () {
+                        const products = {{ Js::from(App\Models\Product::all()) }};
+
+                        const initProductsSelect = $selectDomProductIn => $selectDomProductIn.select2({
+                            dropdownParent: $('#manufactureModalBody'),
+                            placeholder: '{{ __('Product') }}',
+                            data: [{
+                                id: null,
+                                text: null
+                            }].concat(products.map(product => {
+                                return {
+                                    id: product.id,
+                                    text: product.name
+                                }
+                            }))
+                        });
+
+                        const productSelectParentDiv = document.createElement('div')
+                        productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
+                        const $selectDomProductIn = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
+                            .addClass('form-control productSelect')
+                            .attr('name', `detailsProductIn[${nDetailInputSetProductIn}][product_id]`)
+                        $(productSelectParentDiv).append($selectDomProductIn)
+                        console.log(detail)
+                        initProductsSelect($selectDomProductIn);
+                        $selectDomProductIn.val(detail.product_id).change();
+
+                        return productSelectParentDiv
+                    }
+
+
+                    $(detailRowDiv).append(getProductSelect())
+
+
+                    const qtyInputParentDiv = document.createElement('div')
+                    qtyInputParentDiv.setAttribute('class', 'col-4 px-2')
+                    $(qtyInputParentDiv).append(
+                        `<input class="form-control" name="detailsProductIn[${nDetailInputSetProductIn}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                    )
+
+                    
+
+
+                    const getRemoveRowButtonParentDiv = () => {
+                        const temp = document.createElement('div')
+                        temp.setAttribute('class', 'col-1 pl-2 pr-0')
+                        $(temp).append($(
+                            `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
+                        ))
+
+                        return temp;
+                    }
+
+
+                    $(detailRowDiv).append(qtyInputParentDiv)
+
+                    if (nDetailInputSetProductIn !== 0) {
+                        $(detailRowDiv).append(getRemoveRowButtonParentDiv())
+                    }
+                }
+
+
+                $(document).on('click', '.addManufactureButton', function() {
                     $('[name="_method"][value="put"]').remove()
 
-                    setMaterialOutFormValue({});
+                    setmanufactureFormValue({});
                     deleteManufacture.style.display = "none";
 
                     $('div .materialOutDetailRowDiv').remove()
+                    $('div .addProductInDetailRow').remove()
 
 
                     addMaterialOutDetailRow({})
                     addMaterialOutDetailRow({})
                     addMaterialOutDetailRow({})
 
-                    manufacture.action = "{{ route('material-outs.store') }}";
+                    addProductInDetailRow({})
+                    addProductInDetailRow({})
+                    addProductInDetailRow({})
+
+                    manufactureform.action = "{{ route('manufactures.store') }}";
                 });
 
-                $(document).on('click', '.editMaterialOutButton', function() {
-                    const materialOutId = $(this).data('material-id');
-                    const materialOut = materialOutsCrudDiv.materialOuts.find(materialOut => materialOut.id ===
-                        materialOutId);
+                $(document).on('click', '.editManufactureButton', function() {
+                    const manufactureId = $(this).data('manufacture-id');
+                    const manufacture = manufactureCrudDiv.manufactures.find(manufacture => manufacture.id ===
+                        manufactureId);
+                    
                     deleteManufacture.style.display = "block";
 
                     $('div .materialOutDetailRowDiv').remove()
+                    $('div .detailInputSetProductInDiv').remove()
+                    
 
 
-                    $('#manufacture').append($('@method('put')'))
+                    $('#manufactureform').append($('@method('put')'))
 
-                    setMaterialOutFormValue(materialOut);
-
-                    manufacture.action = `{{ route('material-outs.update', '') }}/${materialOut.id}`;
-                    deleteManufacture.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`;
+                    setmanufactureFormValue(manufacture);
+                    
+                    manufactureform.action = `{{ route('manufactures.update', '') }}/${manufacture.id}`;
+                    deleteManufacture.action = `{{ route('manufactures.destroy', '') }}/${manufacture.id}`;
                 })
 
                 $(document).on('click', '#addMaterialOutDetailButton', function() {
                     addMaterialOutDetailRow({})
                 })
 
+                $(document).on('click', '#addProductInsButton', function() {
+                    addProductInDetailRow({})
+                })
 
                 // ################## DATATABLE SECTION
 
-                const datatableSearch = tag => materialOutsCrudDiv.materialOutDatatable.DataTable().search(tag).draw()
+                const datatableSearch = tag => manufactureCrudDiv.materialOutDatatable.DataTable().search(tag).draw()
 
-                materialOutsCrudDiv.materialOutDatatable = $(materialOutDatatable).dataTable({
+                manufactureCrudDiv.materialOutDatatable = $(materialOutDatatable).dataTable({
                     processing: true,
                     search: {
                         return: true,
@@ -251,7 +475,7 @@
                     ajax: {
                         url: "/api/datatable/manufacture?with=productIn.details.product,materialOut.details.materialInDetail.material",
                         dataSrc: json => {
-                            materialOutsCrudDiv.materialOuts = json.data;
+                            manufactureCrudDiv.manufactures = json.data;
                             return json.data;
                         },
                         beforeSend: function(request) {
@@ -292,9 +516,9 @@
                                 '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
                             )
                             editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#materialOutFormModal')
-                            editButton.addClass('editMaterialOutButton');
-                            editButton.attr('data-material-id', row.id)
+                            editButton.attr('data-target', '#manufactureFormModal')
+                            editButton.addClass('editManufactureButton');
+                            editButton.attr('data-manufacture-id', row.id)
                             return editButton.prop('outerHTML')
                         },
                         orderable: false

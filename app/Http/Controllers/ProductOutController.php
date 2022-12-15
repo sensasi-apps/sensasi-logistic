@@ -66,7 +66,7 @@ class ProductOutController extends Controller
             ProductOutDetail::insert($productOutDetailsFromInput);
         }
 
-        return redirect()->route('product-outs.index', '#out')->with('notifications', [
+        return redirect()->route('products.index', '#out')->with('notifications', [
             [__('Product out data has been added successfully'), 'success']
         ]);
     }
