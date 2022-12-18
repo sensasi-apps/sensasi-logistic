@@ -27,6 +27,13 @@ class User extends Authenticatable implements CanResetPassword
         'password',
     ];
 
+    // protected $appends = ['roles'];
+
+    // public function getRolesAttribute(){
+    //     return $this->roles();
+    // }
+
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -50,4 +57,5 @@ class User extends Authenticatable implements CanResetPassword
     {
         return Hash::check(env('APP_KEY'), $this->password);
     }
+
 }

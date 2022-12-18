@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
 use App\Http\Controllers\ManufactureController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -73,8 +74,12 @@ Route::middleware('auth')->group(function () {
 
 
     Route::controller(AppSystemController::class)->group(function () {
-        Route::prefix('system')->name('system')->group(function () {
+        Route::prefix('system')->name('system.')->group(function () {
             Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
+
+            Route::resource('user', UserController::class)->except([
+                'create', 'show', 'edit'
+            ]);
         });
     });
 
@@ -106,6 +111,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('manufactures', ManufactureController::class)->except([
         'create', 'show', 'edit'
     ]);
+
+    
 
     if (App::environment('local')) {
         Route::get('basic-page-format', fn () => view('basic-page-format'));
