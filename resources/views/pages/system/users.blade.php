@@ -32,12 +32,14 @@
 
             <div class="form-group">
                 <label for="emailInput">{{ __('validation.attributes.email') }}</label>
-                <input type="email" class="form-control" name="email" id="emailInput" required>
+                <input type="email" class="form-control" name="email" value="{{ $user->email ?? '' }}" id="emailInput"
+                    required>
             </div>
 
             <div class="form-group">
                 <label for="nameInput">{{ __('validation.attributes.name') }}</label>
-                <input type="text" class="form-control" name="name" required id="nameInput">
+                <input type="text" class="form-control" name="name" required value="{{ $user->name ?? '' }}"
+                    id="nameInput">
             </div>
 
             <div class="form-group">
@@ -57,7 +59,6 @@
                 <select class="form-control select2" multiple='multiple' id="rolesSelect" name="roles[]">
                 </select>
             </div>
-
         </form>
 
         @slot('footer')
@@ -88,125 +89,128 @@
 
 @push('js')
     <script>
-        let users
-        let userDatatable = $('#userDatatable')
-        const roles = {{ Js::from(Spatie\Permission\Models\Role::all()) }};
+        (function() {
 
-        $('#rolesSelect').select2({
-            dropdownParent: '#userForm',
-            placeholder: '{{ __('Roles') }}',
-            data: roles.map(role => {
-                return {
-                    text: role.name
-                }
-            })
-        });
+            let users
+            let userDatatable = $('#userDatatable')
+            const roles = {{ Js::from(Spatie\Permission\Models\Role::all()) }};
 
-        const deletePutMethodInput = () => {
-            $('[name="_method"][value="put"]').remove()
-        }
-
-        const addPutMethodInput = () => {
-            $('#userForm').append($('@method('put')'))
-        }
-
-        const setFormValue = user => {
-            $('#rolesSelect').val(user.roles?.map(role => role.name) || []).change();
-            nameInput.value = user.name || null
-            emailInput.value = user.email || null
-            deleteId.value = user.id
-        }
-
-
-        const datatableSearch = tag =>
-            userDatatable.DataTable().search(tag).draw()
-
-
-        $(document).on('click', '.addUserButton', function() {
-
-            deletePutMethodInput();
-            setFormValue({});
-
-            $('#pwInput').attr('required', '')
-            $('#pwInput2').attr('required', '');
-
-            document.getElementById('userFormModal').setTitle('{{ __('Add new user') }}');
-            deleteFormModalButtonToggle.style.display = "none";
-            userForm.action = "{{ url('system/users/') }}";
-        })
-
-        $(document).on('click', '.editUserButton', function() {
-
-            const userId = $(this).data('user-id');
-            const user = users.find(user => user.id === userId);
-
-            setFormValue(user);
-            deletePutMethodInput();
-            addPutMethodInput();
-
-            deleteFormModalButtonToggle.style.display = "block";
-            $('#pwInput').removeAttr('required');
-            $('#pwInput2').removeAttr('required');
-
-            deleteUserName.innerHTML = user.name
-            document.getElementById('userFormModal').setTitle(`{{ __('Edit user') }}: ${user.name}`);
-            userForm.action = "{{ url('system/users/') }}/" + user.id;
-            deleteForm.action = "{{ url('system/users/') }}/" + user.id;
-        });
-
-        $(document).ready(function() {
-            userDatatable = userDatatable.dataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-                ajax: {
-                    url: '/api/datatable/User?with=roles',
-                    dataSrc: json => {
-                        users = json.data;
-                        return json.data;
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
-                        )
-                    },
-                    cache: true
-                },
-                order: [],
-                columns: [{
-                        data: 'email',
-                        title: '{{ __('validation.attributes.name') }}'
-                    }, {
-                        data: 'name',
-                        title: '{{ __('validation.attributes.name') }}'
-                    },
-                    {
-                        data: 'roles',
-                        name: 'roles.name',
-                        title: '{{ __('validation.attributes.roles') }}',
-                        orderable: false,
-                        render: roles => roles?.map(role =>
-                            `<a href="#" onclick="datatableSearch('${role.name}')" class="m-1 badge badge-primary">${role.name}</a>`
-                        ).join('') || null,
-                    },
-                    {
-                        render: function(data, type, row) {
-                            const editButton = $(
-                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
-                            editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#userFormModal')
-                            editButton.addClass('editUserButton');
-                            editButton.attr('data-user-id', row.id)
-                            return editButton.prop('outerHTML')
-                        },
-                        orderable: false
+            $('#rolesSelect').select2({
+                dropdownParent: '#userForm',
+                placeholder: '{{ __('Roles') }}',
+                data: roles.map(role => {
+                    return {
+                        text: role.name
                     }
-                ]
+                })
             });
-        });
+
+            const deletePutMethodInput = () => {
+                $('[name="_method"][value="put"]').remove()
+            }
+
+            const addPutMethodInput = () => {
+                $('#userForm').append($('@method('put')'))
+            }
+
+            const setFormValue = user => {
+                $('#rolesSelect').val(user.roles?.map(role => role.name) || []).change();
+                nameInput.value = user.name || null
+                emailInput.value = user.email || null
+                deleteId.value = user.id
+            }
+
+
+            const datatableSearch = tag =>
+                userDatatable.DataTable().search(tag).draw()
+
+
+            $(document).on('click', '.addUserButton', function() {
+
+                deletePutMethodInput();
+                setFormValue({});
+
+                $('#pwInput').attr('required', '')
+                $('#pwInput2').attr('required', '');
+
+                document.getElementById('userFormModal').setTitle('{{ __('Add new user') }}');
+                deleteFormModalButtonToggle.style.display = "none";
+                userForm.action = "{{ url('system/users/') }}";
+            })
+
+            $(document).on('click', '.editUserButton', function() {
+
+                const userId = $(this).data('user-id');
+                const user = users.find(user => user.id === userId);
+
+                setFormValue(user);
+                deletePutMethodInput();
+                addPutMethodInput();
+
+                deleteFormModalButtonToggle.style.display = "block";
+                $('#pwInput').removeAttr('required');
+                $('#pwInput2').removeAttr('required');
+
+                deleteUserName.innerHTML = user.name
+                document.getElementById('userFormModal').setTitle(`{{ __('Edit user') }}: ${user.name}`);
+                userForm.action = "{{ url('system/users/') }}/" + user.id;
+                deleteForm.action = "{{ url('system/users/') }}/" + user.id;
+            });
+
+            $(document).ready(function() {
+                userDatatable = userDatatable.dataTable({
+                    processing: true,
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
+                    },
+                    serverSide: true,
+                    ajax: {
+                        url: '/api/datatable/User?with=roles',
+                        dataSrc: json => {
+                            users = json.data;
+                            return json.data;
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader(
+                                "Authorization",
+                                'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            )
+                        },
+                        cache: true
+                    },
+                    order: [],
+                    columns: [{
+                            data: 'email',
+                            title: '{{ __('validation.attributes.name') }}'
+                        }, {
+                            data: 'name',
+                            title: '{{ __('validation.attributes.name') }}'
+                        },
+                        {
+                            data: 'roles',
+                            name: 'roles.name',
+                            title: '{{ __('validation.attributes.roles') }}',
+                            orderable: false,
+                            render: roles => roles?.map(role =>
+                                `<a href="#" onclick="datatableSearch('${role.name}')" class="m-1 badge badge-primary">${role.name}</a>`
+                            ).join('') || null,
+                        },
+                        {
+                            render: function(data, type, row) {
+                                const editButton = $(
+                                    '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
+                                )
+                                editButton.attr('data-toggle', 'modal')
+                                editButton.attr('data-target', '#userFormModal')
+                                editButton.addClass('editUserButton');
+                                editButton.attr('data-user-id', row.id)
+                                return editButton.prop('outerHTML')
+                            },
+                            orderable: false
+                        }
+                    ]
+                });
+            })
+        })();
     </script>
 @endpush

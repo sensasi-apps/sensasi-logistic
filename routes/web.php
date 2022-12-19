@@ -82,6 +82,10 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
+
+
+
 
     Route::resource('materials', MaterialController::class)->except([
         'create', 'show', 'edit'

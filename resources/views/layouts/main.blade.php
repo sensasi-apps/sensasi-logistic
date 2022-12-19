@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+@php $user = Auth::user() @endphp
+
 <html lang="{{ app()->getLocale() }}">
 
 <head>
@@ -46,6 +49,37 @@
                 @include('layouts._with-sidebar')
         @endswitch
     </div>
+
+    <x-_modal id="profile" title="{{ __('Edit profile') }}">
+        <form action="{{ route('user.update') }}" method="post" id="userProfileForm">
+            @csrf
+
+            <div class="form-group">
+                <label for="emailInput">{{ __('validation.attributes.email') }}</label>
+                <input type="email" class="form-control" name="email" value="{{ $user->email ?? '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nameInput">{{ __('validation.attributes.name') }}</label>
+                <input type="text" class="form-control" name="name" required value="{{ $user->name ?? '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="pwInput">{{ __('validation.attributes.password') }}</label>
+                <input type="password" class="form-control" name="password" minlength="8" maxlength="255">
+            </div>
+
+            <div class="form-group">
+                <label for="pwInput2">{{ __('validation.attributes.password_confirmation') }}</label>
+                <input type="password" class="form-control" name="password_confirmation" minlength="8" maxlength="255">
+            </div>
+
+        </form>
+
+        @slot('footer')
+            <button type="submit" form="userProfileForm" class="btn btn-primary">{{ __('Save') }}</button>
+        @endslot
+    </x-_modal>
 
     @stack('modal')
 

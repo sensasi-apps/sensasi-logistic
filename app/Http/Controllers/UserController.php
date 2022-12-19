@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -73,6 +74,25 @@ class UserController extends Controller
         return redirect()->route('system.users.index')->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been updated successfully'), 'success']
 
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function selfUpdate(Request $request)
+    {
+        $user = Auth::user();
+        $validatedInput = $this->validateInput($request, $user);
+
+        $user->update($validatedInput);
+
+        return redirect()->back()->with('notifications', [
+            [__('Your profile has been updated successfully'), 'success']
         ]);
     }
 
