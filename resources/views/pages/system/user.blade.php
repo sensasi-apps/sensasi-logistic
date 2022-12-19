@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', __('Material'))
+@section('title', __('User'))
 
 @include('components.assets._datatable')
 @include('components.assets._select2')
@@ -9,7 +9,7 @@
     <div class="section-body">
         <h2 class="section-title">
             {{ __('User List') }}
-            <button type="button" class="ml-2 btn btn-success addMaterialButton" data-toggle="modal"
+            <button type="button" class="ml-2 btn btn-success addUserButton" data-toggle="modal"
                 data-target="#userFormModal">
                 <i class="fas fa-plus-circle"></i> {{ __('Add') }}
             </button>
@@ -18,7 +18,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped" id="materialDatatable" style="width:100%">
+                    <table class="table table-striped" id="userDatatable" style="width:100%">
                     </table>
                 </div>
             </div>
@@ -32,12 +32,12 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Add new material') }}</h5>
+                    <h5 class="modal-title" id="userFormModalLabel">{{ __('Add new user') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material">
+                <div class="modal-body" id="modal_body_user">
 
                     <form method="POST" id="userForm">
                         @csrf
@@ -66,13 +66,7 @@
 
                         <div class="form-group">
                             <label for="role">{{ __('Add Role') }}</label>
-                            <select class="form-control select2" multiple='multiple' id="role" name="role[]">
-                                <!-- <option value="Super Admin">Super Admin</option>
-                                <option value="Stackholder">Stackholder</option>
-                                <option value="Manufacture">Manufacture</option>
-                                <option value="Sales">Sales</option>
-                                <option value="Warehouse">Warehouse</option> -->
-                            </select>
+                            <select class="form-control select2" multiple='multiple' id="role" name="role[]"></select>
                         </div>
 
                     </form>
@@ -97,12 +91,12 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel">{{ __('Are you sure') }}?</h5>
+                    <h5 class="modal-title" id="userFormModalLabel">{{ __('Are you sure') }}?</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="modal_body_material" style="font-size: 1.1rem">
+                <div class="modal-body" id="modal_body_user" style="font-size: 1.1rem">
                     {{ __('This action can not be undone') }}.
                     {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteUserName"></b>
                     <form method="post" id="deleteForm">
@@ -123,7 +117,7 @@
     <script>
         let users
         const tagsSelect = $('#tagsSelect')
-        let materialDatatable = $('#materialDatatable')
+        let userDatatable = $('#userDatatable')
         const roles = {{ Js::from(App\Models\Role::all()) }};
 
         $('#role').select2({
@@ -144,8 +138,8 @@
             $('#userForm').append($('@method('put')'))
         }
 
-        const setFormValue = material => {
-            const roles = material.roles?.map(function(detail){
+        const setFormValue = user => {
+            const roles = user.roles?.map(function(detail){
                 console.log(detail)
                 return detail.name
             })
@@ -157,26 +151,26 @@
             const selectOpts = tagsSelect.find('option');
             const optValues = selectOpts.map((i, select) => select.innerHTML);
 
-            material.tags?.map(tag => {
+            user.tags?.map(tag => {
                 if ($.inArray(tag, optValues) === -1) {
                     tagsSelect.append(`<option>${tag}</option>`);
                 };
             })
 
-            tagsSelect.val(material.tags || []).change();
-            idInput.value = material.id || null
-            nameInput.value = material.name || null
-            emailInput.value = material.email || null
-            deleteId.value = material.id
+            tagsSelect.val(user.tags || []).change();
+            idInput.value = user.id || null
+            nameInput.value = user.name || null
+            emailInput.value = user.email || null
+            deleteId.value = user.id
         }
 
 
         const datatableSearch = tag =>
-            materialDatatable.DataTable().search(tag).draw()
+            userDatatable.DataTable().search(tag).draw()
 
 
-        $(document).on('click', '.addMaterialButton', function() {
-            $('#materialFormModalLabel').html('{{ __('Add new material') }}')
+        $(document).on('click', '.addUserButton', function() {
+            $('#userFormModalLabel').html('{{ __('Add new user') }}')
 
 
             deletePutMethodInput();
@@ -189,8 +183,8 @@
             userForm.action = "{{ url('system/user/') }}";
         })
 
-        $(document).on('click', '.editMaterialButton', function() {
-            $('#materialFormModalLabel').html('{{ __('Edit user') }}')
+        $(document).on('click', '.editUserButton', function() {
+            $('#userFormModalLabel').html('{{ __('Edit user') }}')
 
             const userId = $(this).data('user-id');
             const user = users.find(user => user.id === userId);
@@ -214,7 +208,7 @@
         });
 
         $(document).ready(function() {
-            materialDatatable = materialDatatable.dataTable({
+            userDatatable = userDatatable.dataTable({
                 processing: true,
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
@@ -256,7 +250,7 @@
                         )
                         editButton.attr('data-toggle', 'modal')
                         editButton.attr('data-target', '#userFormModal')
-                        editButton.addClass('editMaterialButton');
+                        editButton.addClass('editUserButton');
                         editButton.attr('data-user-id', row.id)
                         return editButton.prop('outerHTML')
                     },
