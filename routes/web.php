@@ -73,10 +73,10 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     Route::controller(AppSystemController::class)->group(function () {
-        Route::prefix('system')->name('system')->group(function () {
-            Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
+        Route::prefix('system')->name('system.')->group(function () {
+            Route::get('ip-addr', 'ipAddrIndex')->name('ip-addr');
 
-            Route::resource('users', UserController::class, ['as' => '.users'])->except([
+            Route::resource('users', UserController::class)->except([
                 'create', 'show', 'edit'
             ]);
         });

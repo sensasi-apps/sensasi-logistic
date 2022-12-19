@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\ResetPasswordNotification;
+// use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable implements CanResetPassword
 {
@@ -26,13 +26,6 @@ class User extends Authenticatable implements CanResetPassword
         'email',
         'password',
     ];
-
-    // protected $appends = ['roles'];
-
-    // public function getRolesAttribute(){
-    //     return $this->roles();
-    // }
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -57,5 +50,4 @@ class User extends Authenticatable implements CanResetPassword
     {
         return Hash::check(env('APP_KEY'), $this->password);
     }
-
 }

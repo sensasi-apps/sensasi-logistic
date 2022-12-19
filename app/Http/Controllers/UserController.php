@@ -8,6 +8,26 @@ use App\Models\User;
 
 class UserController extends Controller
 {
+    public function validateInput(Request $request, User $user = null)
+    {
+        $validationRules = [
+            'name' => 'required|max:255',
+            'email' => 'required|email:dns|unique:users,email' . ($user ? ",$user->id,id" : null)
+        ];
+
+        if (!$user || $user->has_default_password || $request->password) {
+            $validationRules['password'] = 'required|confirmed|min:8|max:255';
+        }
+
+        $validatedInput = $request->validate($validationRules);
+
+        if (isset($validatedInput['password'])) {
+            $validatedInput['password'] = bcrypt($validatedInput['password']);
+        }
+
+        return $validatedInput;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,17 +35,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('pages.system.user');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return view('pages.system.users');
     }
 
     /**
@@ -36,48 +46,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $user = $request->validate([
-            'email' => 'required|unique:mysql_system.users',
-            'name' => 'required',
-            'password' => 'required|min:8'
+        $validatedInput = $this->validateInput($request);
+        $user = User::create($validatedInput)->assignRole($request->roles);
+
+        return redirect()->route('system.users.index')->with('notifications', [
+            [__('Password and password confirmation is not same'), 'danger']
         ]);
-
-        if ($request->password === $request->password2) {
-            $user['password'] = bcrypt($request->password);
-            User::create($user)->assignRole([$request->role]);
-            return redirect()->route('system.user.index')->with('notifications', [
-                [__('User data has been added successfully'), 'success']
-            ]);
-        } else {
-            return redirect()->route('system.user.index')->with('notifications', [
-                [__('Password and password confirmation is not same'), 'danger']
-            ]);
-        }
-
-
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return redirect()->route('system.users.index')->with('notifications', [
+            [__('User') . " <b>$user->name</b> " . __('has been added successfully'), 'success']
+        ]);
     }
 
     /**
@@ -87,36 +64,16 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        // dd($request->all());
-        $allRoles = User::find($id)->getRoleNames();
-        
-         $user = $request->validate([
-            'email' => 'required',
-            'name' => 'required',
-        ]);
+        $validatedInput = $this->validateInput($request, $user);
 
-        if($request->password == null && $request->password2 == null){
-            foreach ($request->role as $row) {
-                User::find($id)->syncRoles([$request->role])->update($user);
-            }
-            return redirect()->route('system.user.index')->with('notifications', [
-                [__('User data has been updated successfully'), 'success']
-            ]);
-        }elseif ($request->password === $request->password2) {
-            $user['password'] = bcrypt($request->password);
-            foreach ($request->role as $row) {
-                User::find($id)->syncRoles([$request->role])->update($user);
-            }
-            return redirect()->route('system.user.index')->with('notifications', [
-                [__('User data has been updated successfully'), 'success']
-            ]);
-        }else {
-            return redirect()->route('system.user.index')->with('notifications', [
-                [__('Password and password confirmation is not same'), 'danger']
-            ]);
-        }
+        $user->syncRoles($request->roles)->update($validatedInput);
+
+        return redirect()->route('system.users.index')->with('notifications', [
+            [__('User') . " <b>$user->name</b> " . __('has been updated successfully'), 'success']
+
+        ]);
     }
 
     /**
@@ -125,12 +82,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        User::find($id)->delete();
+        $user->delete();
 
-        return redirect()->route('system.user.index')->with('notifications', [
-            [__('User data has been deleted'), 'danger']
+        return redirect()->route('system.users.index')->with('notifications', [
+            [__('User') . " <b>$user->name</b> " . __('has been deleted successfully'), 'warning']
+
         ]);
     }
 }
