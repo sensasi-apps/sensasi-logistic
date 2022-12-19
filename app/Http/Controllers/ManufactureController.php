@@ -104,12 +104,12 @@ class ManufactureController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
 
-            return redirect()->route('manufactures.index', '#in')->with('notifications', [
+            return redirect()->back()->with('notifications', [
                 [__('Someting went wrong')]
             ]);
         }
 
-        return redirect()->route('manufactures.index', '#in')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [" <b>" . __('Manufacture data') . "</b> " . __('has been added successfully'), 'success']
 
         ]);
@@ -190,12 +190,12 @@ class ManufactureController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return redirect()->route('manufactures.index')->with('notifications', [
+            return redirect()->back()->with('notifications', [
                 [__('Something went wrong')]
             ]);
         }
 
-        return redirect()->route('manufactures.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Manufacture data') . __('has been updated successfully'), 'success']
         ]);
     }
@@ -214,7 +214,7 @@ class ManufactureController extends Controller
 
         $manufatureDate = $manufacture->at->format('d-M-Y');
         
-        return redirect()->route('manufactures.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Manufacture: ') . "$manufatureDate " . __('has been deleted successfully'), 'warning']
         ]);
     }

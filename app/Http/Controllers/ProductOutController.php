@@ -66,7 +66,7 @@ class ProductOutController extends Controller
             ProductOutDetail::insert($productOutDetailsFromInput);
         }
 
-        return redirect()->route('products.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Product out data has been added successfully'), 'success']
         ]);
     }
@@ -125,7 +125,7 @@ class ProductOutController extends Controller
             );
         }
 
-        return redirect()->route('products.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Product out data has been updated successfully'), 'success']
         ]);
     }
@@ -139,7 +139,7 @@ class ProductOutController extends Controller
     public function destroy(ProductOut $productOut)
     {
         $productOut->delete();
-        return redirect()->route('products.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Product Out data has been deleted'), 'warning']
         ]);
     }

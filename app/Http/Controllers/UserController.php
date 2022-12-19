@@ -50,10 +50,10 @@ class UserController extends Controller
         $validatedInput = $this->validateInput($request);
         $user = User::create($validatedInput)->assignRole($request->roles);
 
-        return redirect()->route('system.users.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Password and password confirmation is not same'), 'danger']
         ]);
-        return redirect()->route('system.users.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been added successfully'), 'success']
         ]);
     }
@@ -71,7 +71,7 @@ class UserController extends Controller
 
         $user->syncRoles($request->roles)->update($validatedInput);
 
-        return redirect()->route('system.users.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been updated successfully'), 'success']
 
         ]);
@@ -106,7 +106,7 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return redirect()->route('system.users.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been deleted successfully'), 'warning']
 
         ]);
