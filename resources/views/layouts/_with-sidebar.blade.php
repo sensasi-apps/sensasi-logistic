@@ -19,16 +19,16 @@
                     <div class="d-sm-none d-lg-inline-block">{{ Auth::user()->name }}</div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <div class="dropdown-title">Logged in 5 min ago</div>
-                    <a href="features-profile.html" class="dropdown-item has-icon">
-                        <i class="far fa-user"></i> Profile
+                    {{-- <div class="dropdown-title">Logged in 5 min ago</div> --}}
+                    <a href="#profile" data-toggle="modal" class="dropdown-item has-icon">
+                        <i class="fas fa-cog"></i> Profile
                     </a>
-                    <a href="features-activities.html" class="dropdown-item has-icon">
+                    {{-- <a href="features-activities.html" class="dropdown-item has-icon">
                         <i class="fas fa-bolt"></i> Activities
                     </a>
                     <a href="features-settings.html" class="dropdown-item has-icon">
                         <i class="fas fa-cog"></i> Settings
-                    </a>
+                    </a> --}}
                     <div class="dropdown-divider"></div>
                     <form action="{{ route('auth.logout') }}" method="POST" id="logoutForm">
                         @csrf
@@ -40,6 +40,7 @@
             </li>
         </ul>
     </nav>
+
     <div class="main-sidebar sidebar-style-2">
         <aside id="sidebar-wrapper">
             <div class="sidebar-brand">
@@ -78,9 +79,9 @@
             <a href="{{ config('app.owner_url') }}" target="_blank">{{ config('app.owner') }}</a>
             <div class="bullet"></div> Copyright &copy; 2022
         </div>
-        {{-- <div class="footer-right">
-            v12.34
-        </div> --}}
+        <div class="footer-right">
+            v{{ config('app.version') }}
+        </div>
     </footer>
 </div>
 

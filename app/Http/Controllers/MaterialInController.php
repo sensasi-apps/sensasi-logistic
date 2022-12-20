@@ -51,7 +51,7 @@ class MaterialInController extends Controller
             MaterialInDetail::insert($materialInDetailsFromInput);
         }
 
-        return redirect()->route('materials.index', '#in')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
         ]);
     }
@@ -101,7 +101,7 @@ class MaterialInController extends Controller
             );
         }
 
-        return redirect()->route('materials.index', '#in')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material in data ') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been updated successfully'), 'success']
         ]);
     }
@@ -115,14 +115,14 @@ class MaterialInController extends Controller
     public function destroy(MaterialIn $materialIn)
     {
         if ($materialIn->outDetails()->count() > 0) {
-            return redirect()->route('materials.index', '#in')->with('notifications', [
+            return redirect()->back()->with('notifications', [
                 [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('cannot be deleted. Material(s) has been used'), 'danger']
             ]);
         }
 
 
         $materialIn->delete();
-        return redirect()->route('materials.index', '#in')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been deleted successfully'), 'warning']
         ]);
     }

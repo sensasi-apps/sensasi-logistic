@@ -153,7 +153,11 @@ return [
 		'tags' => 'Penanda',
 		'note' => 'Catatan',
 		'type' => 'Jenis',
-		'at' => 'Pada'
+		'at' => 'Pada',
 
+		'email' => 'E-mail',
+		'password' => 'Kata sandi',
+		'password_confirmation' => 'Konfirmasi kata sandi',
+		'roles' => 'Peran'
 	],
 ];

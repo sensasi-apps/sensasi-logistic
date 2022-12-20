@@ -61,7 +61,7 @@
         <li class="menu-header">{{ __('System') }}</li>
 
         <li>
-            <a class="nav-link" href="{{ url('system/user') }}">
+            <a class="nav-link" href="{{ url('system/users') }}">
                 <i class="fas fa-user-cog"></i>
                 <span>{{ __('Users') }}</span>
             </a>

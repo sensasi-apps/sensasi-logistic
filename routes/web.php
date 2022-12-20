@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
 use App\Http\Controllers\ManufactureController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -52,15 +53,15 @@ Route::middleware('guest')->group(function () {
     Route::view('forgot-password', 'pages.auth.forgot-password-form');
 
     Route::controller(AuthController::class)->group(function () {
-        
+
         Route::post('login', 'login');
-        
+
         Route::prefix('login')->name('login')->group(function () {
             Route::view('/', 'pages.auth.login-form');
             Route::get('oauth/google', 'googleOauth')->name('.oauth.google');
             Route::get('oauth/google/redirect', 'handleGoogleOauth')->name('.oauth.google.callback');
         });
-        
+
         Route::post('forgot-password', 'forgotPassword');
         Route::get('reset-password/{token}', 'resetPasswordForm')->name('password.reset');
         Route::post('reset-password', 'resetPassword')->name('password.update');
@@ -71,14 +72,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => null)->name('/');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-
     Route::controller(AppSystemController::class)->group(function () {
-        Route::prefix('system')->name('system')->group(function () {
-            Route::get('ip-addr', 'ipAddrIndex')->name('.ip-addr');
+        Route::prefix('system')->name('system.')->group(function () {
+            Route::get('ip-addr', 'ipAddrIndex')->name('ip-addr');
+
+            Route::resource('users', UserController::class)->except([
+                'create', 'show', 'edit'
+            ]);
         });
     });
 
-    
+    Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
+
+
+
+
     Route::resource('materials', MaterialController::class)->except([
         'create', 'show', 'edit'
     ]);

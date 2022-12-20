@@ -51,14 +51,13 @@ class AuthController extends Controller
 				? redirect()->intended('/')->with('alerts', [
 					[
 						'class' => 'warning',
-						'message' => 'Password belum diator, silahkan <a href="#">atur password</a>.'
-						// 'message' => 'Password belum diator, silahkan <a href="' . route('profile.setPassword') . '">atur password</a>.'
+						'message' => 'Password belum diatur, silahkan <a href="#profile" data-toggle="modal">atur password</a>.'
 					]
 				])
 				: redirect();
 		}
 
-		return redirect()->route('login')->withErrors([
+		return redirect()->back()->withErrors([
 			'attemp' => 'email <strong>' . $googleUser->getEmail() . '</strong> tidak terdaftar pada sistem, silahkan menghubungi admin.'
 		]);
 	}
@@ -133,7 +132,7 @@ class AuthController extends Controller
 		);
 
 		return $status === Password::PASSWORD_RESET
-			? redirect()->route('login')->with('notifications', [[__('password.reset'), 'success']])
+			? redirect()->back()->with('notifications', [[__('password.reset'), 'success']])
 			: back()->withErrors(['email' => [__($status)]]);
 	}
 }

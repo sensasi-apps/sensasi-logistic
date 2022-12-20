@@ -51,7 +51,7 @@ class MaterialOutController extends Controller
             MaterialOutDetail::insert($materialOutDetailsFromInput);
         }
 
-        return redirect()->route('materials.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
 
         ]);
@@ -98,7 +98,7 @@ class MaterialOutController extends Controller
             );
         }
 
-        return redirect()->route('materials.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been updated successfully'), 'success']
 
         ]);
@@ -113,7 +113,7 @@ class MaterialOutController extends Controller
     public function destroy(MaterialOut $materialOut)
     {
         $materialOut->delete();
-        return redirect()->route('materials.index', '#out')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been deleted successfully'), 'warning']
 
         ]);
