@@ -13,6 +13,7 @@ use App\Http\Controllers\ManufactureController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
+use App\Http\Controllers\ManufactureReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -86,6 +87,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('report')->name('report.')->group(function(){
             route::resource('materials', MaterialReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
             route::resource('products', ProductReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
+            route::resource('manufactures', ManufactureReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
         });
     });
     Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');

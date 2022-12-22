@@ -26,6 +26,7 @@ class MaterialReportController extends Controller
         $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
         ->with('materialOut')
         ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
+        ->where('type', '!=', 'Manufacture')
         ->where('material_outs.deleted_at', null)->get();
         if ($request->daterange) {
             $materialInDetail = MaterialInDetail::with('material')
@@ -38,6 +39,7 @@ class MaterialReportController extends Controller
             $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
             ->with('materialOut')
             ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
+            ->where('type', '!=', 'Manufacture')
             ->where('material_outs.at', '>=', $dateRange[0])
             ->where('material_outs.at', '<=', $dateRange[1])
             ->where('material_outs.deleted_at', null)->get();
