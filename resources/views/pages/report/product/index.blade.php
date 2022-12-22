@@ -38,7 +38,7 @@
         window.onhashchange()
         
         $('#pageTab a.nav-link').on('click', function(e) {
-            window.history.pushState(null, null, `materials${e.target.hash}`)
+            window.history.pushState(null, null, `products${e.target.hash}`)
         })
     </script>
 @endpush

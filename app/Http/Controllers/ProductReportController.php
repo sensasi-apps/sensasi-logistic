@@ -20,27 +20,30 @@ class ProductReportController extends Controller
         ->with('product')
         ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
         ->where('product_ins.deleted_at', null)
-        ->where('type', 'is Not', 'Manufacture')->get();
+        ->where('type', '!=', 'Manufacture')->get();
 
         $productOutDetail = productOutDetail::with('productOut')
         ->with('productInDetail.product')
         ->join('product_outs', 'product_outs.id', 'product_out_details.product_out_id')
-        ->where('product_outs.deleted_at', null)->get();
+        ->where('product_outs.deleted_at', null)
+        ->where('type', '!=', 'Manufacture')->get();
         
         if ($request->daterange) {
             $productInDetail = productInDetail::with('productIn')
             ->with('product')
-            ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
+            ->join('product_ins', 'product_ins.id', "product_in_details.product_in_id")
             ->where('product_ins.at', '>=', $dateRange[0])
             ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('product_ins.deleted_at', null)->get();
+            ->where('product_ins.deleted_at', null)
+            ->where('type', '!=', 'Manufacture')->get();
 
-            $productInDetail = productInDetail::with('productIn')
+            $productOutDetail = productOutDetail::with('productOut')
             ->with('productInDetail.product')
             ->join('product_outs', 'product_outs.id', 'product_out_details.product_out_id')
             ->where('product_outs.at', '>=', $dateRange[0])
             ->where('product_outs.at', '<=', $dateRange[1])
-            ->where('product_outs.deleted_at', null)->get();
+            ->where('product_outs.deleted_at', null)
+            ->where('type', '!=', 'Manufacture')->get();
         }
 
         return view('pages.report.product.index', compact('productInDetail'));

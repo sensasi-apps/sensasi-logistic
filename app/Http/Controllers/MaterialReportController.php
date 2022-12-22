@@ -19,11 +19,28 @@ class MaterialReportController extends Controller
     public function index(Request $request)
     {
         $dateRange = explode('_', $request->daterange);
-        $materialInDetail = MaterialInDetail::with('material')->with('materialIn')->get();
-        $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')->with('materialOut')->get();
+        $materialInDetail = MaterialInDetail::with('material')
+        ->with('materialIn')
+        ->join('material_ins', 'material_ins.id', 'material_in_details.material_in_id')
+        ->where('material_ins.deleted_at', null)->get();
+        $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
+        ->with('materialOut')
+        ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
+        ->where('material_outs.deleted_at', null)->get();
         if ($request->daterange) {
-            $materialInDetail = MaterialInDetail::with('material')->with('materialIn')->join('material_ins', 'material_ins.id', 'material_in_details.material_in_id')->where('material_ins.at', '>=', $dateRange[0])->where('material_ins.at', '<=', $dateRange[1])->get();
-            $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')->with('materialOut')->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')->where('material_outs.at', '>=', $dateRange[0])->where('material_outs.at', '<=', $dateRange[1])->get();
+            $materialInDetail = MaterialInDetail::with('material')
+            ->with('materialIn')
+            ->join('material_ins', 'material_ins.id', 'material_in_details.material_in_id')
+            ->where('material_ins.at', '>=', $dateRange[0])
+            ->where('material_ins.at', '<=', $dateRange[1])
+            ->where('material_ins.deleted_at', null)->get();
+
+            $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
+            ->with('materialOut')
+            ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
+            ->where('material_outs.at', '>=', $dateRange[0])
+            ->where('material_outs.at', '<=', $dateRange[1])
+            ->where('material_outs.deleted_at', null)->get();
         }
         return view('pages.report.material.index', compact('materialInDetail','materialOutDetail'));
     }

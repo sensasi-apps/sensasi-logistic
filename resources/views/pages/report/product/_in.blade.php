@@ -11,10 +11,9 @@
         <div class="card-body">
             <div class="table-responsive">
                 <div class="card">
-                    <form method="get" action="{{route('report.products.index')}}#in">
+                    <form method="get" action="{{route('report.products.index')}}">
                         <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon" id="datepickerin"><i class="fas fa-calendar"></i> Choose Date</a>
                         <input type="hidden" name="daterange" id="daterangein">
-                        <input type="hidden" name="#in" value="#in">
                         <button class="btn btn-info" type="submit">Filter</button>
                     </form>
                 </div>
