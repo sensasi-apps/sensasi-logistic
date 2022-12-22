@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\ProductInDetail;
+use App\Models\ProductOutDetail;
 class ProductReportController extends Controller
 {
     /**
@@ -18,11 +19,12 @@ class ProductReportController extends Controller
         $productInDetail = productInDetail::with('productIn')
         ->with('product')
         ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
-        ->where('product_ins.deleted_at', null)->get();
+        ->where('product_ins.deleted_at', null)
+        ->where('type', 'is Not', 'Manufacture')->get();
 
         $productOutDetail = productOutDetail::with('productOut')
         ->with('productInDetail.product')
-        ->join('product_outs', 'product_outs.id', 'product_in_details.product_in_id')
+        ->join('product_outs', 'product_outs.id', 'product_out_details.product_out_id')
         ->where('product_outs.deleted_at', null)->get();
         
         if ($request->daterange) {
