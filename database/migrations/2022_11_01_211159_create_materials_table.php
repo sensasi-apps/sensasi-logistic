@@ -19,6 +19,7 @@ class CreateMaterialsTable extends Migration
             $table->string('name')->unique();
             $table->string('tags_json')->nullable();
             $table->string('unit', 10);
+            $table->integer('low_qty')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
