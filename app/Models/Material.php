@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +15,20 @@ class Material extends Model
     protected $fillable = ['code', 'name', 'tags', 'unit'];
     protected $appends = ['tags', 'qty'];
 
-    public function setTagsAttribute(Array $tags)
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function (self $material) {
+            Helper::logAction('created', $material);
+        });
+
+        static::updated(function (self $material) {
+            Helper::logAction('updated', $material);
+        });
+    }
+
+    public function setTagsAttribute(array $tags)
     {
         $this->tags_json = json_encode($tags);
     }

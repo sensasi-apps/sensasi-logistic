@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -24,7 +25,9 @@ class AuthController extends Controller
 
 
 		if (Auth::attempt($credentials, isset($request->remember))) {
-			$user = Auth::user();
+
+			Helper::logAuth('login via form');
+
 			$request->session()->regenerate();
 			return redirect()->intended('/');
 		}
@@ -45,6 +48,9 @@ class AuthController extends Controller
 
 		if ($user !== null) {
 			Auth::login($user);
+
+			Helper::logAuth('login via google');
+
 			session()->regenerate();
 
 			return $user->has_default_password
@@ -64,13 +70,15 @@ class AuthController extends Controller
 
 	public function logout(Request $request)
 	{
+		Helper::logAuth('logout');
+
 		Auth::logout();
 
 		$request->session()->invalidate();
 
 		$request->session()->regenerateToken();
 
-		return redirect();
+		return redirect()->route('login');
 	}
 
 
@@ -84,6 +92,7 @@ class AuthController extends Controller
 
 		if ($user) {
 			Password::sendResetLink(['email' => $request->email]);
+			Helper::logAuth('request reset password');
 		}
 
 		return redirect()
@@ -126,6 +135,8 @@ class AuthController extends Controller
 				])->setRememberToken(Str::random(60));
 
 				$user->save();
+
+				Helper::logAuth('password reseted');
 
 				event(new PasswordReset($user));
 			}

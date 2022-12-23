@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,6 +19,19 @@ class Manufacture extends Model
     protected $dates = [
         'at'
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function (self $Manufacture) {
+            Helper::logAction('created', $Manufacture);
+        });
+
+        static::updated(function (self $Manufacture) {
+            Helper::logAction('updated', $Manufacture);
+        });
+    }
 
     public function productIn(){
         return $this->belongsTo(productIn::class, 'product_in_id', 'id');

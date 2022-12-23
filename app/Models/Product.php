@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,19 @@ class Product extends Model
     protected $connection = 'mysql';
     protected $fillable = ['code', 'name', 'tags', 'default_price','unit'];
     protected $appends = ['tags', 'qty'];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function (self $product) {
+            Helper::logAction('created', $product);
+        });
+
+        static::updated(function (self $product) {
+            Helper::logAction('updated', $product);
+        });
+    }
 
     public function setTagsAttribute(Array $tags)
     {

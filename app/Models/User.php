@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Helper;
 use Illuminate\Contracts\Auth\CanResetPassword;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,8 +47,26 @@ class User extends Authenticatable implements CanResetPassword
         'email_verified_at' => 'datetime',
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function (self $user) {
+            Helper::logAction('created', $user);
+        });
+
+        static::updated(function (self $user) {
+            Helper::logAction('updated', $user);
+        });
+    }
+
     public function getHasDefaultPasswordAttribute()
     {
         return Hash::check(env('APP_KEY'), $this->password);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(UserActivity::class);
     }
 }
