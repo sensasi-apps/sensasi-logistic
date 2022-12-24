@@ -45,13 +45,13 @@
         <aside id="sidebar-wrapper">
             <div class="sidebar-brand">
                 <a href="{{ route('/') }}">
-                    <i class="fas fa-box"></i>
+                    <i class="fas fa-bolt text-warning"></i>
                     {{ config('app.name') }}
                 </a>
             </div>
             <div class="sidebar-brand sidebar-brand-sm">
                 <a href="{{ route('/') }}">
-                    <i class="fas fa-box"></i>
+                    <i class="fas fa-bolt text-warning"></i>
                 </a>
             </div>
 
