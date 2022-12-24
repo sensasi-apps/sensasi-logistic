@@ -13,6 +13,7 @@ class MaterialController extends Controller
         return $request->validate([
             'name' => 'required|unique:mysql.materials,name'  . ($materialId ? ",$materialId,id" : null),
             'code' => 'nullable|unique:mysql.materials,code'  . ($materialId ? ",$materialId,id" : null),
+            'low_qty' => 'numeric',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);

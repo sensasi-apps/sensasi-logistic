@@ -47,6 +47,12 @@
             </div>
 
             <div class="form-group">
+                <label for="lowQty">{{ __('validation.attributes.low_qty') }}</label>
+                <input type="number" min="0" class="form-control" name="low_qty" required id="lowQty">
+            </div>
+            
+
+            <div class="form-group">
                 <label for="tagsSelect">{{ __('Tags') }}</label>
                 <select id="tagsSelect" name="tags[]" class="form-control select2" multiple
                     data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
@@ -108,6 +114,7 @@
             nameInput.value = product.name || null
             unitInput.value = product.unit || null
             priceInput.value = product.default_price || null
+            lowQty.value = product.low_qty || null
             codeInput.value = product.code || null
             deleteId.value = product.id
         }
@@ -176,7 +183,8 @@
                     title: '{{ __('Unit') }}'
                 }, {
                     data: 'default_price',
-                    title: '{{ __('validation.attributes.default_price') }}'
+                    title: '{{ __('validation.attributes.default_price') }}',
+                    render: data => data.toLocaleString()
                 }, {
                     data: 'tags',
                     name: 'tags_json',

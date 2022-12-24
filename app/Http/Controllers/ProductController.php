@@ -14,6 +14,7 @@ class ProductController extends Controller
         return $request->validate([
             'code' => 'nullable|string|unique:mysql.products,code' . ($productId ? ",$productId,id" : null),
             'name' => 'required|string|unique:mysql.products,name' . ($productId ? ",$productId,id" : null),
+            'low_qty' => 'numeric',
             'unit' => 'required|string',
             'default_price' => 'required|numeric',
             'tags' => 'nullable|array'

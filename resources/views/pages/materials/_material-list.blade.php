@@ -55,6 +55,11 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="materialLowQtyInput">{{ __('validation.attributes.unit') }}</label>
+                            <input type="text" class="form-control" name="low_qty" required id="materialLowQtyInput">
+                        </div>
+
+                        <div class="form-group">
                             <label for="materialTagsSelect">{{ __('validation.attributes.tags') }}</label>
                             <select id="materialTagsSelect" name="tags[]" class="form-control select2" multiple
                                 data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
@@ -129,6 +134,7 @@
                 materialIdInput.value = material.id || null
                 materialNameInput.value = material.name || null
                 materialUnitInput.value = material.unit || null
+                materialLowQtyInput.value = material.low_qty || null
                 materialCodeInput.value = material.code || null
             }
 
