@@ -16,13 +16,15 @@ class CreateMaterialsTable extends Migration
         Schema::connection('mysql')->create('materials', function (Blueprint $table) {
             $table->id();
             $table->string('code', 10)->nullable()->unique();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('brand')->nullable();
             $table->json('tags_json')->nullable();
             $table->string('unit', 10);
             $table->integer('low_qty')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['name', 'brand']);
         });
     }
 

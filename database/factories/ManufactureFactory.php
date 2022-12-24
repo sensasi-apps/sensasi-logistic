@@ -2,12 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\MaterialIn;
-use App\Models\MaterialInDetail;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MaterialInFactory extends Factory
+class ManufactureFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,15 +15,16 @@ class MaterialInFactory extends Factory
     public function definition()
     {
         $userIds = \App\Models\User::all()->pluck('id');
+        $productInIds = \App\Models\ProductIn::all()->pluck('id');
+        $materialOutIds = \App\Models\MaterialOut::all()->pluck('id');
         $upperLimit = Carbon::now()->subMonths(3);
-        
+
         return [
-            'code' => $this->faker->unique()->numerify('M-IN-#####'),
+            'code' => $this->faker->unique()->numerify('MAN-#####'),
             'at' => $this->faker->dateTimeThisYear($upperLimit),
-            'type' => $this->faker->randomElement(['Pembelian', 'Hibah']),
             'created_by_user_id' => $this->faker->randomElement($userIds),
-            'last_updated_by_user_id' => $this->faker->randomElement($userIds),
-            'note' => $this->faker->sentence(10)
+            'material_out_id' => $this->faker->randomElement($materialOutIds),
+            'product_in_id' => $this->faker->randomElement($productInIds)            
         ];
     }
 }

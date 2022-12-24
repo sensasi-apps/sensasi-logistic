@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductOutFactory extends Factory
@@ -14,10 +15,12 @@ class ProductOutFactory extends Factory
     public function definition()
     {
         $userIds = \App\Models\User::all()->pluck('id');
+        $upperLimit = Carbon::now()->subMonths(3);
+
         return [
-            'code' => $this->faker->unique()->numerify('#####'),
-            'at' => $this->faker->dateTimeThisYear(),
-            'type' => $this->faker->randomElement([__('Stock Opname'), __('Return')]),
+            'code' => $this->faker->unique()->numerify('P-OUT-#####'),
+            'at' => $this->faker->dateTimeThisYear($upperLimit),
+            'type' => $this->faker->randomElement([__('Stock Opname'), __('Return'), __('Sales'), __('Other')]),
             'created_by_user_id' => $this->faker->randomElement($userIds),
             'last_updated_by_user_id' => $this->faker->randomElement($userIds),
             'note' => $this->faker->sentence(10)

@@ -15,8 +15,8 @@ class ProductOutDetailFactory extends Factory
      */
     public function definition()
     {
-        $productOutIds = \App\Models\MaterialOut::all()->pluck('id');
-        $productInDetailIds = \App\Models\MaterialInDetail::all()->pluck('id');
+        $productOutIds = \App\Models\ProductOut::all()->pluck('id');
+        $productInDetailIds = \App\Models\ProductInDetail::all()->pluck('id');
 
         do {
             $productOutId = $this->faker->randomElement($productOutIds);
