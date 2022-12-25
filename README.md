@@ -38,13 +38,6 @@ database connection is required, please filling up all variables below.
 ```env
 ...
 
-DB_CONNECTION_SYSTEM=mysql_system
-DB_HOST_SYSTEM=127.0.0.1
-DB_PORT_SYSTEM=3306
-DB_DATABASE_SYSTEM=sensasi_logistic_mis_system
-DB_USERNAME_SYSTEM=root
-DB_PASSWORD_SYSTEM=root
-
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306

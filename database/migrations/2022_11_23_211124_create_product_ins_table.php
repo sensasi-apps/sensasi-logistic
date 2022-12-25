@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateProductInsTable extends Migration
@@ -14,23 +13,11 @@ class CreateProductInsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('product_ins', function (Blueprint $table) {
-            $database = DB::connection('mysql_system')->getDatabaseName();
+        Schema::create('product_ins', function (Blueprint $table) {
             $table->id();
             $table->string('code', 15)->nullable()->unique();
             $table->dateTime('at');
             $table->string('type');
-
-            $table->foreignId('created_by_user_id')
-                ->constrained("$database.users")
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            $table->foreignId('last_updated_by_user_id')
-                ->constrained("$database.users")
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
             $table->text('note')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -44,6 +31,6 @@ class CreateProductInsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('product_ins');
+        Schema::dropIfExists('product_ins');
     }
 }

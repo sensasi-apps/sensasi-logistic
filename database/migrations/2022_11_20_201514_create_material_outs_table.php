@@ -14,23 +14,11 @@ class CreateMaterialOutsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('material_outs', function (Blueprint $table) {
-            $database = DB::connection('mysql_system')->getDatabaseName();
+        Schema::create('material_outs', function (Blueprint $table) {
             $table->id();
             $table->string('code', 15)->nullable()->unique();
             $table->dateTime('at');
             $table->string('type');
-
-            $table->foreignId('created_by_user_id')
-                ->constrained("$database.users")
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            $table->foreignId('last_updated_by_user_id')
-                ->constrained("$database.users")
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
             $table->text('note')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -44,6 +32,6 @@ class CreateMaterialOutsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('material_outs');
+        Schema::dropIfExists('material_outs');
     }
 }
