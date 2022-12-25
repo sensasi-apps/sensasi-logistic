@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\MaterialOutDetail;
-use App\Models\ProductInDetail;
+use Illuminate\Support\Facades\DB;
+
+use App\Models\MaterialOut;
+use App\Models\ProductIn;
 
 class ManufactureReportController extends Controller
 {
@@ -17,36 +19,60 @@ class ManufactureReportController extends Controller
     public function index(Request $request)
     {
         $dateRange = explode('_', $request->daterange);
-        $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
-        ->with('materialOut')
-        ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
-        ->where('material_outs.deleted_at', null)
-        ->where('material_outs.type', '=', 'Manufacture')->get();
+        $materialOutDetailNota = MaterialOut::with('details.materialInDetail.material')
+        ->where('type', '=', 'Manufacture')->get();
 
-        $productInDetail = productInDetail::with('productIn')
-        ->with('product')
-        ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
-        ->where('product_ins.deleted_at', null)
-        ->where('product_ins.type', '=', 'Manufacture')->get();
+        $materialOutDetailItem = MaterialOut::groupBy('materials.name')->select('materials.name', 
+            DB::raw('sum(material_out_details.qty) as qty'),
+            DB::raw("group_concat(DISTINCT materials.unit) as unit"))
+        ->join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
+        ->join('material_in_details', 'material_in_details.id', 'material_out_details.material_in_detail_id')
+        ->join('materials', 'materials.id', 'material_in_details.material_id')
+        ->where('type', '=', 'Manufacture')
+        ->get();
+
+        $productInDetailNota = productIn::with('details.product')
+        ->where('type', '=', 'Manufacture')->get();
+
+        $productInDetailItem = productIn::select('products.name',
+            DB::raw('sum(product_in_details.qty) as qty'),
+            DB::raw("group_concat(DISTINCT products.unit) as unit"))
+        ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
+        ->join('products', 'products.id', 'product_in_details.product_id')
+        ->groupBy('products.name')
+        ->where('type', '=', 'Manufacture')->get();
 
         if ($request->daterange) {
-            $productInDetail = productInDetail::with('productIn')
-            ->with('product')
-            ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
+            $productInDetailNota = productIn::with('details.product')
             ->where('product_ins.at', '>=', $dateRange[0])
             ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('product_ins.deleted_at', null)
-            ->where('product_ins.type', '=', 'Manufacture')->get();
+            ->where('type', '=', 'Manufacture')->get();
 
-            $materialOutDetail = MaterialOutDetail::with('materialInDetail.material')
-            ->with('materialOut')
-            ->join('material_outs', 'material_outs.id', 'material_out_details.material_out_id')
+            $productInDetailItem = productIn::groupBy('products.name')->select('products.name',
+                DB::raw('sum(product_in_details.qty) as qty'),
+                DB::raw("group_concat(DISTINCT products.unit) as unit"))
+            ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
+            ->join('products', 'products.id', 'product_in_details.product_id')
+            ->where('product_ins.at', '>=', $dateRange[0])
+            ->where('product_ins.at', '<=', $dateRange[1])
+            ->where('type', '=', 'Manufacture')->get();
+
+            $materialOutDetailNota = MaterialOut::with('details.materialInDetail.material')
+            ->where('at', '>=', $dateRange[0])
+            ->where('at', '<=', $dateRange[1])
+            ->where('type', '=', 'Manufacture')->get();
+
+            $materialOutDetailItem = MaterialOut::groupBy('materials.name')->select('materials.name', 
+                DB::raw('sum(material_out_details.qty) as qty'),
+                DB::raw("group_concat(DISTINCT materials.unit) as unit"))
+            ->join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
+            ->join('material_in_details', 'material_in_details.id', 'material_out_details.material_in_detail_id')
+            ->join('materials', 'materials.id', 'material_in_details.material_id')
             ->where('material_outs.at', '>=', $dateRange[0])
             ->where('material_outs.at', '<=', $dateRange[1])
-            ->where('material_outs.deleted_at', null)
             ->where('material_outs.type', '=', 'Manufacture')->get();
         }
-        return view('pages.report.manufacture.index', compact('productInDetail','materialOutDetail'));
+        return view('pages.report.manufacture.index', compact('productInDetailItem', 'productInDetailNota','materialOutDetailItem', 'materialOutDetailNota'));
     }
 
     /**

@@ -11,35 +11,30 @@
         <div class="card-body">
             <div class="table-responsive">
                 <div class="card">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="note-tab" data-toggle="tab" data-target="#nota" type="button" role="tab" aria-controls="nota" aria-selected="true">Per Nota</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="item-tab" data-toggle="tab" data-target="#item" type="button" role="tab" aria-controls="item" aria-selected="false">Per Item</button>
+                      </li>
+                    </ul>
+
                     <form method="get" action="{{route('report.materials.index')}}">
-                        <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon" id="datepicker"><i class="fas fa-calendar"></i> Choose Date</a>
+                        <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon" id="datepickerin"><i class="fas fa-calendar"></i> Choose Date</a>
                         <input type="hidden" name="daterange" id="daterange">
-                        <input type="hidden" name="#in" value="#in">
                         <button class="btn btn-info" type="submit">Filter</button>
                     </form>
                 </div>
 
-                <table class="table table-striped" id="materialInDatatable" style="width:100%">
-                    <tr>
-                        <th>{{ __('At') }}</th>
-                        <th>{{ __('Name') }}</th>
-                        <th>{{ __('Quantity') }}</th>
-                        <th>{{ __('Price') }}</th>
-                        <th>{{ __('Total') }}</th>
-                        <th>{{ __('Type') }}</th>
-                    </tr>
-
-                    @foreach($materialInDetail as $row)
-                        <tr>
-                            <td>{{date_format($row->materialIn->at, 'Y-m-d')}}</td>
-                            <td>{{$row->material->name}}</td>
-                            <td>{{$row->qty}} {{$row->material->unit}}</td>
-                            <td>Rp. {{$row->price}}</td>
-                            <td>Rp. {{$row->price*$row->qty}}</td>
-                            <td>{{$row->materialIn->type}}</td>
-                        </tr>
-                    @endforeach
-                </table>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="nota" role="tabpanel" aria-labelledby="note-tab">
+                        @include('pages.report.material.inTable._nota')
+                    </div>
+                    <div class="tab-pane fade" id="item" role="tabpanel" aria-labelledby="item-tab">
+                        @include('pages.report.material.inTable._item')
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -58,7 +53,7 @@
                     // console.log(start.format('YYYY MMMM D') + ' - ' + end.format('YYYY MMMM D'))
                 }
 
-                $('#datepicker').daterangepicker({
+                $('#datepickerin').daterangepicker({
                     autoUpdateInput: false,
                     startDate: start,
                     endDate: end,

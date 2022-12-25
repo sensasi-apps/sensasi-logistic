@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Models\ProductInDetail;
+use App\Models\ProductIn;
+use App\Models\ProductOut;
 use App\Models\ProductOutDetail;
 class ProductReportController extends Controller
 {
@@ -16,37 +20,62 @@ class ProductReportController extends Controller
     public function index(Request $request)
     {
         $dateRange = explode('_', $request->daterange);
-        $productInDetail = productInDetail::with('productIn')
-        ->with('product')
-        ->join('product_ins', 'product_ins.id', 'product_in_details.product_in_id')
-        ->where('product_ins.deleted_at', null)
+        $productInDetailNota = productIn::with('details.product')
         ->where('type', '!=', 'Manufacture')->get();
 
-        $productOutDetail = productOutDetail::with('productOut')
-        ->with('productInDetail.product')
-        ->join('product_outs', 'product_outs.id', 'product_out_details.product_out_id')
-        ->where('product_outs.deleted_at', null)
+        $productInDetailItem = productIn::select('products.name',
+            DB::raw('sum(product_in_details.qty) as qty'),
+            DB::raw("group_concat(DISTINCT products.unit) as unit"))
+        ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
+        ->join('products', 'products.id', 'product_in_details.product_id')
+        ->groupBy('products.name')
+        ->where('type', '!=', 'Manufacture')->get();
+
+        $productOutDetailNota = productOut::with('details.productInDetail.product')
+        ->where('type', '!=', 'Manufacture')->get();
+
+        $productOutDetailItem = productOut::groupBy('products.name')->select('products.name',
+            DB::raw('sum(product_out_details.qty) as qty'),
+            DB::raw('sum(product_out_details.qty*product_out_details.price) as total'),
+            DB::raw("group_concat(DISTINCT products.unit) as unit"))
+        ->join('product_out_details', 'product_out_details.product_out_id', 'product_outs.id')
+        ->join('product_in_details', 'product_in_details.id', 'product_out_details.product_in_detail_id')
+        ->join('products', 'products.id', 'product_in_details.product_id')
         ->where('type', '!=', 'Manufacture')->get();
         
         if ($request->daterange) {
-            $productInDetail = productInDetail::with('productIn')
-            ->with('product')
-            ->join('product_ins', 'product_ins.id', "product_in_details.product_in_id")
+
+            $productInDetailNota = productIn::with('details.product')
             ->where('product_ins.at', '>=', $dateRange[0])
             ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('product_ins.deleted_at', null)
             ->where('type', '!=', 'Manufacture')->get();
 
-            $productOutDetail = productOutDetail::with('productOut')
-            ->with('productInDetail.product')
-            ->join('product_outs', 'product_outs.id', 'product_out_details.product_out_id')
+            $productInDetailItem = productIn::groupBy('products.name')->select('products.name',
+                DB::raw('sum(product_in_details.qty) as qty'),
+                DB::raw("group_concat(DISTINCT products.unit) as unit"))
+            ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
+            ->join('products', 'products.id', 'product_in_details.product_id')
+            ->where('product_ins.at', '>=', $dateRange[0])
+            ->where('product_ins.at', '<=', $dateRange[1])
+            ->where('type', '!=', 'Manufacture')->get();
+
+            $productOutDetailItem = productOut::groupBy('products.name')->select('products.name',
+                DB::raw('sum(product_out_details.qty) as qty'),
+                DB::raw('sum(product_out_details.qty*product_out_details.price) as total'),
+                DB::raw("group_concat(DISTINCT products.unit) as unit"))
+            ->join('product_out_details', 'product_out_details.product_out_id', 'product_outs.id')
+            ->join('product_in_details', 'product_in_details.id', 'product_out_details.product_in_detail_id')
+            ->join('products', 'products.id', 'product_in_details.product_id')
             ->where('product_outs.at', '>=', $dateRange[0])
             ->where('product_outs.at', '<=', $dateRange[1])
-            ->where('product_outs.deleted_at', null)
             ->where('type', '!=', 'Manufacture')->get();
+
+            $productOutDetailNota = productOut::with('details.productInDetail.product')
+            ->where('product_outs.at', '>=', $dateRange[0])
+            ->where('product_outs.at', '<=', $dateRange[1])->get();
         }
 
-        return view('pages.report.product.index', compact('productInDetail'));
+        return view('pages.report.product.index', compact('productInDetailNota', 'productInDetailItem','productOutDetailNota', 'productOutDetailItem'));
     }
 
     /**
