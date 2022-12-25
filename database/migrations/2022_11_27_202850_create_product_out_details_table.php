@@ -14,7 +14,7 @@ class CreateProductOutDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('product_out_details', function (Blueprint $table) {
+        Schema::create('product_out_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_in_detail_id')
                 ->constrained('product_in_details')
@@ -31,35 +31,38 @@ class CreateProductOutDetailsTable extends Migration
             $table->unique(['product_in_detail_id', 'product_out_id'], 'product_out_details_unique');
         });
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE product_monthly_movements_upsert_out_procedure (
+        DB::unprepared('CREATE OR REPLACE PROCEDURE product_monthly_movements_upsert_out_procedure (
             IN productID int,
             IN yearAt int,
             IN monthAt int
         )
         BEGIN
                 INSERT INTO
-                    product_monthly_movements (`product_id`, `year`, `month`, `out`)
+                    product_monthly_movements (product_id, year, month, `out`, avg_out, avg_price)
                 SELECT
                     product_id,
                     yearAt,
                     monthAt,
-                    @total_qty := SUM(qty)
-                FROM (SELECT productID as product_id, `mod`.qty
-                    FROM product_in_details AS `pid`
-                    LEFT JOIN product_out_details AS `mod` ON `pid`.id = `mod`.product_in_detail_id
-                    LEFT JOIN product_outs AS mo ON `mod`.product_out_id = mo.id
+                    @total_qty := SUM(qty),
+                    @avg_qty := AVG(qty),
+                    @avg_price := AVG(CASE WHEN price > 0 THEN price ELSE NULL END)
+                FROM (SELECT productID as product_id, pod.qty, price
+                    FROM product_in_details AS pid
+                    LEFT JOIN product_out_details AS pod ON pid.id = pod.product_in_detail_id
+                    LEFT JOIN product_outs AS po ON pod.product_out_id = po.id
                     WHERE
-                        `pid`.product_id = productID AND
-                        `mo`.`deleted_at` IS NULL AND
-                        YEAR(`mo`.`at`) = yearAt AND
-                        MONTH(`mo`.`at`) = monthAt
-                    UNION SELECT productID, 0) AS qty_temp
+                        pid.product_id = productID AND
+                        po.deleted_at IS NULL AND
+                        YEAR(po.at) = yearAt AND
+                        MONTH(po.at) = monthAt AND
+                        pod.qty > 0
+                    UNION SELECT productID, 0, 0) AS qty_temp
                 GROUP BY product_id
-                ON DUPLICATE KEY UPDATE `out` = @total_qty;
+                ON DUPLICATE KEY UPDATE `out` = @total_qty, avg_out = @avg_qty, avg_price = @avg_price;
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE product_out_details__product_monthly_movements_procedure (
+        DB::unprepared('CREATE OR REPLACE PROCEDURE product_out_details__product_monthly_movements_procedure (
                 IN productOutId int,
                 IN productInDetailId int
             )
@@ -84,7 +87,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_outs_after_update_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_outs_after_update_trigger
             AFTER UPDATE
             ON product_outs
             FOR EACH ROW
@@ -124,7 +127,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_insert_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_insert_trigger
                 AFTER INSERT
                 ON product_out_details
                 FOR EACH ROW
@@ -133,7 +136,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_update_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_update_trigger
                 AFTER UPDATE
                 ON product_out_details
                 FOR EACH ROW
@@ -149,7 +152,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_delete_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_delete_trigger
                 AFTER DELETE
                 ON product_out_details
                 FOR EACH ROW
@@ -167,12 +170,12 @@ class CreateProductOutDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('product_out_details');
-        DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `product_monthly_movements_upsert_out_procedure`');
-        DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `product_out_details__product_monthly_movements_procedure`');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_outs_after_update_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_out_details_after_insert_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_out_details_after_update_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_out_details_after_delete_trigger');
+        Schema::dropIfExists('product_out_details');
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_monthly_movements_upsert_out_procedure`');
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_out_details__product_monthly_movements_procedure`');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_outs_after_update_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_out_details_after_insert_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_out_details_after_update_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_out_details_after_delete_trigger');
     }
 }

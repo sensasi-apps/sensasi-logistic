@@ -14,7 +14,7 @@ class CreateProductInDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('product_in_details', function (Blueprint $table) {
+        Schema::create('product_in_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_in_id')
                 ->constrained('product_ins')
@@ -31,19 +31,20 @@ class CreateProductInDetailsTable extends Migration
         });
 
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE product_monthly_movements_upsert_in_procedure (
+        DB::unprepared('CREATE OR REPLACE PROCEDURE product_monthly_movements_upsert_in_procedure (
                 IN productID int,
                 IN yearAt int,
                 IN monthAt int
             )
             BEGIN
                 INSERT INTO
-                    product_monthly_movements (product_id, year, month, `in`)
+                    product_monthly_movements (product_id, year, month, `in`, avg_in)
                 SELECT
                     product_id,
                     yearAt,
                     monthAt,
-                    @total_qty := SUM(qty)
+                    @total_qty := SUM(qty),
+                    @avg_qty := AVG(qty)
                 FROM (SELECT productID as product_id, pid.qty
                     FROM product_in_details AS pid
                     LEFT JOIN product_ins AS `pi` ON pid.product_in_id = `pi`.id
@@ -51,16 +52,17 @@ class CreateProductInDetailsTable extends Migration
                         pid.product_id = productID AND
                         `pi`.deleted_at IS NULL AND
                         YEAR(`pi`.at) = yearAt AND
-                        MONTH(`pi`.at) = monthAt
+                        MONTH(`pi`.at) = monthAt AND
+                        pid.qty > 0
                 UNION SELECT productID, 0
                 ) AS qty_temp
                 GROUP BY product_id
-                ON DUPLICATE KEY UPDATE `in` = @total_qty;
+                ON DUPLICATE KEY UPDATE `in` = @total_qty, avg_in = @avg_qty;
             END;
         ');
 
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE PROCEDURE product_in_details__product_monthly_movements_procedure (
+        DB::unprepared('CREATE OR REPLACE PROCEDURE product_in_details__product_monthly_movements_procedure (
                 IN productInID int,
                 IN productID int
             )
@@ -76,7 +78,7 @@ class CreateProductInDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_ins_after_update_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_ins_after_update_trigger
                 AFTER UPDATE
                 ON product_ins
                 FOR EACH ROW
@@ -108,7 +110,7 @@ class CreateProductInDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_insert_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_insert_trigger
                 AFTER INSERT
                 ON product_in_details
                 FOR EACH ROW
@@ -117,7 +119,7 @@ class CreateProductInDetailsTable extends Migration
             END;
         ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_update_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_update_trigger
                 AFTER UPDATE
                 ON product_in_details
                 FOR EACH ROW
@@ -133,7 +135,7 @@ class CreateProductInDetailsTable extends Migration
             END;
             ');
 
-        DB::connection('mysql')->unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_delete_trigger
+        DB::unprepared('CREATE OR REPLACE TRIGGER product_in_details_after_delete_trigger
                 AFTER DELETE
                 ON product_in_details
                 FOR EACH ROW
@@ -152,12 +154,12 @@ class CreateProductInDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('product_in_details');
-        DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `product_monthly_movements_upsert_in_procedure`');
-        DB::connection('mysql')->unprepared('DROP PROCEDURE IF EXISTS `product_in_details__product_monthly_movements_procedure`');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_ins_after_update_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_in_details_after_insert_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_in_details_after_update_trigger');
-        DB::connection('mysql')->unprepared('DROP TRIGGER IF EXISTS product_in_details_after_delete_trigger');
+        Schema::dropIfExists('product_in_details');
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_monthly_movements_upsert_in_procedure`');
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_in_details__product_monthly_movements_procedure`');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_ins_after_update_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_in_details_after_insert_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_in_details_after_update_trigger');
+        DB::unprepared('DROP TRIGGER IF EXISTS product_in_details_after_delete_trigger');
     }
 }

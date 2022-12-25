@@ -13,7 +13,7 @@ class CreateMaterialMonthlyMovementsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('material_monthly_movements', function (Blueprint $table) {
+        Schema::create('material_monthly_movements', function (Blueprint $table) {
             $table->foreignId('material_id')
                 ->constrained('materials')
                 ->cascadeOnUpdate()
@@ -23,7 +23,10 @@ class CreateMaterialMonthlyMovementsTable extends Migration
             $table->unsignedTinyInteger('month');
             $table->bigInteger('in')->default(0);
             $table->bigInteger('out')->default(0);
-
+            $table->bigInteger('avg_in')->default(0);
+            $table->bigInteger('avg_out')->default(0);
+            $table->bigInteger('avg_price')->default(0);
+            
             $table->primary(['material_id', 'year', 'month']);
         });
     }
@@ -35,6 +38,6 @@ class CreateMaterialMonthlyMovementsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('material_monthly_movements');
+        Schema::dropIfExists('material_monthly_movements');
     }
 }
