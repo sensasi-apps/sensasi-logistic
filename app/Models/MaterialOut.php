@@ -11,8 +11,7 @@ class MaterialOut extends Model
 {
     use HasFactory;
     use SoftDeletes;
-
-    protected $connection = 'mysql';
+    
     protected $fillable = ['code', 'at', 'type', 'created_by_user_id', 'last_updated_by_user_id', 'note', 'history_json'];
 
     protected $dates = [
@@ -23,12 +22,12 @@ class MaterialOut extends Model
     {
         parent::boot();
 
-        static::created(function (self $manufactureOut) {
-            Helper::logAction('created', $manufactureOut);
+        static::created(function (self $materialOut) {
+            Helper::logAction('created', $materialOut);
         });
 
-        static::updated(function (self $manufactureOut) {
-            Helper::logAction('updated', $manufactureOut);
+        static::updated(function (self $materialOut) {
+            Helper::logAction('updated', $materialOut);
         });
     }
 
