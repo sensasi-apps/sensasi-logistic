@@ -80,7 +80,7 @@ class AuthController extends Controller
 		Helper::logAuth('logout');
 		$request->user()->tokens()->delete();
 		
-		Cookie::forget('api-token');
+		Cookie::queue(Cookie::forget('api-token'));
 
 		Auth::logout();
 
