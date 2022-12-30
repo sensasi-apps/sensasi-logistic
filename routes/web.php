@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InitializeAppController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialInController;
@@ -68,8 +69,11 @@ Route::middleware('guest')->group(function () {
     });
 });
 
+
 Route::middleware('auth')->group(function () {
-    Route::get('/', fn () => null)->name('/');
+    Route::get('/', fn () => redirect()->route('dashboard'))->name('/');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     Route::controller(AppSystemController::class)->group(function () {

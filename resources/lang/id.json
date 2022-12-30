@@ -16,6 +16,7 @@
 
   "Material": "Bahan",
   "Material List": "Daftar Bahan",
+  "Product List": "Daftar Produk",
   "Tags": "Penanda",
   "has been added successfully": "telah berhasil ditambahkan",
   "has been deleted successfully": "telah berhasil dihapus",
@@ -46,5 +47,26 @@
   "Add New Material Out": "Tambah bahan keluar",
   "Material in data": "Data bahan masuk",
   "Material out data": "Data bahan keluar",
-  "cannot be deleted. Material(s) has been used": "tidak dapat dihapus. Bahan telah digunakan."
+  "cannot be deleted. Material(s) has been used": "tidak dapat dihapus. Bahan telah digunakan.",
+
+  "Dashboard": "Dasbor",
+  "material ins": "Bahan masuk",
+  "material outs": "Bahan keluar",
+  "materials": "Bahan",
+  "products": "Produk",
+  "Current Assets": "Aset saat ini",
+  "Assets In/Out": "Aset Masuk/Keluar",
+
+  "January": "Januari",
+  "February": "Februari",
+  "March": "Maret",
+  "April": "April",
+  "May": "Mei",
+  "June": "Juni",
+  "July": "Juli",
+  "August": "Agustus",
+  "September": "September",
+  "October": "Oktober",
+  "November": "November",
+  "December": "Desember"
 }
