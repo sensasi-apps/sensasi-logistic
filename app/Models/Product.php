@@ -11,9 +11,12 @@ class Product extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
     protected $connection = 'mysql';
     protected $fillable = ['code', 'name', 'tags', 'default_price','unit'];
     protected $appends = ['tags', 'qty'];
+    protected $with = ['monthlyMovements'];
+
 
     public static function boot()
     {
@@ -46,7 +49,6 @@ class Product extends Model
     public function getQtyAttribute()
     {
         $qty = 0;
-        $this->load('monthlyMovements');
 
         foreach ($this->monthlyMovements as $monthlyMovement) {
             $qty += $monthlyMovement->in - $monthlyMovement->out;
