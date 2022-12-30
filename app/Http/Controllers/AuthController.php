@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Helper;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Cookie;
+
+
 class AuthController extends Controller
 {
 	public function login(Request $request)
@@ -23,12 +26,16 @@ class AuthController extends Controller
 			'password' => 'required|min:8|max:255',
 		]);
 
-
 		if (Auth::attempt($credentials, isset($request->remember))) {
 
 			Helper::logAuth('login via form');
 
+			
 			$request->session()->regenerate();
+
+			$apiToken = $request->user()->createToken('api-token')->plainTextToken;
+
+			Cookie::queue('api-token', encrypt($apiToken), time() + 10 * 365 * 24 * 60 * 60);
 		}
 
 		return back()->withErrors(['attemp' => 'email dan password tidak sesuai']);
@@ -47,19 +54,20 @@ class AuthController extends Controller
 
 		if ($user !== null) {
 			Auth::login($user);
-
 			Helper::logAuth('login via google');
 
 			session()->regenerate();
+			$apiToken = $user->createToken('api-token');
 
-			return $user->has_default_password
-				? redirect()->intended('/')->with('alerts', [
-					[
-						'class' => 'warning',
-						'message' => 'Password belum diatur, silahkan <a href="#profile" data-toggle="modal">atur password</a>.'
-					]
-				])
-				: redirect();
+			Cookie::queue('api-token', encrypt($apiToken), time() + 10 * 365 * 24 * 60 * 60);
+
+
+			request()->session()->flash('alerts', [
+				[
+					'class' => 'warning',
+					'message' => 'Password belum diatur, silahkan <a href="#profile" data-toggle="modal">atur password</a>.'
+				]
+			]);
 		}
 
 		return redirect()->back()->withErrors([
@@ -70,6 +78,9 @@ class AuthController extends Controller
 	public function logout(Request $request)
 	{
 		Helper::logAuth('logout');
+		$request->user()->tokens()->delete();
+		
+		Cookie::forget('api-token');
 
 		Auth::logout();
 
@@ -77,7 +88,7 @@ class AuthController extends Controller
 
 		$request->session()->regenerateToken();
 
-		return redirect()->route('login');
+		return redirect()->back();
 	}
 
 

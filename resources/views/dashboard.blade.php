@@ -62,6 +62,8 @@
                     url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
                 },
                 serverSide: true,
+
+
                 ajax: {
                     url: 'api/datatable/Material',
                     dataSrc: json => {
@@ -71,10 +73,11 @@
                     beforeSend: function(request) {
                         request.setRequestHeader(
                             "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
                         )
                     },
-                    cache: true
+                    cache: true,
+                    accept: 'application/json'
                 },
                 order: [],
                 columns: [{
@@ -106,7 +109,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Product') }}',
+                    url: 'api/datatable/Product',
                     dataSrc: json => {
                         products = json.data;
                         return json.data;
@@ -114,7 +117,7 @@
                     beforeSend: function(request) {
                         request.setRequestHeader(
                             "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
                         )
                     },
                     cache: true

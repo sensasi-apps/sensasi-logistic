@@ -167,7 +167,7 @@
                     beforeSend: function(request) {
                         request.setRequestHeader(
                             "Authorization",
-                            'Bearer {{ Auth::user()->createToken('user_' . Auth::user()->id)->plainTextToken }}'
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
                         )
                     },
                     cache: true
