@@ -28,7 +28,6 @@ class ManufactureController extends Controller
         $materialOutFromInput['code'] = $manufactureFromInput['code'];
         $materialOutFromInput['at'] = $manufactureFromInput['at'];
         $materialOutFromInput['type'] = 'Manufacture';
-        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
         $materialOutDetailsFromInput = $request->validate([
             'detailsMaterialOut' => 'required|array',
@@ -39,22 +38,12 @@ class ManufactureController extends Controller
         $productInFromInput['code'] = $manufactureFromInput['code'];
         $productInFromInput['at'] = $manufactureFromInput['at'];
         $productInFromInput['type'] = 'Manufacture';
-        $productInFromInput['last_updated_by_user_id'] = Auth::user()->id;
 
         $productInDetailsFromInput = $request->validate([
             'detailsProductIn' => 'required|array',
             'detailsProductIn.*.product_id' => 'required|exists:mysql.products,id',
             'detailsProductIn.*.qty' => 'required|integer',
         ])['detailsProductIn'];
-
-
-
-        if (!$manufactureId) {
-            $manufactureFromInput['created_by_user_id'] = Auth::user()->id;
-            $materialOutFromInput['created_by_user_id'] = Auth::user()->id;
-            $productInFromInput['created_by_user_id'] = Auth::user()->id;
-        }
-
 
         return [$manufactureFromInput, $materialOutFromInput, $materialOutDetailsFromInput, $productInFromInput, $productInDetailsFromInput];
     }

@@ -12,7 +12,8 @@ class ProductIn extends Model
     use HasFactory;
     use SoftDeletes;
     protected $connection = "mysql";
-    protected $fillable = ['code', 'at', 'type', 'created_by_user_id', 'last_updated_by_user_id', 'note'];
+
+    protected $guarded = ['id'];
 
     public static function boot()
     {

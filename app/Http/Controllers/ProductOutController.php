@@ -31,8 +31,6 @@ class ProductOutController extends Controller
             'details.*.price' => 'required|integer'
         ])['details'];
 
-        $productOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
-
         return [$productOutFromInput, $productOutDetailsFromInput];
     }
 
@@ -55,8 +53,6 @@ class ProductOutController extends Controller
     public function store(Request $request)
     {
         [$productOutFromInput, $productOutDetailsFromInput] = $this->validateInput($request);
-
-        $productOutFromInput['created_by_user_id'] = Auth::user()->id;
 
         if ($productOut = productOut::create($productOutFromInput)) {
             foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {

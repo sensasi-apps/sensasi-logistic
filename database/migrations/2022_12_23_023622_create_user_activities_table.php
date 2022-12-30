@@ -21,8 +21,8 @@ class CreateUserActivitiesTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->string('action');
-            $table->bigInteger('table_id')->nullable();
-            $table->string('table_name')->nullable();
+            $table->string('model')->nullable();
+            $table->bigInteger('model_id')->nullable();
             $table->json('value')->nullable();
             $table->timestamp('at')->default(DB::raw('CURRENT_TIMESTAMP(0)'));
             $table->string('ip')->nullable();

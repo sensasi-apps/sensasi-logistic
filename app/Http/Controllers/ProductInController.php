@@ -26,8 +26,6 @@ class ProductInController extends Controller
             'details.*.qty' => 'required|integer'
         ])['details'];
 
-        $productInFromInput['last_updated_by_user_id'] = Auth::user()->id;
-
         return [$productInFromInput, $productInDetailsFromInput];
     }
 
@@ -40,8 +38,6 @@ class ProductInController extends Controller
     public function store(Request $request)
     {
         [$productInFromInput, $productInDetailsFromInput] = $this->validateInput($request);
-
-        $productInFromInput['created_by_user_id'] = Auth::user()->id;
 
         if ($productIn = ProductIn::create($productInFromInput)) {
             foreach ($productInDetailsFromInput as &$productInDetailFromInput) {

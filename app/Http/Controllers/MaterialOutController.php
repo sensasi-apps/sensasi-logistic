@@ -26,8 +26,6 @@ class MaterialOutController extends Controller
             'details.*.qty' => 'required|integer',
         ])['details'];
 
-        $materialOutFromInput['last_updated_by_user_id'] = Auth::user()->id;
-
         return [$materialOutFromInput, $materialOutDetailsFromInput];
     }
 
@@ -40,8 +38,6 @@ class MaterialOutController extends Controller
     public function store(Request $request)
     {
         [$materialOutFromInput, $materialOutDetailsFromInput] = $this->validateInput($request);
-
-        $materialOutFromInput['created_by_user_id'] = Auth::user()->id;
 
         if ($materialOut = MaterialOut::create($materialOutFromInput)) {
             foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {

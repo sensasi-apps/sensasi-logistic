@@ -15,8 +15,8 @@ class Helper
 		UserActivity::create([
 			'user_id' => auth()->id(),
 			'action' => $action,
-			'table_name' => $modelInstance->getTable(),
-			'table_id' => $modelInstance->id,
+			'model' => $modelInstance::class,
+			'model_id' => $modelInstance->id,
 			'value' => json_encode($modelInstance->getDirty()),
 			'ip' => request()->ip(),
 			'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),

@@ -12,8 +12,8 @@ class MaterialOut extends Model
     use HasFactory;
     use SoftDeletes;
     
-    protected $fillable = ['code', 'at', 'type', 'created_by_user_id', 'last_updated_by_user_id', 'note', 'history_json'];
-
+    protected $guarded = ['id'];
+    
     protected $dates = [
         'at'
     ];
