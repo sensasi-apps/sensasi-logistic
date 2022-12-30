@@ -29,7 +29,6 @@ class AuthController extends Controller
 			Helper::logAuth('login via form');
 
 			$request->session()->regenerate();
-			return redirect()->intended('/');
 		}
 
 		return back()->withErrors(['attemp' => 'email dan password tidak sesuai']);
