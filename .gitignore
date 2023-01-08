@@ -14,5 +14,3 @@ yarn-error.log
 /.idea
 /.vscode
 *_bak
-resources/views/pages/report/manufacture/inde.blade.php
-resources/views/pages/report/manufacture/_in.blade.php
