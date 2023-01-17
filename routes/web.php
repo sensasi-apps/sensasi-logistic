@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\ManufactureReportController;
+use App\Http\Controllers\Url_generatorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -127,4 +128,10 @@ Route::middleware('auth')->group(function () {
     if (App::environment('local')) {
         Route::get('basic-page-format', fn () => view('basic-page-format'));
     }
+
+    Route::get('url_generator/generate', [Url_generatorController::class, 'generate'])->name('url_generator.generate');
 });
+
+Route::get('url_generator', [Url_generatorController::class, 'index'])->name('url_generator.index')->middleware('signed');
+
+Route::post('url_generator/store', [Url_generatorController::class, 'store'])->name('url_generator.store');
