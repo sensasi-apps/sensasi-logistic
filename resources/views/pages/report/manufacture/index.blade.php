@@ -2,6 +2,27 @@
 
 @section('title', __('Material'))
 
+@push('css')
+    <style>
+        @media print {
+            body {
+                all: unset !important;
+            }
+
+            body>*:not(.print-only) {
+                display: none !important;
+            }
+
+        }
+
+        @media not print {
+            .print-only {
+                display: none !important
+            }
+        }
+    </style>
+@endpush
+
 @section('main-content')
     <div class="section-body">
         <ul id="pageTab" class="nav nav-pills nav-fill" role="tablist">

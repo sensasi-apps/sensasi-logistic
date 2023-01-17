@@ -3,11 +3,14 @@
         <th>{{ __('Name') }}</th>
         <th>{{ __('Quantity') }}</th>
     </tr>
-
-    @foreach($materialOutDetailItem as $row)
-        <tr>
-            <td>{{$row->name}}</td>
-            <td>{{$row->qty}} {{$row->unit}}</td>
-        </tr>
-    @endforeach
+    @if($materialOutDetailItem->count() != 0)
+        @foreach($materialOutDetailItem as $row)
+            <tr>
+                <td>{{$row->name}}</td>
+                <td>{{$row->qty}} {{$row->unit}}</td>
+            </tr>
+        @endforeach
+    @else
+        <tr align="center"><td colspan="2">{{ __('No data available in table') }}</td></tr>
+    @endif
 </table>
