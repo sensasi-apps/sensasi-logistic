@@ -47,9 +47,9 @@ class MaterialOutController extends Controller
             if ($materialOut = MaterialOut::create($materialOutFromInput)) {
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
                     $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
-                    $stoks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->get();
-                    foreach ($stoks as $stok) {
-                        if ($stok->stock->qty < $materialOutDetailFromInput['qty']) {
+                    $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->get();
+                    foreach ($stocks as $stock) {
+                        if ($stock->stock->qty < $materialOutDetailFromInput['qty']) {
                             DB::rollback();
                             return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
                         }
