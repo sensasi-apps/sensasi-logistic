@@ -270,7 +270,7 @@
                     },
                     serverSide: true,
                     ajax: {
-                        url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductIn') }}?with=details.product',
+                        url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductIn') }}?with=details.stock,details.product',
                         dataSrc: json => {
                             productInsCrudDiv.productIns = json.data;
                             return json.data;
@@ -301,7 +301,8 @@
                         name: 'details.product.name',
                         width: '20%',
                         render: details => details.map(detail => renderTagProductInsButton(
-                            `${detail.product?.name} (${detail.qty})`)).join('')
+                            `${detail.product?.name} (${detail.qty}/${parseInt(detail.stock.qty)})`)).join('')
+
                     }, {
                         render: function(data, type, row) {
                             const editButton = $(

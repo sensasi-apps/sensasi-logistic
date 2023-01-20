@@ -47,7 +47,7 @@ class MaterialOutController extends Controller
             MaterialOutDetail::insert($materialOutDetailsFromInput);
         }
 
-        return redirect()->back()->with('notifications', [
+        return redirect()->route('materials.index')->with('notifications', [
             [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
 
         ]);

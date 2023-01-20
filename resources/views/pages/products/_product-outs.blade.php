@@ -131,7 +131,7 @@
 
                                     return {
                                         id: productInDetail.id,
-                                        text: `${productInDetail.product?.name} (${productInDetail.stock?.qty}) ${moment(productInDetail.at).format('DD-MM-YYYY')}`
+                                        text: `${productInDetail.product?.name} (${parseInt(productInDetail.stock?.qty)}) ${moment(productInDetail.at).format('DD-MM-YYYY')}`
                                     }
                                 })
 

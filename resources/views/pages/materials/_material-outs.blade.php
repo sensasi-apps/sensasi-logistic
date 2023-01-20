@@ -131,7 +131,7 @@
 
                                 return {
                                     id: materialInDetail.id,
-                                    text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${materialInDetail.material_in?.at ? moment(materialInDetail.material_in?.at).format('DD-MM-YYYY') : null}`
+                                    text: `${materialInDetail.material?.name} (${parseInt(materialInDetail.stock?.qty)}) ${materialInDetail.material_in?.at ? moment(materialInDetail.material_in?.at).format('DD-MM-YYYY') : null}`
                                 }
                             })
 
