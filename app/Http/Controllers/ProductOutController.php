@@ -54,12 +54,26 @@ class ProductOutController extends Controller
     {
         [$productOutFromInput, $productOutDetailsFromInput] = $this->validateInput($request);
 
-        if ($productOut = productOut::create($productOutFromInput)) {
-            foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {
-                $productOutDetailFromInput['product_out_id'] = $productOut->id;
-            }
+        DB::beginTransaction();
 
-            ProductOutDetail::insert($productOutDetailsFromInput);
+        try{
+            if ($productOut = productOut::create($productOutFromInput)) {
+                foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {
+                    $productOutDetailFromInput['product_out_id'] = $productOut->id;
+                    $stocks =  ProductInDetail::with('stock')->where('id', $productOutDetailFromInput['product_in_detail_id'])->first();
+                    if ($stock->stock->qty < $productOutDetailFromInput['qty']) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [[__('Product out data') . __('Something Went Wrong'), 'warning']]);
+                    }
+                }
+
+                ProductOutDetail::insert($productOutDetailsFromInput);
+                DB::commit();
+            }
+        } catch(\Throwable $Th){
+            DB::rollback();
+
+            return redirect()->back()->with('notifications', [[__('Product out data') . __('Something Went Wrong'), 'warning']]);
         }
 
         return redirect()->back()->with('notifications', [
@@ -100,25 +114,44 @@ class ProductOutController extends Controller
     public function update(Request $request, ProductOut $productOut)
     {
         [$productOutFromInput, $productOutDetailsFromInput] = $this->validateInput($request, $productOut->id);
-        if ($productOut->update($productOutFromInput)) {
-            foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {
-                $productOutDetailFromInput['product_out_id'] = $productOut->id;
+        
+        DB::beginTransaction();
+
+        try {
+            if ($productOut->update($productOutFromInput)) {
+                foreach ($productOutDetailsFromInput as &$productOutDetailFromInput) {
+                    $productOutDetailFromInput['product_out_id'] = $productOut->id;
+                    $stocks =  ProductInDetail::with('stock')->where('id', $productOutDetailFromInput['product_in_detail_id'])->first();
+                    $awal = ProductOut::join('product_out_details', 'product_out_details.product_out_id', 'product_outs.id')
+                    ->find($productOutDetailFromInput['product_out_id']);
+                    $sisa = $stocks->stock->qty + ($awal->qty - $productOutDetailFromInput['qty']);
+                    if ($sisa < 0) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [[__('Product out data') . __('Something Went Wrong'), 'warning']]);
+                    }
+                }
+
+                $toBeDeletedProductIds = $this->getToBeDeletedProductIds($productOut, $productOutDetailsFromInput);
+
+                if ($toBeDeletedProductIds->isNotEmpty()) {
+                    $productOut
+                        ->details()
+                        ->whereIn('product_id', $toBeDeletedProductIds)
+                        ->delete();
+                }
+
+                ProductOutDetail::upsert(
+                    $productOutDetailsFromInput,
+                    ['product_out_id', 'product_in_detail_id'],
+                    ['qty']
+                );
             }
+            DB::commit();
+            
+        } catch(\Throwable $Th) {
+            DB::rollback();
 
-            $toBeDeletedProductIds = $this->getToBeDeletedProductIds($productOut, $productOutDetailsFromInput);
-
-            if ($toBeDeletedProductIds->isNotEmpty()) {
-                $productOut
-                    ->details()
-                    ->whereIn('product_id', $toBeDeletedProductIds)
-                    ->delete();
-            }
-
-            ProductOutDetail::upsert(
-                $productOutDetailsFromInput,
-                ['product_out_id', 'product_in_detail_id'],
-                ['qty']
-            );
+            return redirect()->back()->with('notifications', [[__('Product out data') . __('Something Went Wrong'), 'warning']]);
         }
 
         return redirect()->back()->with('notifications', [

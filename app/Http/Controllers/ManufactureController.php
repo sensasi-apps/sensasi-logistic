@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
+use App\Models\MaterialInDetail;
 use App\Models\Manufacture;
 use App\Models\ProductIn;
 use App\Models\ProductInDetail;
@@ -64,13 +65,22 @@ class ManufactureController extends Controller
     {
         [$manufactureFromInput, $materialOutFromInput, $materialOutDetailsFromInput, $productInFromInput, $productInDetailsFromInput] = $this->validateInput($request);
 
-
         DB::beginTransaction();
+        // dd($request->all());
 
         try {
             if ($materialOut = MaterialOut::create($materialOutFromInput)) {
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
                     $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+                    foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                        $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+                        $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
+                        // dd($stocks->stock->qty);
+                        if ($stocks->stock->qty < $materialOutDetailFromInput['qty']) {
+                            DB::rollback();
+                            return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
+                        }
+                    }
                 }
 
                 MaterialOutDetail::insert($materialOutDetailsFromInput);
@@ -134,6 +144,14 @@ class ManufactureController extends Controller
     
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
                     $materialOutDetailFromInput['material_out_id'] = $manufacture->material_out_id;
+                    $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
+                    $awal = MaterialOut::join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
+                    ->find($materialOutDetailFromInput['material_out_id']);
+                    $sisa = $stocks->stock->qty + ($awal->qty - $materialOutDetailFromInput['qty']);
+                    if ($sisa < 0) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
+                    }
                 }
     
                 $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($manufacture, $materialOutDetailsFromInput);

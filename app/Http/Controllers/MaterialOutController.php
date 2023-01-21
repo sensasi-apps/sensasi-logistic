@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 
 use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
+use App\Models\MaterialInDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MaterialOutController extends Controller
 {
@@ -39,15 +41,31 @@ class MaterialOutController extends Controller
     {
         [$materialOutFromInput, $materialOutDetailsFromInput] = $this->validateInput($request);
 
-        if ($materialOut = MaterialOut::create($materialOutFromInput)) {
-            foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
-            }
+        DB::beginTransaction();
 
-            MaterialOutDetail::insert($materialOutDetailsFromInput);
+        try{
+            if ($materialOut = MaterialOut::create($materialOutFromInput)) {
+                foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                    $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+                    $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
+                    if ($stock->stock->qty < $materialOutDetailFromInput['qty']) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
+                    }
+                }
+
+                MaterialOutDetail::insert($materialOutDetailsFromInput);
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+
+            return redirect()->back()->with('notifications', [
+                [__('Something went wrong')]
+            ]);
         }
 
-        return redirect()->route('materials.index')->with('notifications', [
+        return redirect()->back()->with('notifications', [
             [__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
 
         ]);
@@ -72,26 +90,51 @@ class MaterialOutController extends Controller
     {
         [$materialOutFromInput, $materialOutDetailsFromInput] = $this->validateInput($request, $materialOut->id);
 
+        // dd($request->all());
 
-        if ($materialOut->update($materialOutFromInput)) {
-            foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+        DB::beginTransaction();
+
+        foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                    $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+                    
+                }
+
+        try{
+            if ($materialOut->update($materialOutFromInput)) {
+                foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
+                    $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
+                    $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
+                    $awal = MaterialOut::join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
+                    ->find($materialOutDetailFromInput['material_out_id']);
+                    $sisa = $stocks->stock->qty + ($awal->qty - $materialOutDetailFromInput['qty']);
+                    if ($sisa < 0) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
+                    }
+                }
+
+                $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($materialOut, $materialOutDetailsFromInput);
+
+                if ($toBeDeletedMaterialInDetailIds->isNotEmpty()) {
+                    $materialOut
+                        ->details()
+                        ->whereIn('material_in_detail_id', $toBeDeletedMaterialInDetailIds)
+                        ->delete();
+                }
+
+                MaterialOutDetail::upsert(
+                    $materialOutDetailsFromInput,
+                    ['material_out_id', 'material_in_detail_id'],
+                    ['qty']
+                );
             }
 
-            $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($materialOut, $materialOutDetailsFromInput);
-
-            if ($toBeDeletedMaterialInDetailIds->isNotEmpty()) {
-                $materialOut
-                    ->details()
-                    ->whereIn('material_in_detail_id', $toBeDeletedMaterialInDetailIds)
-                    ->delete();
-            }
-
-            MaterialOutDetail::upsert(
-                $materialOutDetailsFromInput,
-                ['material_out_id', 'material_in_detail_id'],
-                ['qty']
-            );
+            DB::commit();
+        } catch(\Throwable $th){
+            DB::rollback();
+            return redirect()->back()->with('notifications', [
+                [__('Something went wrong')]
+            ]);
         }
 
         return redirect()->back()->with('notifications', [
