@@ -30,7 +30,7 @@ class CreateMaterialInDetailsStockView extends Migration
                 LEFT JOIN material_outs AS `mo` ON `mod`.material_out_id = `mo`.id
                 LEFT JOIN material_ins AS `mi` ON `mid`.material_in_id = `mi`.id
             GROUP BY
-                mid.id;
+                mid.id, mid.qty, mi.deleted_at;
         ');
     }
 

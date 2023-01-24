@@ -52,7 +52,7 @@ class MaterialOutController extends Controller
                     if ($mid->stock->qty < $materialOutDetailFromInput['qty']) {
                         DB::rollback();
                         return redirect()->back()->with('notifications', [
-                            [__('Material') . " <b>" . $mid->material->name . " (" . ($mid->materialIn->code ?: $mid->materialIn->at->format('DD-MM-YYYY')) . ")</b> " . __('is out of stock'), 'danger']
+                            [__('Material') . " <b>" . $mid->material->name . " (" . ($mid->materialIn->code ?: $mid->materialIn->at->format('D-M-Y')) . ")</b> " . __('is out of stock'), 'danger']
                         ]);
                     }
 

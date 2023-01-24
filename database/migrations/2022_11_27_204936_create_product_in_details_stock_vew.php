@@ -30,7 +30,7 @@ class CreateProductInDetailsStockVew extends Migration
                 LEFT JOIN product_outs AS `po` ON `pod`.product_out_id = `po`.id
                 LEFT JOIN product_ins AS `pi` ON `pid`.product_in_id = `pi`.id
             GROUP BY
-                pid.id;
+                pid.id, pid.qty, pi.deleted_at;
         ');
     }
 

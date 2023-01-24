@@ -65,22 +65,24 @@ class ManufactureController extends Controller
     {
         [$manufactureFromInput, $materialOutFromInput, $materialOutDetailsFromInput, $productInFromInput, $productInDetailsFromInput] = $this->validateInput($request);
 
+        $midIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
+        $mids = MaterialInDetail::with('material', 'stock', 'materialIn')->whereIn('id', $midIdsFromInput)->get()->keyBy('id');
+
         DB::beginTransaction();
-        // dd($request->all());
 
         try {
             if ($materialOut = MaterialOut::create($materialOutFromInput)) {
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                    $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
-                    foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                        $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
-                        $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
-                        // dd($stocks->stock->qty);
-                        if ($stocks->stock->qty < $materialOutDetailFromInput['qty']) {
-                            DB::rollback();
-                            return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
-                        }
+                    $mid = $mids[$materialOutDetailFromInput['material_in_detail_id']];
+
+                    if ($mid->stock->qty < $materialOutDetailFromInput['qty']) {
+                        DB::rollback();
+                        return redirect()->back()->with('notifications', [
+                            [__('Material') . " <b>" . $mid->material->name . " (" . ($mid->materialIn->code ?: $mid->materialIn->at->format('D-M-Y')) . ")</b> " . __('is out of stock'), 'danger']
+                        ]);
                     }
+
+                    $materialOutDetailFromInput['material_out_id'] = $materialOut->id;
                 }
 
                 MaterialOutDetail::insert($materialOutDetailsFromInput);
@@ -135,35 +137,38 @@ class ManufactureController extends Controller
 
         [$manufactureFromInput, $materialOutFromInput, $materialOutDetailsFromInput, $productInFromInput, $productInDetailsFromInput] = $this->validateInput($request, $manufacture->id, $manufacture->material_out_id, $manufacture->product_in_id);
 
+        $midIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
+        $manufacture->load('materialOut.details.MaterialInDetail.material', 'materialOut.details.MaterialInDetail.stock', 'materialOut.details.MaterialInDetail.materialIn');
+        $mids = MaterialInDetail::with('material', 'stock', 'materialIn')->whereIn('id', $midIdsFromInput)->get()->keyBy('id');
+
         DB::beginTransaction();
 
         try {
+
             if ($manufacture->update($manufactureFromInput)) {
-                $manufacture->materialOut()->update($materialOutFromInput);
-                $manufacture->productIn()->update($productInFromInput);
-    
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
-                    $materialOutDetailFromInput['material_out_id'] = $manufacture->material_out_id;
-                    $stocks =  MaterialInDetail::with('stock')->where('id', $materialOutDetailFromInput['material_in_detail_id'])->first();
-                    $awal = MaterialOut::join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
-                    ->find($materialOutDetailFromInput['material_out_id']);
-                    $sisa = $stocks->stock->qty + ($awal->qty - $materialOutDetailFromInput['qty']);
-                    if ($sisa < 0) {
+                    $mid = $mids[$materialOutDetailFromInput['material_in_detail_id']];
+                    $mod = $manufacture->materialOut->details->where('material_in_detail_id', $mid->id)->first();
+
+                    if ($mid->stock->qty < $materialOutDetailFromInput['qty'] - ($mod ? $mod->qty : 0)) {
                         DB::rollback();
-                        return redirect()->back()->with('notifications', [[__('Material out data') . " <b>" . $materialOut->at->format('d-m-Y') . "</b> " . __('Something Went Wrong'), 'warning']]);
+                        return redirect()->back()->with('notifications', [
+                            [__('Material') . " <b>" . $mid->material->name . " (" . ($mid->materialIn->code ?: $mid->materialIn->at->format('D-M-Y')) . ")</b> " . __('is out of stock'), 'danger']
+                        ]);
                     }
+
+                    $materialOutDetailFromInput['material_out_id'] = $manufacture->material_out_id;
                 }
-    
+
                 $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($manufacture, $materialOutDetailsFromInput);
-    
+
                 if ($toBeDeletedMaterialInDetailIds->isNotEmpty()) {
-                    $manufacture
-                        ->materialOut
+                    $materialOut
                         ->details()
                         ->whereIn('material_in_detail_id', $toBeDeletedMaterialInDetailIds)
                         ->delete();
                 }
-    
+
                 MaterialOutDetail::upsert(
                     $materialOutDetailsFromInput,
                     ['material_out_id', 'material_in_detail_id'],
