@@ -47,11 +47,12 @@ class InitializeAppController extends Controller
     ]);
 
     $validatedInput['password'] = bcrypt($validatedInput['password']);
-    $user = User::create($validatedInput);
 
-    $user->assignRole('Super Admin');
+    $super = User::insert($validatedInput);
 
-    Auth::login($user);
+    $user = User::where('email', $validatedInput['email'])
+            ->first()
+            ->assignRole('Super Admin');
 
     return redirect()->route('initialize-app.check');
   }
@@ -78,8 +79,6 @@ class InitializeAppController extends Controller
     ]);
 
     $user->assignRole('Super Admin');
-
-    Auth::login($user);
 
     return redirect(route('initialize-app.check'));
   }
