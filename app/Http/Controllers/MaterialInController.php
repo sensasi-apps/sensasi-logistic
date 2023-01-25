@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class MaterialInController extends Controller
@@ -52,12 +53,47 @@ class MaterialInController extends Controller
         ]);
     }
 
-    private function getToBeDeletedMaterialIds(MaterialIn $materialIn, array $materialInDetailsFromInput)
+    private function updateMaterialInDetails(MaterialIn $materialIn, Collection $materialInDetailsFromInput)
     {
-        $existsMaterialIds = $materialIn->details->pluck('material_id');
-        $materialIdsFromInput = collect($materialInDetailsFromInput)->pluck('material_id');
+        $oldMaterialIds = $materialIn->details->pluck('material_id');
+        $newMaterialIds = $materialInDetailsFromInput->pluck('material_id');
 
-        return $existsMaterialIds->diff($materialIdsFromInput);
+        // delete section
+        $toBeDeletedMaterialIds = $oldMaterialIds->diff($newMaterialIds);
+        $toBeDeletedMaterialInDetails = $materialIn->details->whereIn('material_id', $toBeDeletedMaterialIds);
+
+        // validate deleted material in details
+        $toBeDeletedMaterialInDetailIds = $toBeDeletedMaterialInDetails->filter(function ($materialInDetail) {
+            // if material in detail has out detail, then it cannot be deleted
+            return $materialInDetail->outDetails->isEmpty();
+        })->pluck('id')->toArray();
+
+        // delete material in details
+        if ($toBeDeletedMaterialInDetailIds) {
+            MaterialInDetail::destroy($toBeDeletedMaterialInDetailIds);
+        }
+
+        // update section
+        $toBeUpdatedMaterialIds = $newMaterialIds->intersect($oldMaterialIds);
+        $toBeUpdatedMaterialInDetails = $materialIn->details->whereIn('material_id', $toBeUpdatedMaterialIds)->keyBy('material_id');
+
+        // validate updated material in details
+        $validatedMaterialInDetailsFromInput = $materialInDetailsFromInput->filter(
+            function ($materialInDetailFromInput) use ($toBeUpdatedMaterialInDetails) {
+                $materialId = $materialInDetailFromInput['material_id'];
+                // if new qty is greater or equal to stock, then it can be updated
+                return $materialInDetailFromInput['qty'] >= $toBeUpdatedMaterialInDetails[$materialId]->stock->qty;
+            }
+        )->toArray();
+
+        // update material in details
+        $materialIn->details()->update($validatedMaterialInDetailsFromInput);
+
+
+        // insert
+        // insert new material in details
+        $newMaterialsFromInput = collect($materialInDetailsFromInput)->whereIn('material_id', $newMaterialIds->diff($oldMaterialIds))->toArray();
+        MaterialInDetail::create($newMaterialsFromInput);
     }
 
 
@@ -71,30 +107,14 @@ class MaterialInController extends Controller
     public function update(Request $request, MaterialIn $materialIn)
     {
         [$materialInFromInput, $materialInDetailsFromInput] = $this->validateInput($request, $materialIn->id);
+        $materialIn->load('details.outDetails', 'details.material', 'details.stock');
 
         if ($materialIn->update($materialInFromInput)) {
             foreach ($materialInDetailsFromInput as &$materialInDetailFromInput) {
                 $materialInDetailFromInput['material_in_id'] = $materialIn->id;
             }
 
-            $toBeDeletedMaterialIds = $this->getToBeDeletedMaterialIds($materialIn, $materialInDetailsFromInput);
-
-            // TODO: Check outDetails before delete;
-            $deleteQuery = $materialIn->details()->with('outDetails')->whereIn('material_id', $toBeDeletedMaterialIds);
-            $toBeDeletedMaterialIds = $deleteQuery->get()->map(fn ($detail) => $detail->outDetails ? null : $detail->material_id );
-
-            if ($toBeDeletedMaterialIds->isNotEmpty()) {
-                $materialIn
-                    ->details()
-                    ->whereIn('material_id', $toBeDeletedMaterialIds)
-                    ->delete();
-            }
-
-            MaterialInDetail::upsert(
-                $materialInDetailsFromInput,
-                ['material_in_id', 'material_id'],
-                ['qty', 'price']
-            );
+            $this->updateMaterialInDetails($materialIn, collect($materialInDetailsFromInput));
         }
 
         return redirect()->back()->with('notifications', [

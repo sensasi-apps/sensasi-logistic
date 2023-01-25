@@ -10,9 +10,9 @@ use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
 use App\Models\MaterialInDetail;
 use App\Models\Manufacture;
+use App\Models\Product;
 use App\Models\ProductIn;
 use App\Models\ProductInDetail;
-use Illuminate\Support\Facades\Auth;
 
 class ManufactureController extends Controller
 {
@@ -137,14 +137,19 @@ class ManufactureController extends Controller
 
         [$manufactureFromInput, $materialOutFromInput, $materialOutDetailsFromInput, $productInFromInput, $productInDetailsFromInput] = $this->validateInput($request, $manufacture->id, $manufacture->material_out_id, $manufacture->product_in_id);
 
-        $midIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
         $manufacture->load('materialOut.details.MaterialInDetail.material', 'materialOut.details.MaterialInDetail.stock', 'materialOut.details.MaterialInDetail.materialIn');
+        $manufacture->load('productIn.details.product', 'productIn.details.stock');
+
+        $midIdsFromInput = collect($materialOutDetailsFromInput)->pluck('material_in_detail_id');
         $mids = MaterialInDetail::with('material', 'stock', 'materialIn')->whereIn('id', $midIdsFromInput)->get()->keyBy('id');
+
+        $pidIdsFromInput = collect($productInDetailsFromInput)->pluck('product_in_detail_id');
+        $pids = ProductInDetail::with('product', 'stock', 'productIn')->whereIn('id', $pidIdsFromInput)->get()->keyBy('id');
+
 
         DB::beginTransaction();
 
         try {
-
             if ($manufacture->update($manufactureFromInput)) {
                 foreach ($materialOutDetailsFromInput as &$materialOutDetailFromInput) {
                     $mid = $mids[$materialOutDetailFromInput['material_in_detail_id']];
@@ -163,7 +168,7 @@ class ManufactureController extends Controller
                 $toBeDeletedMaterialInDetailIds = $this->getToBeDeletedMaterialInDetailIds($manufacture, $materialOutDetailsFromInput);
 
                 if ($toBeDeletedMaterialInDetailIds->isNotEmpty()) {
-                    $materialOut
+                    $manufacture->materialOut
                         ->details()
                         ->whereIn('material_in_detail_id', $toBeDeletedMaterialInDetailIds)
                         ->delete();
@@ -174,23 +179,23 @@ class ManufactureController extends Controller
                     ['material_out_id', 'material_in_detail_id'],
                     ['qty']
                 );
-    
-    
+
+
                 foreach ($productInDetailsFromInput as &$productInDetailFromInput) {
                     $productInDetailFromInput['product_in_id'] = $manufacture->product_in_id;
                 }
-    
+
                 $toBeDeletedProductIds = $this->getToBeDeletedProductIds($manufacture, $productInDetailsFromInput);
-    
+
                 if ($toBeDeletedProductIds->isNotEmpty()) {
-    
+
                     $manufacture
                         ->productIn
                         ->details()
                         ->whereIn('product_id', $toBeDeletedProductIds)
                         ->delete();
                 }
-    
+
                 ProductInDetail::upsert(
                     $productInDetailsFromInput,
                     ['product_in_id', 'product_id'],
@@ -203,7 +208,10 @@ class ManufactureController extends Controller
             DB::rollBack();
 
             return redirect()->back()->with('notifications', [
-                [__('Something went wrong')]
+                [
+                    __('Something went wrong'),
+                    'danger'
+                ]
             ]);
         }
 
@@ -225,7 +233,7 @@ class ManufactureController extends Controller
         $manufacture->delete();
 
         $manufatureDate = $manufacture->at->format('d-M-Y');
-        
+
         return redirect()->back()->with('notifications', [
             [__('Manufacture: ') . "$manufatureDate " . __('has been deleted successfully'), 'warning']
         ]);
