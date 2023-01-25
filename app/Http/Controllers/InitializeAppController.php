@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Helper;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,77 +11,107 @@ use Laravel\Socialite\Facades\Socialite;
 
 class InitializeAppController extends Controller
 {
-  private function isAdminExist()
-  {
-    return User::role('Super Admin')->count() > 0;
-  }
-
-  public function check()
-  {
-    if (!$this->isAdminExist()) {
-      return redirect()->route('initialize-app.create-admin-user');
-    }
-    
-    return redirect('/');
-  }
-
-  public function index()
-  {
-    return redirect()->route('initialize-app.check');
-  }
-
-  public function createAdminUser()
-  {
-    if ($this->isAdminExist()) {
-      abort('403');
+    private function isAdminExist()
+    {
+        return User::role('Super Admin')->count() > 0;
     }
 
-    return view('pages.initialize-app.admin-user-form');
-  }
+    public function check()
+    {
+        // Is user with role super admin not exist
+        if (!$this->isAdminExist()) {
+            return redirect()->route('initialize-app.create-admin-user');
+        }
 
-  public function storeAdminUser(Request $request)
-  {
-    $validatedInput = $request->validate([
-      'name' => 'required|max:255',
-      'email' => 'required|unique:users|email:dns',
-      'password' => 'required|confirmed|min:8|max:255',
-    ]);
+        // is user login
+        if (request()->user()) {
+            $apiToken = request()->user()->createToken('api-token')->plainTextToken;
 
-    $validatedInput['password'] = bcrypt($validatedInput['password']);
-    $user = User::create($validatedInput);
+            return redirect('/')
+                ->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
+        }
 
-    $user->assignRole('Super Admin');
+        return redirect('/');
+    }
 
-    Auth::login($user);
+    public function index()
+    {
+        return redirect()->route('initialize-app.check');
+    }
 
-    return redirect()->route('initialize-app.check');
-  }
+    public function createAdminUser()
+    {
+        if ($this->isAdminExist()) {
+            abort('403');
+        }
 
-  public function signUpWithGoogle()
-  {
-    return Socialite::driver('google')
-      ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
-      ->redirect();
-  }
+        return view('pages.initialize-app.admin-user-form');
+    }
 
-  public function handleGoogleCallback(Request $request)
-  {
-    $googleUser = Socialite::driver('google')
-      ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
-      ->stateless()
-      ->user();
+    public function storeAdminUser(Request $request)
+    {
+        $validatedInput = $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|unique:users|email:dns',
+            'password' => 'required|confirmed|min:8|max:255',
+        ]);
 
-    $user = User::create([
-      'name' => $googleUser->name,
-      'email' => $googleUser->email,
-      'google_id' => $googleUser->id,
-      'password' => bcrypt(env('APP_KEY'))
-    ]);
+        $validatedInput['password'] = bcrypt($validatedInput['password']);
 
-    $user->assignRole('Super Admin');
+        User::insert($validatedInput);
 
-    Auth::login($user);
+        $user = User::where('email', $validatedInput['email'])
+            ->first()
+            ->assignRole('Super Admin');
 
-    return redirect(route('initialize-app.check'));
-  }
+        Auth::login($user);
+
+        Helper::logAuth('first registered and login via form');
+
+        $request->session()->regenerate();
+
+        return redirect()
+            ->route('initialize-app.check');
+    }
+
+    public function signUpWithGoogle()
+    {
+        return Socialite::driver('google')
+            ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
+            ->redirect();
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        $googleUser = Socialite::driver('google')
+            ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
+            ->stateless()
+            ->user();
+
+        User::insert([
+            'name' => $googleUser->name,
+            'email' => $googleUser->email,
+            'google_id' => $googleUser->id,
+            'password' => bcrypt(env('APP_KEY'))
+        ]);
+
+        $user = User::where('email', $googleUser->email)
+            ->first()->assignRole('Super Admin');
+
+        Auth::login($user);
+
+        $request->session()->regenerate();
+
+        session()->flash('notifications', [
+            [
+                'Password belum diatur, silahkan <b><a href="#profile" data-toggle="modal">atur password</a></b>.',
+                'warning'
+            ]
+        ]);
+
+        Helper::logAuth('first registered and login via google');
+
+        return redirect()
+            ->route('initialize-app.check');
+    }
 }
