@@ -95,6 +95,6 @@ class MaterialsSeeder extends Seeder
             ]
         ];
 
-        DB::connection('mysql')->table('materials')->insert($materials);
+        DB::table('materials')->insert($materials);
     }
 }

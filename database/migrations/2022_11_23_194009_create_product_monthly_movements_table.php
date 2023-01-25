@@ -13,7 +13,7 @@ class CreateProductMonthlyMovementsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('product_monthly_movements', function (Blueprint $table) {
+        Schema::create('product_monthly_movements', function (Blueprint $table) {
             $table->foreignId('product_id')
                 ->constrained('products')
                 ->cascadeOnUpdate()
@@ -38,6 +38,6 @@ class CreateProductMonthlyMovementsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('mysql')->dropIfExists('product_monthly_movements');
+        Schema::dropIfExists('product_monthly_movements');
     }
 }

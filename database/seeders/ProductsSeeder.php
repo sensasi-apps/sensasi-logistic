@@ -52,6 +52,6 @@ class ProductsSeeder extends Seeder
             ]
         ];
 
-        DB::connection('mysql')->table('products')->insert($products);
+        DB::table('products')->insert($products);
     }
 }
