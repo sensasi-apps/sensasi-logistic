@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Helper;
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -26,19 +27,19 @@ class AuthController extends Controller
 			'password' => 'required|min:8|max:255',
 		]);
 
-		if (Auth::attempt($credentials, isset($request->remember))) {
-
-			Helper::logAuth('login via form');
-
-			
-			$request->session()->regenerate();
-
-			$apiToken = $request->user()->createToken('api-token')->plainTextToken;
-
-			Cookie::queue('api-token', encrypt($apiToken), time() + 10 * 365 * 24 * 60 * 60);
+		if (!Auth::attempt($credentials, isset($request->remember))) {
+			return back()->withErrors(['attemp' => __('auth.failed')]);
 		}
 
-		return back()->withErrors(['attemp' => 'email dan password tidak sesuai']);
+		$request->session()->regenerate();
+
+		$apiToken = $request->user()->createToken('api-token')->plainTextToken;
+
+		Helper::logAuth('login via form');
+
+		return redirect()
+			->intended(RouteServiceProvider::HOME)
+			->withCookie(cookie('api-token', encrypt($apiToken->plainTextToken), 10 * 365 * 24 * 60 * 60));
 	}
 
 	public function googleOauth()
@@ -46,40 +47,50 @@ class AuthController extends Controller
 		return Socialite::driver('google')->redirect();
 	}
 
-	public function handleGoogleOauth()
+	public function handleGoogleOauth(Request $request)
 	{
 		$googleUser = Socialite::driver('google')->user();
 
-		$user = User::firstWhere('email', $googleUser->getEmail());
+		$user = User::firstWhere(
+			'email',
+			$googleUser->getEmail()
+		);
 
-		if ($user !== null) {
-			Auth::login($user);
-			Helper::logAuth('login via google');
+		// if user not found
+		if (!$user) {
+			return redirect('login')->withErrors([
+				'attemp' => __('Your email :email is not registered on the system, please contact the administrator.', ['email' => "<strong>{$googleUser->getEmail()}</strong>"])
+			]);
+		}
 
-			session()->regenerate();
-			$apiToken = $user->createToken('api-token');
+		Auth::login($user, true);
 
-			Cookie::queue('api-token', encrypt($apiToken), time() + 10 * 365 * 24 * 60 * 60);
+		$request->session()->regenerate();
 
+		$apiToken = $request->user()->createToken('api-token')->plainTextToken;
 
-			request()->session()->flash('alerts', [
+		Helper::logAuth('login via google');
+
+		// if user password is default
+		if (Hash::check(config('app.key'), $user->password)) {
+			session()->flash('notifications', [
 				[
-					'class' => 'warning',
-					'message' => 'Password belum diatur, silahkan <a href="#profile" data-toggle="modal">atur password</a>.'
+					__('Password is not configured, please set your password :here', ['here' => '<a href="javascript;;" class="alert-link" data-toggle="modal" data-target="#profile">' . __('here') . '</a>.']),
+					'warning'
 				]
 			]);
 		}
 
-		return redirect()->back()->withErrors([
-			'attemp' => 'email <strong>' . $googleUser->getEmail() . '</strong> tidak terdaftar pada sistem, silahkan menghubungi admin.'
-		]);
+		return redirect()
+			->intended(RouteServiceProvider::HOME)
+			->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
 	}
 
 	public function logout(Request $request)
 	{
 		Helper::logAuth('logout');
 		$request->user()->tokens()->delete();
-		
+
 		Cookie::queue(Cookie::forget('api-token'));
 
 		Auth::logout();
