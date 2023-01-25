@@ -2,9 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\MaterialIn;
-use App\Models\MaterialInDetail;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MaterialInFactory extends Factory
@@ -16,11 +13,9 @@ class MaterialInFactory extends Factory
      */
     public function definition()
     {
-        $upperLimit = Carbon::now()->subMonths(3);
-        
         return [
             'code' => $this->faker->unique()->numerify('M-IN-#####'),
-            'at' => $this->faker->dateTimeThisYear($upperLimit),
+            'at' => $this->faker->dateTimeBetween('-3 months', '-1 week'),
             'type' => $this->faker->randomElement(['Pembelian', 'Hibah']),
             'note' => $this->faker->sentence(10)
         ];

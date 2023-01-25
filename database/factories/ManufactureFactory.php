@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ManufactureFactory extends Factory
@@ -16,11 +15,10 @@ class ManufactureFactory extends Factory
     {
         $productInIds = \App\Models\ProductIn::all()->pluck('id');
         $materialOutIds = \App\Models\MaterialOut::all()->pluck('id');
-        $upperLimit = Carbon::now()->subMonths(3);
 
         return [
             'code' => $this->faker->unique()->numerify('MAN-#####'),
-            'at' => $this->faker->dateTimeThisYear($upperLimit),
+            'at' => $this->faker->dateTimeBetween('-3 months', '-1 week'),
             'material_out_id' => $this->faker->randomElement($materialOutIds),
             'product_in_id' => $this->faker->randomElement($productInIds)            
         ];
