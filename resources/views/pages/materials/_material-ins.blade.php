@@ -36,9 +36,6 @@
                     <form method="POST" id="materialInForm" onsubmit="return validateInputs();">
                         @csrf
 
-                        <input type="hidden" name="id" id="materialInId">
-
-
                         <div class="row">
                             <div class="col form-group">
                                 <label for="materialInCodeInput">{{ __('Code') }}</label>
@@ -113,8 +110,8 @@
                 })
             })
 
-            const validateInputs = () => {
-                const selectedMaterialIds = []
+            function validateInputs() {
+                const selectedMaterialIds = [];
                 let isValid = true;
 
                 $('.text-danger').remove();
@@ -151,7 +148,7 @@
                 materialInDetailsParent.append(detailRowDiv);
 
                 function getMaterialSelect() {
-                    const materials = {{ Js::from(App\Models\Material::all()) }};
+                    const materials = @json(App\Models\Material::all());
 
                     const initMaterialsSelect = $selectDom => $selectDom.select2({
                         dropdownParent: '#materialInFormModalBody',
@@ -159,7 +156,7 @@
                         data: materials.map(material => {
                             return {
                                 id: material.id,
-                                text: material.name
+                                text: `${material.name} (${material.brand})`
                             }
                         })
                     });
@@ -192,14 +189,12 @@
                     return temp;
                 }
 
-
-                $(detailRowDiv).append(getMaterialSelect())
-
+                $(detailRowDiv).append(getMaterialSelect());
 
                 const qtyInputParentDiv = document.createElement('div')
                 qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
                 $(qtyInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="${detail.qty - detail.stock.qty | 0}" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
                 )
 
                 const priceInputParentDiv = document.createElement('div')
@@ -231,7 +226,6 @@
             const setMaterialInFormValue = materialIn => {
                 const materialInTypeSelect = $('#materialInTypeSelect')
                 materialInTypeSelect.val(materialIn.type || null).trigger('change')
-                materialInId.value = materialIn.id || null
                 materialInCodeInput.value = materialIn.code || null
                 materialInNoteInput.value = materialIn.note || null
 
