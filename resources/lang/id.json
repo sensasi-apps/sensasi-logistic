@@ -13,7 +13,6 @@
   "Cancel": "Batal",
   "Add New Material": "Tambah Bahan Baru",
   "Edit Material": "Ubah Bahan",
-
   "Material": "Bahan",
   "Material List": "Daftar Bahan",
   "Product List": "Daftar Produk",
@@ -21,8 +20,6 @@
   "has been added successfully": "telah berhasil ditambahkan",
   "has been deleted successfully": "telah berhasil dihapus",
   "has been updated successfully": "telah berhasil diperbaharui",
-
-  
   "Material in": "Bahan masuk",
   "Material In": "Bahan Masuk",
   "Material In List": "Daftar Bahan Masuk",
@@ -38,7 +35,6 @@
   "New material": "Bahan baru",
   "More": "Lebih banyak",
   "Add New Material In": "Tambah bahan masuk",
-
   "Material out": "Bahan keluar",
   "Material Out": "Bahan keluar",
   "Edit Material Out": "Ubah Bahan Keluar",
@@ -48,7 +44,6 @@
   "Material in data": "Data bahan masuk",
   "Material out data": "Data bahan keluar",
   "cannot be deleted. Material(s) has been used": "tidak dapat dihapus. Bahan telah digunakan.",
-
   "Dashboard": "Dasbor",
   "material ins": "Bahan masuk",
   "material outs": "Bahan keluar",
@@ -56,7 +51,6 @@
   "products": "Produk",
   "Current Assets": "Aset saat ini",
   "Assets In/Out": "Aset Masuk/Keluar",
-
   "January": "Januari",
   "February": "Februari",
   "March": "Maret",
@@ -68,5 +62,10 @@
   "September": "September",
   "October": "Oktober",
   "November": "November",
-  "December": "Desember"
+  "December": "Desember",
+  "notification.data_added": "Data :type :name telah berhasil ditambahkan",
+  "notification.data_updated": "Data :type :name telah berhasil diperbaharui",
+  "notification.data_deleted": "Data :type :name telah berhasil dihapus",
+  "error.new qty is make stock negative": "Jumlah baru untuk :name baru akan membuat stok menjadi negatif",
+  "error.delete.data is used": "Data :type :name tidak dapat dihapus karena telah digunakan"
 }
