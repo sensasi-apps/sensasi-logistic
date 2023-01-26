@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 use App\Models\Views\MaterialInDetailsStockView;
 
 class MaterialInDetail extends Model
@@ -31,6 +32,10 @@ class MaterialInDetail extends Model
 
     public function getQtyRemainAttribute()
     {
+        if (!$this->relationLoaded('stock')) {
+            $this->load('stock');
+        }
+
         return $this->stock->qty;
     }
 
@@ -44,9 +49,10 @@ class MaterialInDetail extends Model
         return self::with(['material', 'materialIn', 'stock'])
             ->has('materialIn')
             ->whereRelation('stock', 'qty', '>', 0)
-            ->where(fn ($query) => $query
-                ->whereRelation('material', 'name', 'LIKE', "%${q}%")
-                ->orWhereRelation('materialIn', 'at', 'LIKE', "%${q}%")
+            ->where(
+                fn ($query) => $query
+                    ->whereRelation('material', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('materialIn', 'at', 'LIKE', "%{$q}%")
             )
             ->orderBy('material_in_id')->limit(25);
     }

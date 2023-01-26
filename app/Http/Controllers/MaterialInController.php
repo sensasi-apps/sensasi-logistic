@@ -4,29 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\MaterialIn;
-use App\Models\MaterialInDetail;
-use Illuminate\Support\Facades\Auth;
+use App\Repositories\MaterialInRepository;
+use Illuminate\Http\RedirectResponse;
 
 class MaterialInController extends Controller
 {
-    private function validateInput(Request $request, int $materialInId = null)
+    public function __construct(private MaterialInRepository $repo)
     {
-        $materialInFromInput = $request->validate([
-            'code' => 'nullable|string|unique:mysql.material_ins,code' . ($materialInId ? ",$materialInId,id" : null),
-            'type' => 'required|string',
-            'note' => 'nullable|string',
-            'at' => 'required|date'
-        ]);
-
-        $materialInDetailsFromInput = $request->validate([
-            'details' => 'required|array',
-            'details.*.material_id' => 'required|exists:mysql.materials,id',
-            'details.*.qty' => 'required|integer',
-            'details.*.price' => 'required|integer'
-        ])['details'];
-
-        return [$materialInFromInput, $materialInDetailsFromInput];
     }
 
     /**
@@ -35,31 +19,23 @@ class MaterialInController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        [$materialInFromInput, $materialInDetailsFromInput] = $this->validateInput($request);
+        $data = $request->only(['id', 'code', 'type', 'note', 'at']);
 
-        if ($materialIn = MaterialIn::create($materialInFromInput)) {
-            foreach ($materialInDetailsFromInput as &$materialInDetailFromInput) {
-                $materialInDetailFromInput['material_in_id'] = $materialIn->id;
-            }
-
-            MaterialInDetail::insert($materialInDetailsFromInput);
+        try {
+            $materialIn = $this->repo->create($data, $request->details);
+        } catch (\Throwable $th) {
+            return back()->withErrors(json_decode($th->getMessage()));
         }
 
-        return redirect()->back()->with('notifications', [
-            [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been added successfully'), 'success']
+        return back()->with('notifications', [
+            [
+                __('notification.data_added', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
+                'success'
+            ]
         ]);
     }
-
-    private function getToBeDeletedMaterialIds(MaterialIn $materialIn, array $materialInDetailsFromInput)
-    {
-        $existsMaterialIds = $materialIn->details->pluck('material_id');
-        $materialIdsFromInput = collect($materialInDetailsFromInput)->pluck('material_id');
-
-        return $existsMaterialIds->diff($materialIdsFromInput);
-    }
-
 
     /**
      * Update the specified resource in storage.
@@ -68,37 +44,23 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, MaterialIn $materialIn)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        [$materialInFromInput, $materialInDetailsFromInput] = $this->validateInput($request, $materialIn->id);
+        $data = $request->only(['code', 'type', 'note', 'at']);
+        $data['id'] = $id;
+        $detailsData = $request->details;
 
-        if ($materialIn->update($materialInFromInput)) {
-            foreach ($materialInDetailsFromInput as &$materialInDetailFromInput) {
-                $materialInDetailFromInput['material_in_id'] = $materialIn->id;
-            }
-
-            $toBeDeletedMaterialIds = $this->getToBeDeletedMaterialIds($materialIn, $materialInDetailsFromInput);
-
-            // TODO: Check outDetails before delete;
-            $deleteQuery = $materialIn->details()->with('outDetails')->whereIn('material_id', $toBeDeletedMaterialIds);
-            $toBeDeletedMaterialIds = $deleteQuery->get()->map(fn ($detail) => $detail->outDetails ? null : $detail->material_id );
-
-            if ($toBeDeletedMaterialIds->isNotEmpty()) {
-                $materialIn
-                    ->details()
-                    ->whereIn('material_id', $toBeDeletedMaterialIds)
-                    ->delete();
-            }
-
-            MaterialInDetail::upsert(
-                $materialInDetailsFromInput,
-                ['material_in_id', 'material_id'],
-                ['qty', 'price']
-            );
+        try {
+            $materialIn = $this->repo->update($data, $detailsData);
+        } catch (\Throwable $th) {
+            return back()->withErrors(json_decode($th->getMessage()));
         }
 
-        return redirect()->back()->with('notifications', [
-            [__('Material in data ') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been updated successfully'), 'success']
+        return back()->with('notifications', [
+            [
+                __('notification.data_updated', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
+                'success'
+            ]
         ]);
     }
 
@@ -108,18 +70,20 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(MaterialIn $materialIn)
+    public function destroy(int $materialInId): RedirectResponse
     {
-        if ($materialIn->outDetails()->count() > 0) {
-            return redirect()->back()->with('notifications', [
-                [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('cannot be deleted. Material(s) has been used'), 'danger']
-            ]);
+        try {
+            $materialIn = $this->repo->delete($materialInId);
+        } catch (\Throwable $th) {
+            return back()->withErrors(json_decode($th->getMessage()));
         }
 
 
-        $materialIn->delete();
-        return redirect()->back()->with('notifications', [
-            [__('Material in data') . " <b>" . $materialIn->at->format('d-m-Y') . "</b> " . __('has been deleted successfully'), 'warning']
+        return back()->with('notifications', [
+            [
+                __('notification.data_updated', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
+                'success'
+            ]
         ]);
     }
 }
