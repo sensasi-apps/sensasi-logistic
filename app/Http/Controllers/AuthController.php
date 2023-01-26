@@ -39,7 +39,7 @@ class AuthController extends Controller
 
 		return redirect()
 			->intended(RouteServiceProvider::HOME)
-			->withCookie(cookie('api-token', encrypt($apiToken->plainTextToken), 10 * 365 * 24 * 60 * 60));
+			->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
 	}
 
 	public function googleOauth()
