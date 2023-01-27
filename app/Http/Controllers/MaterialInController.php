@@ -70,10 +70,10 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $materialInId): RedirectResponse
+    public function destroy(): RedirectResponse
     {
         try {
-            $materialIn = $this->repo->delete($materialInId);
+            $materialIn = $this->repo->deleteData();
         } catch (\Throwable $th) {
             return back()->withErrors(json_decode($th->getMessage()));
         }

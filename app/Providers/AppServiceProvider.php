@@ -14,7 +14,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->when('App\Repositories\MaterialInRepository')
+            ->needs('App\Models\MaterialIn')
+            ->give(function () {
+                $materialInId = \Illuminate\Support\Facades\Route::current()->parameter('material_in');
+                $with = [
+                    'details.material',
+                    'details.outDetails',
+                    'details.stock'
+                ];
+
+                return $materialInId ? \App\Models\MaterialIn::with($with)->findOrFail($materialInId) : new \App\Models\MaterialIn();
+            });
     }
 
     /**
@@ -25,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Blade::directive('number', function (mixed $expression, int $decimals = null, string $decPoint = null, string $thousandsSep = null) {
-            
+
             if (app()->getLocale() == 'id') {
                 $decimals = $decimals ?? 0;
                 $decPoint = $decPoint ?? "','";
