@@ -44,10 +44,9 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
         $data = $request->only(['code', 'type', 'note', 'at']);
-        $data['id'] = $id;
         $detailsData = $request->details;
 
         try {
