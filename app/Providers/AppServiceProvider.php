@@ -21,14 +21,23 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(MaterialInRepository::class)
             ->needs(MaterialIn::class)
             ->give(function () {
+                if (Route::current() == null) {
+                    return new MaterialIn();
+                }
+
                 $materialInId = Route::current()->parameter('material_in');
+
+                if ($materialInId == null) {
+                    return new MaterialIn();
+                }
+
                 $with = [
                     'details.material',
                     'details.outDetails',
                     'details.stock'
                 ];
 
-                return $materialInId ? MaterialIn::with($with)->findOrFail($materialInId) : new MaterialIn();
+                return MaterialIn::with($with)->findOrFail($materialInId);
             });
     }
 

@@ -10,6 +10,10 @@ class Helper
 {
 	public static function logAction(string $action, mixed $modelInstance)
 	{
+		if (app()->environment('testing')) {
+			return;
+		}
+
 		$agent = new Agent();
 
 		UserActivity::create([
