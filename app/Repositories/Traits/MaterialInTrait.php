@@ -20,7 +20,7 @@ trait MaterialInTrait
 	{
 		$validator = Validator::make($data, [
 			'id' => 'nullable|numeric',
-			'code' => 'nullable|string|unique:material_ins,code' . (isset($data['id']) && $data['id'] ? ",{$data['id']},id" : null),
+			'code' => 'nullable|string|unique:material_ins,code' . ($this->workingInstance->id ? ",{$this->workingInstance->id}" : null),
 			'type' => 'required|string',
 			'note' => 'nullable|string',
 			'at' => 'required|date'
@@ -28,7 +28,7 @@ trait MaterialInTrait
 
 
 		if ($validator->fails()) {
-			$this->errors = array_merge($this->errors, $validator->errors()->toArray());
+			$this->addError($validator->errors()->toArray());
 		}
 	}
 
@@ -47,7 +47,7 @@ trait MaterialInTrait
 		]);
 
 		if ($validator->fails()) {
-			$this->errors = array_merge($this->errors, $validator->errors()->toArray());
+			$this->addError($validator->errors()->toArray());
 		}
 	}
 
@@ -89,7 +89,8 @@ trait MaterialInTrait
 			$isStockEnoughForUpdate = $materialInDetail->qty_remain >= $materialInDetail->qty - $detailData['qty'];
 
 			if (!$isStockEnoughForUpdate) {
-				$this->errors[] = __('error.new qty is make stock negative', ['name' => $materialInDetail->material->name]);
+				$material = $materialInDetail->material;
+				$this->addError(__('error.new qty is make stock negative', ['name' => "{$material->name} ({$material->brand})", 'type' => '']));
 			}
 		});
 	}
@@ -97,8 +98,9 @@ trait MaterialInTrait
 	private function validateDetailsDataForDelete(Collection $MaterialInDetails): void
 	{
 		$MaterialInDetails->each(function ($materialInDetail) {
-			if (!$materialInDetail->outDetails) {
-				$this->errors[] = __('error.delete.data is used', ['name' => $materialInDetail->material->name, 'type' => __('Material In')]);
+			if ($materialInDetail->outDetails != null) {
+				$material = $materialInDetail->material;
+				$this->addError(__('error.delete.data is used', ['name' => "{$material->name} ({$material->brand})", 'type' => '']));
 			}
 		});
 	}

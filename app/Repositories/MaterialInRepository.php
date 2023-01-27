@@ -33,19 +33,20 @@ class MaterialInRepository extends BaseRepository
 		$this->validateData($data);
 		$this->validateDetailsData($detailsData);
 
-		if (!$this->errors) {
+		if (!$this->getErrors()) {
 			try {
 				DB::beginTransaction();
-				if ($this->workingInstance->create($data)) {
-					foreach ($detailsData as &$detailData) {
-						$detailData['material_in_id'] = $this->workingInstance->id;
-					}
 
-					MaterialInDetail::insert($detailsData);
+				$materialIn = MaterialIn::create($data);
+
+				foreach ($detailsData as &$detailData) {
+					$detailData['material_in_id'] = $materialIn->id;
 				}
+
+				MaterialInDetail::insert($detailsData);
 			} catch (\Throwable $th) {
 				DB::rollBack();
-				$this->errors[] = $th->getMessage();
+				$this->addError($th->getMessage());
 			}
 		}
 
@@ -53,7 +54,7 @@ class MaterialInRepository extends BaseRepository
 
 		DB::commit();
 
-		return $this->workingInstance->fresh();
+		return $materialIn->fresh();
 	}
 
 	/**
@@ -76,30 +77,31 @@ class MaterialInRepository extends BaseRepository
 		$this->validateDetailsDataForUpdate($forUpdate);
 		$this->validateDetailsDataForDelete($forDelete);
 
-		if (!$this->errors) {
+		if (!$this->getErrors()) {
 			try {
 				DB::beginTransaction();
-				if ($this->workingInstance->update($data)) {
 
-					// set material_in_id for each detailData from user input
-					foreach ($detailsData as &$detailData) {
-						$detailData['material_in_id'] = $this->workingInstance->id;
-					}
+				// TODO: error on test when update field 'at'
+				$this->workingInstance->update($data);
 
-					// update/insert data from user input
-					MaterialInDetail::upsert(
-						$detailsData,
-						['material_id', 'material_in_id'],
-						['qty', 'price']
-					);
-
-					// delete record that not exists in $detailsData
-					MaterialInDetail::whereIn('material_in_id', $forDelete->pluck('id')->toArray())
-						->delete();
+				// set material_in_id for each detailData from user input
+				foreach ($detailsData as &$detailData) {
+					$detailData['material_in_id'] = $this->workingInstance->id;
 				}
+
+				// update/insert data from user input
+				MaterialInDetail::upsert(
+					$detailsData,
+					['material_in_id', 'material_id'],
+					['qty', 'price']
+				);
+
+				// delete record that not exists in $detailsData
+				MaterialInDetail::whereIn('material_in_id', $forDelete->pluck('id')->toArray())
+					->delete();
 			} catch (\Throwable $th) {
 				DB::rollBack();
-				$this->errors[] = $th->getMessage();
+				$this->addError($th->getMessage());
 			}
 		}
 
@@ -119,13 +121,13 @@ class MaterialInRepository extends BaseRepository
 	{
 		$this->validateDetailsDataForDelete($this->workingInstance->details);
 
-		if (!$this->errors) {
+		if (!$this->getErrors()) {
 			try {
 				DB::beginTransaction();
 				$this->workingInstance->delete();
 			} catch (\Throwable $th) {
 				DB::rollBack();
-				$this->errors[] = $th->getMessage();
+				$this->addError($th->getMessage());
 			}
 		}
 
