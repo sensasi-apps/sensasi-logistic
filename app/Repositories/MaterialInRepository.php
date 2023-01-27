@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\MaterialIn;
+use App\Models\MaterialInDetail;
 use App\Repositories\Traits\MaterialInTrait;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +41,7 @@ class MaterialInRepository extends BaseRepository
 						$detailData['material_in_id'] = $this->workingInstance->id;
 					}
 
-					$this->workingInstance->detail()->insert($detailsData);
+					MaterialInDetail::insert($detailsData);
 				}
 			} catch (\Throwable $th) {
 				DB::rollBack();
@@ -86,15 +87,14 @@ class MaterialInRepository extends BaseRepository
 					}
 
 					// update/insert data from user input
-					\App\Models\MaterialInDetail::upsert(
+					MaterialInDetail::upsert(
 						$detailsData,
 						['material_id', 'material_in_id'],
 						['qty', 'price']
 					);
 
 					// delete record that not exists in $detailsData
-					$this->workingInstance->details()
-						->whereIn('material_in_id', $forDelete->pluck('id')->toArray())
+					MaterialInDetail::whereIn('material_in_id', $forDelete->pluck('id')->toArray())
 						->delete();
 				}
 			} catch (\Throwable $th) {

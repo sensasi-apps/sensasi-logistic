@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
+
+use App\Models\MaterialIn;
+use App\Repositories\MaterialInRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,17 +18,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->when('App\Repositories\MaterialInRepository')
-            ->needs('App\Models\MaterialIn')
+        $this->app->when(MaterialInRepository::class)
+            ->needs(MaterialIn::class)
             ->give(function () {
-                $materialInId = \Illuminate\Support\Facades\Route::current()->parameter('material_in');
+                $materialInId = Route::current()->parameter('material_in');
                 $with = [
                     'details.material',
                     'details.outDetails',
                     'details.stock'
                 ];
 
-                return $materialInId ? \App\Models\MaterialIn::with($with)->findOrFail($materialInId) : new \App\Models\MaterialIn();
+                return $materialInId ? MaterialIn::with($with)->findOrFail($materialInId) : new MaterialIn();
             });
     }
 
