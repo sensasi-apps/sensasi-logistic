@@ -75,7 +75,7 @@
 
 
                         <div class="">
-                            <a href="#" id="addMaterialInDetailButton" class="btn btn-success btn-sm mr-2"><i
+                            <a href="javascript:;" id="addMaterialInDetailButton" class="btn btn-success btn-sm mr-2"><i
                                     class="fas fa-plus"></i> {{ __('More') }}</a>
                             <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
                         </div>
@@ -194,7 +194,7 @@
                 const qtyInputParentDiv = document.createElement('div')
                 qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
                 $(qtyInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="${detail.qty - detail.stock.qty | 0}" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
+                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="${detail.qty - detail.stock?.qty || 0}" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
                 )
 
                 const priceInputParentDiv = document.createElement('div')
@@ -281,7 +281,7 @@
 
             // ######### DATATABLE SECTION
 
-            const renderTagButton = text => `<a href="#" class="m-1 badge badge-success materialInDetailTag">${text}</a>`
+            const renderTagButton = text => `<a href="javascript:;" class="m-1 badge badge-success materialInDetailTag">${text}</a>`
 
             $(document).on('click', '.materialInDetailTag', function() {
                 const materialName = this.innerHTML.split(' ')[0]
@@ -336,7 +336,7 @@
                 }, {
                     render: function(data, type, row) {
                         const editButton = $(
-                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
+                            '<a class="btn-icon-custom" href="javascript:;"><i class="fas fa-cog"></i></a>'
                         )
                         editButton.attr('data-toggle', 'modal')
                         editButton.attr('data-target', '#materialInFormModal')
