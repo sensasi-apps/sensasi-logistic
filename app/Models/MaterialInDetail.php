@@ -27,7 +27,7 @@ class MaterialInDetail extends Model
 
     public function outDetails()
     {
-        return $this->belongsTo(MaterialOutDetail::class);
+        return $this->hasMany(MaterialOutDetail::class);
     }
 
     public function getQtyRemainAttribute()
