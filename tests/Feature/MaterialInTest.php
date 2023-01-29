@@ -150,16 +150,16 @@ class MaterialInTest extends TestCase
             'material_in_detail_id' => 1,
             'qty' => 10
         ]);
-        
-        
+
+
         $response1 = $this->delete('/material-ins/1');
         $response1->assertStatus(302);
-        
+
         $response2 = $this->delete('/material-ins/2');
         $response2->assertStatus(302);
 
-        // TODO: remove soft delete
-        $this->assertNotSoftDeleted($materialIns[0]);
-        $this->assertSoftDeleted($materialIns[1]);
+        $this->assertDatabaseCount('material_ins', 1);
+        $this->assertDatabaseHas('material_ins', ['id' => 1]);
+        $this->assertDatabaseMissing('material_ins', ['id' => 2]);
     }
 }
