@@ -23,13 +23,13 @@ class MaterialInRepository extends BaseRepository
 	) {
 	}
 
-	private function setWorkingInstance()
+	private function setWorkingInstance(): void
 	{
 		$this->workingInstance = $this->retrieveWorkingInstance();
 		$this->resetErrors();
 	}
 
-	private function retrieveWorkingInstance()
+	private function retrieveWorkingInstance(): MaterialIn
 	{
 		if (Route::current() == null) {
 			return $this->model;
@@ -60,7 +60,7 @@ class MaterialInRepository extends BaseRepository
 	public function create(array $data, array $detailsData): MaterialIn
 	{
 		$this->setWorkingInstance();
-		
+
 		$this->validateData($data);
 		$this->validateDetailsData($detailsData);
 
@@ -69,10 +69,10 @@ class MaterialInRepository extends BaseRepository
 			try {
 				DB::beginTransaction();
 
-				$this->workingInstance = MaterialIn::create($data);
+				$this->workingInstance = $this->model::create($data);
 				$this->addDataIdToDetails($detailsData);
 
-				MaterialInDetail::insert($detailsData);
+				$this->workingInstance->details()->insert($detailsData);
 			} catch (\Throwable $th) {
 				DB::rollBack();
 				$this->addError($th->getMessage());
@@ -129,7 +129,7 @@ class MaterialInRepository extends BaseRepository
 			);
 
 			// delete record that not exists in $detailsData
-			MaterialInDetail::destroy($forDelete->pluck('id')->toArray());
+			$this->workingInstance->details()->whereIn('id', $forDelete->pluck('id')->toArray())->delete();
 
 			DB::commit();
 		} catch (\Throwable $th) {
