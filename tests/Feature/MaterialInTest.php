@@ -46,7 +46,7 @@ class MaterialInTest extends TestCase
         $this->actingAs($user);
     }
 
-    public function material_in_can_be_created()
+    public function test_material_in_can_be_created()
     {
         $this->init();
 
@@ -62,21 +62,70 @@ class MaterialInTest extends TestCase
 
     public function test_material_in_can_be_updated()
     {
+        // 0. initialize data
+
         $this->init();
+        $response = $this->post('material-ins', $this->test_data);
 
-        MaterialIn::factory()->create();
-        MaterialInDetail::factory(3)->create();
+        // case 1 data changed before used
+        $data1 = $this->test_data;
+        $data1['code'] = 'test2';
+        $data1['at'] = '2023-01-01 10:10:10';
+        $data1['note'] = 'test2';
+        $data1['type'] = 'Free';
+        $data1['details'][1]['material_id'] = 4; // change material_id
+        $data1['details'][2]['qty'] = 40; // change qty
 
-        $response = $this->put("material-ins/1", $this->test_data);
+        // test case 1 begin
+        $response = $this->put("material-ins/1", $data1);
 
         $response->assertStatus(302);
+        $this->assertDatabaseCount('material_ins', 1);
+        $this->assertDatabaseHas('material_ins', ['code' => 'test2']);
 
-        $this->assertDatabaseHas('material_in_details', ['qty' => 10]);
-        // $this->assertDatabaseHas('material_in_details', $this->test_data['details'][1]);
-        // $this->assertDatabaseHas('material_in_details', $this->test_data['details'][2]);
+        $this->assertDatabaseCount('material_in_details', 3);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 1]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 4]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 3]);
+
+
+        // case 2 data changed after used
+        MaterialOut::factory()->create();
+        MaterialOutDetail::insert([
+            [
+                'material_out_id' => 1,
+                'material_in_detail_id' => 1,
+                'qty' => 10
+            ], [
+                'material_out_id' => 1,
+                'material_in_detail_id' => 4,
+                'qty' => 10
+            ]
+        ]);
+
+        $data2 = $data1;
+        $data2['code'] = 'test3';
+        $data2['at'] = '2023-01-02 10:10:10';
+        $data2['note'] = 'test3';
+        $data2['type'] = 'Test';
+        $data2['details'][0]['material_id'] = 5; // change material_id
+        $data2['details'][1]['qty'] = 9; // change qty lest than used qty
+
+        // test case 2 begin
+        $response = $this->put("material-ins/1", $data2);
+
+        $response->assertStatus(302);
+        $this->assertDatabaseCount('material_ins', 1);
+        $this->assertDatabaseHas('material_ins', ['code' => 'test3']);
+
+        $this->assertDatabaseCount('material_in_details', 4);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 1]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 4]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 3]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 5]);
     }
 
-    public function material_in_can_be_deleted()
+    public function test_material_in_can_be_deleted()
     {
         $this->init();
 
@@ -101,17 +150,16 @@ class MaterialInTest extends TestCase
             'material_in_detail_id' => 1,
             'qty' => 10
         ]);
-
-        $response = $this->delete('/material-ins/1');
-
-        $response->assertStatus(302);
-
-        $response = $this->delete('/material-ins/2');
-
-        $response->assertStatus(302);
+        
+        
+        $response1 = $this->delete('/material-ins/1');
+        $response1->assertStatus(302);
+        
+        $response2 = $this->delete('/material-ins/2');
+        $response2->assertStatus(302);
 
         // TODO: remove soft delete
-        $this->assertSoftDeleted($materialIns[0]);
-        $this->assertNotSoftDeleted($materialIns[1]);
+        $this->assertNotSoftDeleted($materialIns[0]);
+        $this->assertSoftDeleted($materialIns[1]);
     }
 }

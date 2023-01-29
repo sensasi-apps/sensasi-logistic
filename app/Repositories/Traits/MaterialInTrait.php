@@ -3,8 +3,10 @@
 namespace App\Repositories\Traits;
 
 use App\Models\MaterialIn;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 trait MaterialInTrait
 {
@@ -26,9 +28,8 @@ trait MaterialInTrait
 			'at' => 'required|date'
 		]);
 
-
 		if ($validator->fails()) {
-			$this->addError($validator->errors()->toArray());
+			throw ValidationException::withMessages($validator->errors()->toArray());
 		}
 	}
 
@@ -47,7 +48,7 @@ trait MaterialInTrait
 		]);
 
 		if ($validator->fails()) {
-			$this->addError($validator->errors()->toArray());
+			throw ValidationException::withMessages($validator->errors()->toArray());
 		}
 	}
 
@@ -73,35 +74,50 @@ trait MaterialInTrait
 
 		return [
 			'forInsert' => $detailsDataCollection->whereIn('material_id', $t1->toArray()),
-			'forUpdate' => $detailsDataCollection->whereIn('material_id', $t2->toArray()),
-			'forDelete' => $existsMaterialInDetails->whereIn('material_id', $t3->toArray())
+			'forUpdate' => $this->filterValidDetailsForUpdate($detailsDataCollection->whereIn('material_id', $t2->toArray())),
+			'forDelete' => $this->filterValidDetailsForDelete($existsMaterialInDetails->whereIn('material_id', $t3->toArray()))
 		];
 	}
 
-	private function validateDetailsDataForUpdate(Collection $detailsData): void
+	private function filterValidDetailsForUpdate(Collection $details): Collection
 	{
-		$existsMaterialInDetails = $this->workingInstance->details->keyBy('material_id');
+		$existsDetails = $this->workingInstance->details->keyBy('material_id');
 
-		$detailsData->each(function ($detailData) use ($existsMaterialInDetails) {
-
-			$materialInDetail = $existsMaterialInDetails->get($detailData['material_id']);
-
+		return $details->filter(function ($detailData) use ($existsDetails) {
+			$materialInDetail = $existsDetails->get($detailData['material_id']);
 			$isStockEnoughForUpdate = $materialInDetail->qty_remain >= $materialInDetail->qty - $detailData['qty'];
 
 			if (!$isStockEnoughForUpdate) {
 				$material = $materialInDetail->material;
 				$this->addError(__('error.new qty is make stock negative', ['name' => "{$material->name} ({$material->brand})", 'type' => '']));
 			}
+
+			return $isStockEnoughForUpdate;
 		});
 	}
 
-	private function validateDetailsDataForDelete(Collection $MaterialInDetails): void
+	private function filterValidDetailsForDelete(EloquentCollection $details): EloquentCollection
 	{
-		$MaterialInDetails->each(function ($materialInDetail) {
-			if ($materialInDetail->outDetails != null) {
-				$material = $materialInDetail->material;
+		return $details->filter(function ($detail) {
+			$isUsed = $detail->outDetails->count() > 0;
+
+			if ($isUsed) {
+				$material = $detail->material;
 				$this->addError(__('error.delete.data is used', ['name' => "{$material->name} ({$material->brand})", 'type' => '']));
 			}
+
+			return !$isUsed;
 		});
+	}
+
+	private function addDataIdToDetails(array &$detailsData): void
+	{
+		foreach ($detailsData as &$detailData) {
+			if (!$this->workingInstance->id) {
+				$this->workingInstance->refresh();
+			}
+
+			$detailData['material_in_id'] = $this->workingInstance->id;
+		}
 	}
 }

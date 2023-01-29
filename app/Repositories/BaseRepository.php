@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use Illuminate\Validation\ValidationException;
+
 class BaseRepository
 {
 	private array $errors = [];
@@ -15,7 +17,7 @@ class BaseRepository
 	protected function throwErrorIfAny(): void
 	{
 		if ($this->getErrors()) {
-			throw new \Exception(json_encode($this->errors));
+			throw ValidationException::withMessages($this->getErrors());
 		}
 	}
 
@@ -25,13 +27,8 @@ class BaseRepository
 	 * @param string $error
 	 * @return void
 	 */
-	protected function addError(string|array $error): void
+	protected function addError(string $error): void
 	{
-		if (is_array($error)) {
-			$this->errors = array_merge($this->errors, $error);
-			return;
-		}
-
 		$this->errors[] = $error;
 	}
 
@@ -43,5 +40,10 @@ class BaseRepository
 	protected function getErrors(): array
 	{
 		return $this->errors;
+	}
+
+	protected function resetErrors()
+	{
+		$this->errors = [];
 	}
 }

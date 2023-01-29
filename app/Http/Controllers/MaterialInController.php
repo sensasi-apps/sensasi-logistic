@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Repositories\MaterialInRepository;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 
 class MaterialInController extends Controller
 {
@@ -21,12 +22,13 @@ class MaterialInController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->only(['id', 'code', 'type', 'note', 'at']);
+        $data = $request->only(['code', 'type', 'note', 'at']);
 
         try {
             $materialIn = $this->repo->create($data, $request->details);
         } catch (\Throwable $th) {
-            return back()->withErrors(json_decode($th->getMessage()));
+            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
+            return back()->withInput()->withErrors($th->getMessage());
         }
 
         return back()->with('notifications', [
@@ -47,12 +49,12 @@ class MaterialInController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->only(['code', 'type', 'note', 'at']);
-        $detailsData = $request->details;
 
         try {
-            $materialIn = $this->repo->update($data, $detailsData);
+            $materialIn = $this->repo->update($data, $request->details);
         } catch (\Throwable $th) {
-            return back()->withErrors(json_decode($th->getMessage()));
+            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
+            return back()->withInput()->withErrors($th->getMessage());
         }
 
         return back()->with('notifications', [
@@ -74,9 +76,9 @@ class MaterialInController extends Controller
         try {
             $materialIn = $this->repo->deleteData();
         } catch (\Throwable $th) {
-            return back()->withErrors(json_decode($th->getMessage()));
+            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
+            return back()->withInput()->withErrors($th->getMessage());
         }
-
 
         return back()->with('notifications', [
             [
