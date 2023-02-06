@@ -25,6 +25,25 @@
 	}
 });
 
+$('.modal').on('show.bs.modal', function () {
+	const openedModal = $('.modal.show');
+
+	if (openedModal.length > 0) {
+		const savedStyle = $('body').attr('style');
+
+		function keepBodyStyle() {
+			$('body').attr('style', savedStyle);
+			$('body').addClass('modal-open');
+		}
+
+		keepBodyStyle();
+
+		$(this).on('hidden.bs.modal', function () {
+			keepBodyStyle();
+		});
+	}
+});
+
 [...document.querySelectorAll('button')].map(button => {
 	button.loading = function (isLoadingParam) {
 		const isLoading = isLoadingParam === null ? this.classList.contains('btn-progress') : isLoadingParam;
@@ -96,3 +115,11 @@ const addAlert = (parentEl, message, color = 'danger') => {
 const handleNotifications = notifications =>
 	notifications.map(notif =>
 		addAlert(document.querySelector('.section-body'), notif.messageHtml, notif.color))
+
+function intToCurrency(number) {
+	return number.toLocaleString('id', {
+		style: 'currency',
+		currency: 'IDR',
+		maximumFractionDigits: 0
+	})
+}

@@ -46,3 +46,7 @@
 .alert .close {
 	line-height: unset;
 }
+
+.modal {
+	padding-right: unset !important;
+}
