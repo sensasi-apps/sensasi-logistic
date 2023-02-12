@@ -96,8 +96,12 @@
 @push('js')
     <script>
         {
-            const currentDateVal = moment().format('DD-MM-YYYY');
-            currentDate.innerHTML = currentDateVal;
+            const serverMoment = moment.unix({{ time() }});
+
+            setInterval(() => {
+                serverMoment.add(1, 'second');
+                currentDate.innerHTML = serverMoment.format('DD-MM-YYYY HH:mm:ss');
+            }, 1000);
         };
     </script>
 @endpush
