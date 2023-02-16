@@ -8,17 +8,22 @@
 "use strict";
 
 [...document.querySelectorAll('.modal')].map(modal => {
+
 	modal.setTitle = function (text) {
 		this.querySelector('.modal-title').innerText = text
 	}
 
-	modal.disableAll = function () {
+	modal.addAlert = function (message, color = 'danger') {
+		addAlert(this.querySelector('.modal-body'), message, color);
+	}
+
+	modal.disableAllButtons = function () {
 		[...this.querySelectorAll('button')].map(button => {
 			button.disabled = true
 		})
 	}
 
-	modal.enableAll = function () {
+	modal.enableAllButtons = function () {
 		[...this.querySelectorAll('button')].map(button => {
 			button.disabled = false
 		})
@@ -44,20 +49,6 @@ $('.modal').on('show.bs.modal', function () {
 	}
 });
 
-[...document.querySelectorAll('button')].map(button => {
-	button.loading = function (isLoadingParam) {
-		const isLoading = isLoadingParam === null ? this.classList.contains('btn-progress') : isLoadingParam;
-
-		if (isLoading) {
-			this.classList.add('disabled')
-			this.classList.add('btn-progress')
-		} else {
-			this.classList.remove('disabled')
-			this.classList.remove('btn-progress')
-		}
-	}
-});
-
 [...document.querySelectorAll('form')].map(form => {
 	form.removeMethodInput = function () {
 		$('[name="_method"][value="put"]').remove()
@@ -69,15 +60,31 @@ $('.modal').on('show.bs.modal', function () {
 	}
 
 	form.disableAll = function () {
-		[...this.elements].map(element => {
+		[...this.querySelectorAll('input, button, textarea, select')].map(element => {
 			element.disabled = true;
-		})
+			element.classList.add('disabled');
+		});
+
+		[...this.querySelectorAll('a')].map(element => {
+			element.classList.add('btn-sm');
+			element.classList.add('btn');
+			element.classList.add('disabled');
+		});
 	}
 
 	form.enableAll = function () {
-		[...this.elements].map(element => {
-			element.disabled = false;
-		})
+		[...this.querySelectorAll('input, button, textarea, select')].map(element => {
+			if (!element.dataset.excludeEnabling || element.dataset.excludeEnabling === 'false') {
+				element.disabled = false;
+				element.classList.remove('disabled');
+			}
+		});
+
+		[...this.querySelectorAll('a')].map(element => {
+			element.classList.remove('btn-sm');
+			element.classList.remove('btn');
+			element.classList.remove('disabled');
+		});
 	};
 
 	form.removeAllValidationClass = function () {
@@ -99,7 +106,7 @@ const addAlert = (parentEl, message, color = 'danger') => {
 	alertEl.innerHTML = `
 		<div class="alert-body">
 			<button class="close" data-dismiss="alert">
-				<span>×</span>
+				<span>&times;</span>
 			</button>
 			${message}
 		</div>
@@ -122,4 +129,8 @@ function intToCurrency(number) {
 		currency: 'IDR',
 		maximumFractionDigits: 0
 	})
+}
+
+function csrf_token() {
+	return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
