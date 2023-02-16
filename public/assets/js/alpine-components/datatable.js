@@ -1,7 +1,5 @@
-// TODO: clear table first when user do search
-
 document.addEventListener('alpine:init', () => {
-	Alpine.data('dataTable', (config) => {
+	Alpine.data('dataTable', CONFIG => {
 		return {
 			dataTable: null,
 
@@ -13,8 +11,12 @@ document.addEventListener('alpine:init', () => {
 				}
 			},
 
-			tagOnClick(searchText) {
+			search(searchText) {
 				return this.dataTable.DataTable().search(searchText).draw()
+			},
+
+			draw() {
+				return this.dataTable.DataTable().draw();
 			},
 
 			initDataTable($el) {
@@ -24,26 +26,25 @@ document.addEventListener('alpine:init', () => {
 						return: true,
 					},
 					language: {
-						// TODO: url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-						url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/id.json'
+						url: `https://cdn.datatables.net/plug-ins/1.13.1/i18n/${CONFIG.locale}.json`
 					},
 					serverSide: true,
 					ajax: {
-						url: config.ajaxUrl,
+						url: CONFIG.ajaxUrl,
 						dataSrc: json => {
-							this.$dispatch('material-in:set-data-list', json.data);
+							this.$dispatch(CONFIG.setDataListEventName, json.data);
 							return json.data;
 						},
 						beforeSend: function (request) {
 							request.setRequestHeader(
 								"Authorization",
-								`Bearer ${config.token}`
+								`Bearer ${CONFIG.token}`
 							)
 						},
 						cache: true
 					},
-					order: [1, 'desc'],
-					columns: config.columns
+					order: CONFIG.order || [1, 'desc'],
+					columns: CONFIG.columns
 
 				});
 			}

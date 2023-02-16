@@ -9,6 +9,5 @@
             referrerpolicy="no-referrer"></script>
         <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js" crossorigin="anonymous"
             referrerpolicy="no-referrer"></script>
-        <script src="assets/js/alpine-components/datatable.js"></script>    
     @endpush
 @endonce
