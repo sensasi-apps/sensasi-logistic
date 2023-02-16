@@ -1,0 +1,5 @@
+{
+	"notification.data_added": ":type data :name has been added successfully",
+	"notification.data_updated": ":type data :name has been updated successfully",
+	"notification.data_deleted": ":type data :name has been deleted successfully"
+}

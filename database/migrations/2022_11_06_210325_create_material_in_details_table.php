@@ -81,30 +81,34 @@ class CreateMaterialInDetailsTable extends Migration
             ON material_ins
             FOR EACH ROW
             BEGIN
-                -- TODO: optimize this IF
-                IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
-                    CALL material_in_details__material_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT material_id
-                            FROM material_in_details
-                            WHERE material_in_id = OLD.id
-                        )
-                    );
-                END IF;
+                DECLARE done INT DEFAULT FALSE;
+                DECLARE material_id INT;
 
-                IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
-                    CALL material_monthly_movements_upsert_in_procedure(
-                        (SELECT material_id FROM material_in_details WHERE material_in_id = OLD.id),
-                        YEAR(OLD.at),
-                        MONTH(OLD.at)
-                    );
+                DECLARE cur CURSOR FOR SELECT material_id FROM material_in_details WHERE material_in_id = OLD.id;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-                    CALL material_in_details__material_monthly_movements_procedure(
-                        OLD.id,
-                        (SELECT material_id FROM material_in_details WHERE material_in_id = OLD.id)
-                    );
-                END IF;
+                SET @is_deleted_at_changed = (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL);
+                SET @is_at_changed = YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at);
+
+                OPEN cur;
+
+                read_loop: LOOP
+                    FETCH cur INTO material_id;
+                    IF done THEN
+                        LEAVE read_loop;
+                    END IF;
+
+                    IF @is_deleted_at_changed OR @is_at_changed THEN
+                        CALL material_in_details__material_monthly_movements_procedure(OLD.id, material_id);
+                    END IF;
+
+                    IF @is_at_changed THEN
+                        CALL material_monthly_movements_upsert_in_procedure(material_id, YEAR(OLD.at), MONTH(OLD.at));
+                    END IF;
+                END LOOP;
+
+                CLOSE cur;
+
             END;
         ');
 
