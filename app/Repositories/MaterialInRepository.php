@@ -8,8 +8,7 @@ use App\Repositories\Traits\MaterialInTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-
-class MaterialInRepository extends BaseRepository
+class MaterialInRepository
 {
 	use MaterialInTrait;
 
@@ -26,7 +25,6 @@ class MaterialInRepository extends BaseRepository
 	private function setWorkingInstance(): void
 	{
 		$this->workingInstance = $this->retrieveWorkingInstance();
-		$this->resetErrors();
 	}
 
 	private function retrieveWorkingInstance(): MaterialIn
@@ -57,29 +55,23 @@ class MaterialInRepository extends BaseRepository
 	 * @param array $detailsData input from request
 	 * @return MaterialIn
 	 */
-	public function create(array $data, array $detailsData): MaterialIn
+	public function store(array $data, array $detailsData): MaterialIn
 	{
 		$this->setWorkingInstance();
 
-		$this->validateData($data);
-		$this->validateDetailsData($detailsData);
+		$validatedData = $this->validateData($data);
+		$validatedDetailsData = $this->validateDetailsData($detailsData);
 
+		try {
+			DB::beginTransaction();
 
-		if (!$this->getErrors()) {
-			try {
-				DB::beginTransaction();
+			$this->workingInstance = $this->model::create($validatedData);
+			$this->addDataIdToDetails($validatedDetailsData);
 
-				$this->workingInstance = $this->model::create($data);
-				$this->addDataIdToDetails($detailsData);
-
-				$this->workingInstance->details()->insert($detailsData);
-			} catch (\Throwable $th) {
-				DB::rollBack();
-				$this->addError($th->getMessage());
-			}
+			$this->workingInstance->details()->insert($validatedDetailsData);
+		} catch (\Throwable $th) {
+			DB::rollBack();
 		}
-
-		$this->throwErrorIfAny();
 
 		DB::commit();
 
@@ -97,25 +89,22 @@ class MaterialInRepository extends BaseRepository
 	{
 		$this->setWorkingInstance();
 
-		$this->validateData($data);
-		$this->validateDetailsData($detailsData);
-
-		if ($this->getErrors()) {
-			return $this->throwErrorIfAny();
-		}
+		$validatedData = $this->validateData($data);
+		$validatedDetails = $this->validateDetailsData($detailsData);
 
 		[
 			'forInsert' => $forInsert,
 			'forUpdate' => $forUpdate,
 			'forDelete' => $forDelete
-		] = $this->separateDetailsData(collect($detailsData));
+		] = $this->separateDetailsData(collect($validatedDetails));
 
+		$this->validateForDelete($forDelete->toArray());
 
 		try {
 			DB::beginTransaction();
 
 			// update material_in
-			$this->workingInstance->update($data);
+			$this->workingInstance->update($validatedData);
 
 			$forUpsert = $forInsert->merge($forUpdate)->toArray();
 
@@ -134,12 +123,7 @@ class MaterialInRepository extends BaseRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
-			$this->addError($th->getMessage());
 		}
-
-
-		$this->throwErrorIfAny();
-
 
 		return $this->workingInstance->fresh();
 	}
@@ -149,28 +133,23 @@ class MaterialInRepository extends BaseRepository
 	 *
 	 * @return MaterialIn
 	 **/
-	public function deleteData(): MaterialIn
+	public function destroy(): MaterialIn
 	{
 		$this->setWorkingInstance();
 
 		$details = $this->workingInstance->details;
-		$isDetailsNotUsed = $this->filterValidDetailsForDelete($details)->count() === $details->count();
+		$this->validateForDelete($details->toArray());
 
-		if ($isDetailsNotUsed) {
-			try {
-				DB::beginTransaction();
+		try {
+			DB::beginTransaction();
 
-				$this->workingInstance->details()->delete();
-				$this->workingInstance->delete();
+			$this->workingInstance->details()->delete();
+			$this->workingInstance->delete();
 
-				DB::commit();
-			} catch (\Throwable $th) {
-				DB::rollBack();
-				$this->addError($th->getMessage());
-			}
+			DB::commit();
+		} catch (\Throwable $th) {
+			DB::rollBack();
 		}
-
-		$this->throwErrorIfAny();
 
 		return $this->workingInstance;
 	}

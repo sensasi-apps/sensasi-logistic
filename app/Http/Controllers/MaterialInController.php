@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\MaterialInRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Validation\ValidationException;
 
 class MaterialInController extends Controller
 {
@@ -14,29 +14,56 @@ class MaterialInController extends Controller
     {
     }
 
+    private function getSuccessMessage(string $action, string $name): string
+    {
+        switch ($action) {
+            case 'store':
+                $key = 'added';
+                break;
+
+            case 'update':
+                $key = 'updated';
+                break;
+
+            case 'destroy':
+                $key = 'deleted';
+                break;
+        }
+
+        return __("notification.data_{$key}", ['type' => __('Material In'), 'name' => "<b>{$name}</b>"]);
+    }
+
+
+    private function repoHandler(string $action, Request $request)
+    {
+        $data = $request->only(['code', 'type', 'note', 'at']);
+        $materialIn = $this->repo->$action($data, $request->details);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $this->getSuccessMessage($action, $materialIn->id_for_human),
+            ], 200);
+        }
+
+        return back()->with('notifications', [
+            [
+                $this->getSuccessMessage($action, $materialIn->id_for_human),
+                $action === 'destroy' ? 'warning' : 'success'
+            ]
+        ]);
+    }
+
+
+
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $request->only(['code', 'type', 'note', 'at']);
-
-        try {
-            $materialIn = $this->repo->create($data, $request->details);
-        } catch (\Throwable $th) {
-            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
-            return back()->withInput()->withErrors($th->getMessage());
-        }
-
-        return back()->with('notifications', [
-            [
-                __('notification.data_added', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
-                'success'
-            ]
-        ]);
+        return $this->repoHandler('store', $request);
     }
 
     /**
@@ -46,23 +73,9 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $request->only(['code', 'type', 'note', 'at']);
-
-        try {
-            $materialIn = $this->repo->update($data, $request->details);
-        } catch (\Throwable $th) {
-            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
-            return back()->withInput()->withErrors($th->getMessage());
-        }
-
-        return back()->with('notifications', [
-            [
-                __('notification.data_updated', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
-                'success'
-            ]
-        ]);
+        return $this->repoHandler('update', $request);
     }
 
     /**
@@ -71,20 +84,8 @@ class MaterialInController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(): RedirectResponse
+    public function destroy(Request $request): RedirectResponse|jsonResponse
     {
-        try {
-            $materialIn = $this->repo->deleteData();
-        } catch (\Throwable $th) {
-            throw_unless(app()->environment('production') || $th instanceof ValidationException, $th);
-            return back()->withInput()->withErrors($th->getMessage());
-        }
-
-        return back()->with('notifications', [
-            [
-                __('notification.data_updated', ['type' => __('Material In'), 'name' => "<b>{$materialIn->at->format('d-m-Y')}</b>"]),
-                'success'
-            ]
-        ]);
+        return $this->repoHandler('destroy', $request);
     }
 }
