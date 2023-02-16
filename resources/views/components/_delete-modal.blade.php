@@ -1,4 +1,4 @@
-<x-_modal {{ $attributes->except(['id', 'class', 'formId', 'formId']) }} id="{{ $id ?? ($id = null) }}"
+<x-_modal {{ $attributes->except(['id', 'class', 'formId']) }} id="{{ $id ?? ($id = null) }}"
     class="{{ $class ?? null }}" title="{{ __('Are you sure') }}?" color="danger" centered>
     {{ __('This action can not be undone') }}.
     {{ __('Do you still want to delete') }} <b style="font-size: 1.2rem"></b>
@@ -9,8 +9,12 @@
     </form>
 
     @slot('footer')
+        @if (isset($footer))
+            {{ $footer }}
+        @else
         <button type="submit" {{ $attributes->has(':formId') ? ':' : '' }}form="{{ $formId }}"
             class="btn btn-danger">{{ __('Yes') }}</button>
+        @endif
         <button data-dismiss="modal" class="btn btn-secondary">{{ __('Cancel') }}</button>
     @endslot
 </x-_modal>
