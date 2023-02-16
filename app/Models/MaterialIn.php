@@ -15,6 +15,10 @@ class MaterialIn extends Model
         'at'
     ];
 
+    protected $appends = [
+        'id_for_human'
+    ];
+
     public function details()
     {
         return $this->hasMany(MaterialInDetail::class);
@@ -23,5 +27,10 @@ class MaterialIn extends Model
     public function outDetails()
     {
         return $this->hasManyThrough(MaterialOutDetail::class, MaterialInDetail::class)->has('materialOut');
+    }
+
+    public function getIdForHumanAttribute()
+    {
+        return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }
 }
