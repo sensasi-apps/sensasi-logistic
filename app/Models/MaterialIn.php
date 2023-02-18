@@ -33,4 +33,9 @@ class MaterialIn extends Model
     {
         return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }
+
+    public function getHasOutDetailsAttribute()
+    {
+        return $this->outDetails->count() > 0;
+    }
 }
