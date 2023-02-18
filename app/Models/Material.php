@@ -12,8 +12,8 @@ class Material extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['code', 'name', 'tags', 'unit'];
-    protected $appends = ['tags', 'qty'];
+    protected $fillable = ['code', 'name', 'tags', 'unit', 'low_qty', 'brand'];
+    protected $appends = ['tags', 'qty', 'id_for_human'];
     protected $with = ['monthlyMovements'];
 
     public static function boot()
@@ -36,7 +36,7 @@ class Material extends Model
 
     public function getTagsAttribute()
     {
-        return json_decode($this->tags_json);
+        return json_decode($this->tags_json) ?? [];
     }
 
     public function monthlyMovements()
@@ -58,5 +58,15 @@ class Material extends Model
         }
 
         return $qty;
+    }
+
+    public function getIdForHumanAttribute()
+    {
+        return "[{$this->code}] {$this->name}" . ($this->brand ? " ({$this->brand})" : null);
+    }
+
+    public function getHasChildrenAttribute()
+    {
+        return $this->monthlyMovements->count() > 0;
     }
 }

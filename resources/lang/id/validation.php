@@ -154,6 +154,7 @@ return [
 		'note' => 'Catatan',
 		'type' => 'Jenis',
 		'at' => 'Pada',
+		'low_qty' => 'Jumlah terendah',
 
 		'email' => 'E-mail',
 		'password' => 'Kata sandi',
