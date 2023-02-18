@@ -93,6 +93,7 @@ class CreateProductOutDetailsTable extends Migration
             FOR EACH ROW
             BEGIN
                 -- TODO: optimize this IF
+                -- TODO: fix this like material_in_details
                 IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
                     CALL product_out_details__product_monthly_movements_procedure(
                         OLD.id,
