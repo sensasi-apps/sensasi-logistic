@@ -13,8 +13,7 @@
             {{ $footer }}
         @else
         <button type="submit" {{ $attributes->has(':formId') ? ':' : '' }}form="{{ $formId }}"
-            class="btn btn-danger">{{ __('Yes') }}</button>
+            class="btn btn-secondary">{{ __('Yes') }}</button>
         @endif
-        <button data-dismiss="modal" class="btn btn-secondary">{{ __('Cancel') }}</button>
     @endslot
 </x-_modal>
