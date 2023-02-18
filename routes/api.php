@@ -19,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function() {
     //     return $request->user();
     // });
 
-    Route::get('datatable/{modelName}', '\App\Http\Controllers\Api\DatatableController');
+    // TODO: change to datatable2
+    Route::get('datatable/{model_name}', '\App\Http\Controllers\Api\DatatableController');
+    Route::get('datatable/{model_name}/{params_json}', '\App\Http\Controllers\Api\Datatable2Controller')->name('api.datatable');
     Route::get('select2/{modelName}', '\App\Http\Controllers\Api\Select2Controller');
 });
