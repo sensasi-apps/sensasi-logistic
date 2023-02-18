@@ -1,11 +1,16 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="materialsCrudDiv">
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
+<div>
     <h2 class="section-title">
         {{ __('Material List') }}
-        <button id="addMaterialButton" type="button" class="ml-2 btn btn-primary" data-toggle="modal"
-            data-target="#materialFormModal">
+        <button x-data type="button" @@click="$dispatch('material:open-modal', null)"
+            class="ml-2 btn btn-primary">
             <i class="fas fa-plus-circle"></i> {{ __('Add') }}
         </button>
     </h2>
@@ -13,221 +18,173 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped" id="materialDatatable" style="width:100%">
+                <table x-data="dataTable(materialDataTableConfig)" @@material:datatable-draw.document="draw"
+                    class="table table-striped" style="width:100%">
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-
 @push('modal')
-    <div class="modal fade" id="materialFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialFormModalLabel"></h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <div x-data="crud(materialCrudConfig)" @@material:open-modal.document="openModal"
+        @@material:set-data-list.document="setDataList">
+        <x-_modal centered>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
+
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.code') }}</label>
+                    <input type="text" class="form-control" x-model="formData.code" :id="$id('input')">
                 </div>
-                <div class="modal-body">
 
-                    <form method="POST" id="materialForm">
-                        @csrf
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.name') }}</label>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.name" required>
+                </div>
 
-                        <input type="hidden" name="id" id="materialIdInput">
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.unit') }}</label>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.unit" required>
+                </div>
 
-                        <div class="form-group">
-                            <label for="materialCodeInput">{{ __('validation.attributes.code') }}</label>
-                            <input type="text" class="form-control" name="code" id="materialCodeInput">
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.low_qty') }}</label>
+
+                    <div class="input-group">
+                        <input type="number" min="0" class="form-control" :id="$id('input')"
+                            x-model="formData.low_qty" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" x-show="formData.unit" x-text="formData.unit"></span>
                         </div>
-
-                        <div class="form-group">
-                            <label for="materialNameInput">{{ __('validation.attributes.name') }}</label>
-                            <input type="text" class="form-control" name="name" required id="materialNameInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="materialUnitInput">{{ __('validation.attributes.unit') }}</label>
-                            <input type="text" class="form-control" name="unit" required id="materialUnitInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="materialLowQtyInput">{{ __('validation.attributes.unit') }}</label>
-                            <input type="text" class="form-control" name="low_qty" required id="materialLowQtyInput">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="materialTagsSelect">{{ __('validation.attributes.tags') }}</label>
-                            <select id="materialTagsSelect" name="tags[]" class="form-control select2" multiple
-                                data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
-                            </select>
-                        </div>
-                    </form>
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" form="materialForm" class="btn btn-primary">{{ __('Save') }}</button>
-
-                        <button id="materialDeleteFormModalToggleButton" class="btn btn-icon btn-outline-danger"
-                            data-toggle="tooltip" title="{{ __('Delete') }}">
-                            <i class="fas fa-trash" style="font-size: 1rem !important"></i>
-                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="modal fade" id="materialDeleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">{{ __('Are you sure') }}?</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.tags') }}</label>
+                    <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
+                        formData.tags = $($el).val();
+                    })" :data-select2-opts="select2Opts"
+                        x-effect="addOptionIfNotExists($el, formData.tags); $($el).val(formData.tags).change()"
+                        :id="$id('input')">
+                    </select>
+                </div>
+            </form>
+
+            @slot('footer')
+                <div>
+                    {{-- TODO: bug on save button, text not hide on loading --}}
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" type="submit"
+                        :form="htmlElements.form.id">
+                        {{ __('Save') }}
                     </button>
+
+                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
+                            class="fas fa-undo"></i></button>
                 </div>
-                <div class="modal-body" style="font-size: 1.1rem">
-                    {{ __('This action can not be undone') }}.
-                    {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteMaterialName"></b>
-                    <form method="post" id="materialDeleteForm">
-                        @csrf
-                        @method('delete')
-                    </form>
+
+                <div>
+                    <x-_disabled-delete-button x-show="formData.has_children" x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
+
+                    <template x-if="formData.id && !formData.has_children">
+                        <button class="btn btn-icon btn-outline-danger" tabindex="-1"
+                            @@click="openDeleteModal">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </template>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" form="materialDeleteForm" class="btn btn-danger">{{ __('Yes') }}</button>
-                    <button data-dismiss="modal" class="btn btn-secondary" id="">{{ __('Cancel') }}</button>
-                </div>
-            </div>
-        </div>
+            @endslot
+        </x-_modal>
+
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
     </div>
 @endpush
 
-
-
 @push('js')
     <script>
-        if (materialsCrudDiv) {
-            const deletePutMethodInput = () => {
-                $('[name="_method"][value="put"]').remove()
-            }
+        // page scripts
 
-            const addPutMethodInput = () => {
-                $('#materialForm').append($('@method('put')'))
-            }
+        const select2Opts = JSON.stringify({
+            tags: true,
+            tokenSeparators: [',', ' ']
+        });
 
-            const setFormValue = material => {
-                const materialTagsSelect = $('#materialTagsSelect')
-                const selectOpts = materialTagsSelect.find('option')
-                const optValues = selectOpts.map((i, select) => select.innerHTML)
+        function addOptionIfNotExists($el, tags) {
+            const selectOpts = $($el).find('option')
+            const optValues = selectOpts.map((i, select) => select.innerText)
 
-                material.tags?.map(tag => {
-                    if ($.inArray(tag, optValues) === -1) {
-                        materialTagsSelect.append(`<option>${tag}</option>`)
-                    }
-                })
-
-                materialTagsSelect.val(material.tags || []).change()
-                materialIdInput.value = material.id || null
-                materialNameInput.value = material.name || null
-                materialUnitInput.value = material.unit || null
-                materialLowQtyInput.value = material.low_qty || null
-                materialCodeInput.value = material.code || null
-            }
-
-            // ######## ONCLICK SECTION
-
-            materialDeleteFormModalToggleButton.onclick = () => {
-                $('#materialDeleteConfirmationModal').modal('show')
-            };
-
-            $(document).on('click', '#addMaterialButton', function() {
-                deletePutMethodInput()
-                setFormValue({})
-
-                materialFormModalLabel.innerHTML = '{{ __('Add New Material') }}'
-                materialDeleteFormModalToggleButton.style.display = "none"
-                materialForm.action = "{{ route('materials.store') }}"
+            tags?.map(tag => {
+                if ($.inArray(tag, optValues) === -1) {
+                    $($el).append(`<option>${tag}</option>`)
+                }
             })
-
-            $(document).on('click', '.editMaterialButton', function() {
-                const materialId = $(this).data('material-id')
-                const material = materialsCrudDiv.materials.find(material => material.id === materialId)
-
-                setFormValue(material)
-                deletePutMethodInput()
-                addPutMethodInput()
-
-                materialDeleteFormModalToggleButton.style.display = 'block'
-                materialForm.action = `{{ route('materials.update', '') }}/${material.id}`
-                materialFormModalLabel.innerHTML = `{{ __('Edit Material') }}: ${material.name}`
-                deleteMaterialName.innerHTML = material.name
-                materialDeleteForm.action = `{{ route('materials.destroy', '') }}/${material.id}`
-            });
-
-
-            // ##### DATATABLE SECTION
-            $(document).on('click', '.materialTagButton', function() {
-                materialsCrudDiv.materialDatatable.DataTable().search(this.innerHTML).draw()
-            })
-
-            materialsCrudDiv.materialDatatable = $(materialDatatable).dataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-                ajax: {
-                    url: 'api/datatable/Material',
-                    dataSrc: json => {
-                        materialsCrudDiv.materials = json.data
-                        return json.data
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                        )
-                    },
-                    cache: true
-                },
-                order: [],
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('Code') }}'
-                }, {
-                    data: 'name',
-                    title: '{{ __('Name') }}'
-                }, {
-                    data: 'qty',
-                    title: '{{ __('Qty') }}',
-                    orderable: false,
-                    searchable: false,
-                    render: (data, type, row) => `${data} ${row.unit}`
-                }, {
-                    data: 'tags',
-                    name: 'tags_json',
-                    title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag =>
-                        `<a href="#" class="m-1 badge badge-primary materialTagButton">${tag}</a>`
-                    ).join('') || null,
-                }, {
-                    render: function(data, type, row) {
-                        const editButton = $(
-                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                        )
-                        editButton.attr('data-toggle', 'modal')
-                        editButton.attr('data-target', '#materialFormModal')
-                        editButton.addClass('editMaterialButton')
-                        editButton.attr('data-material-id', row.id)
-                        return editButton.prop('outerHTML')
-                    },
-                    orderable: false
-                }]
-            });
         }
+
+        const materialCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'brand': null,
+                'name': null,
+                'unit': null,
+                'low_qty': null,
+                'tags': []
+            },
+
+            refreshDatatableEventName: 'material:datatable-draw',
+
+            routes: {
+                store: '{{ route('materials.store') }}',
+                update: '{{ route('materials.update', '') }}/',
+                destroy: '{{ route('materials.destroy', '') }}/',
+            },
+
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Material') }}` : `{{ __('Edit Material') }}: ` + this
+                    .formData.id_for_human;
+            },
+
+            getDeleteTitle() {
+                return `{{ __('Delete Material') }}: ` + this.formData.id_for_human;
+            }
+        };
+
+        const materialDataTableConfig = {
+            locale: '{{ app()->getLocale() }}',
+            setDataListEventName: 'material:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $datatableAjaxUrl['material'] }}',
+            order: [2, 'asc'],
+            columns: [{
+                data: 'code',
+                title: '{{ __('Code') }}'
+            }, {
+                data: 'brand',
+                title: '{{ __('Brand') }}'
+            }, {
+                data: 'name',
+                title: '{{ __('Name') }}'
+            }, {
+                data: 'qty',
+                title: '{{ __('Qty') }}',
+                orderable: false,
+                searchable: false,
+                render: (data, type, row) => `${data} ${row.unit}`
+            }, {
+                data: 'tags',
+                name: 'tags_json',
+                width: '15%',
+                orderable: false,
+
+                title: '{{ __('Tags') }}',
+                render: data => data?.map(tag =>
+                    `<a href="javascript:;" class="m-1 badge badge-primary" @click="search('${tag}')">${tag}</a>`
+                ).join(''),
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('material:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
+                },
+                orderable: false
+            }]
+        };
     </script>
 @endpush

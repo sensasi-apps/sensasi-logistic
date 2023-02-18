@@ -14,6 +14,7 @@ class MaterialInDetail extends Model
 
     protected $connection = 'mysql';
     protected $fillable = ['material_in_id', 'material_id', 'qty', 'price'];
+
     public $timestamps = false;
 
     public function material()
@@ -29,6 +30,11 @@ class MaterialInDetail extends Model
     public function outDetails()
     {
         return $this->hasMany(MaterialOutDetail::class);
+    }
+
+    public function getOutTotalAttribute()
+    {
+        return $this->outDetails->sum('qty');
     }
 
     public function getQtyRemainAttribute()

@@ -65,12 +65,11 @@
                     <a href="javascript:;" @@click="formData.details.push({})"
                         class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add material') }}</a>
 
-                    {{-- TODO: should not refresh on added; possible solution material select with ajax --}}
-                    {{-- <span>
+                    <span>
                         {{ __('Material is not on the list') }}?
                         <a href="javascript:;" tabindex="-1" @@click="$dispatch('material:open-modal', null)"
                             class="badge badge-secondary ml-1">{{ __('Add New Material') }}</a>
-                    </span> --}}
+                    </span>
                 </div>
 
 
@@ -85,12 +84,10 @@
 
                         {{-- DETAILS LOOP --}}
                         <template x-for="(detail, $i) in formData.details">
-                            <div x-effect="hasOutDetails = () => detail.out_details?.length > 0"
-                                class="form-group row mx-0 mb-4 align-items-center">
-
+                            <div class="form-group row mx-0 mb-4 align-items-center">
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="hasOutDetails"
-                                        :data-exclude-enabling="hasOutDetails"
+                                    <select class="form-control" :disabled="detail.out_total > 0"
+                                        :data-exclude-enabling="detail.out_total > 0"
                                         x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             data: materials.map(material => ({
@@ -105,8 +102,7 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty"
-                                        :min="detail.out_details?.reduce((total, item) => total + item.qty, 0) || 0"
+                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
                                         required>
 
                                     <div class="input-group-append">
@@ -128,11 +124,11 @@
 
                                 <div class="col-1 pl-4 pr-0">
 
-                                    <x-_disabled-delete-button x-show="hasOutDetails" x-init="$($el).tooltip()"
+                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
                                         :title="__('cannot be deleted. Material(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!hasOutDetails()" :disabled="hasOutDetails"
+                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -146,8 +142,7 @@
             @slot('footer')
                 <div>
                     {{-- TODO: bug on save button, text not hide on loading --}}
-                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''"
-                        :form="htmlElements.form.id">
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
@@ -156,9 +151,9 @@
                 </div>
 
                 <div>
-                    <x-_disabled-delete-button x-show="isDetailsUsed" x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
+                    <x-_disabled-delete-button x-show="formData.has_out_details" x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
 
-                    <template x-if="!isDetailsUsed">
+                    <template x-if="formData.id && !formData.has_out_details">
                         <button class="btn btn-icon btn-outline-danger" tabindex="-1"
                             @@click="openDeleteModal">
                             <i class="fas fa-trash"></i>
@@ -222,7 +217,7 @@
             locale: '{{ app()->getLocale() }}',
             setDataListEventName: 'material-in:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
-            ajaxUrl: '/api/datatable/MaterialIn?with=details.material,details.stock,details.outDetails',
+            ajaxUrl: '{{ $datatableAjaxUrl['material_in'] }}',
             columns: [{
                 data: 'code',
                 title: '{{ __('validation.attributes.code') }}'

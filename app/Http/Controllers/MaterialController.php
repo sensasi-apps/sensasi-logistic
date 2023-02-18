@@ -4,71 +4,104 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Material;
+use Helper;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MaterialController extends Controller
 {
-    private function validateInput(Request $request, int $materialId = null)
+    private function validateInput(Request $request, int $materialId = null): array
     {
+        $name = $request->name;
+        $brand = $request->brand;
+
         return $request->validate([
-            'name' => 'required|unique:mysql.materials,name'  . ($materialId ? ",$materialId,id" : null),
-            'code' => 'nullable|unique:mysql.materials,code'  . ($materialId ? ",$materialId,id" : null),
+            'code' => "nullable|unique:mysql.materials,code,{$materialId}",
+            'name' => ['required', Rule::unique('materials')->where(function ($query) use ($name, $brand) {
+                return $query
+                    ->where('name', $name)
+                    ->where('brand', $brand);
+            })->ignore($materialId)],
+            'brand' => 'nullable',
             'low_qty' => 'numeric',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);
     }
 
-    private function getResponse(string $name, string $type)
+    private function getMaterialDatatableApiUrl(): string
     {
-        $message = [
-            'store' => __('has been added successfully'),
-            'update' => __('has been updated successfully'),
-            'delete' => __('has been deleted successfully')
-        ];
-
-        $color = $type == 'delete' ? 'warning' : 'success';
-
-        if (request()->wantsJson()) {
-            return response()->json([
-                'notifications' => [[
-                    'message' => "$name $message[$type]",
-                    'messageHtml' => "<b>$name</b> $message[$type]",
-                    'color' => $color
-                ]]
-            ]);
-        }
-
-        return redirect(route('materials.index'))->with('notifications', [
-            ["<b>$name</b> $message[$type]", $color]
+        $materialApiParamsJson = json_encode([
+            'append' => [
+                'has_children'
+            ]
         ]);
+
+        return route('api.datatable', ['model_name' => 'Material', 'params_json' => urlencode($materialApiParamsJson)]);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    private function getMaterialInDatatableApiUrl(): string
+    {
+        $materialInApiParamsJson = json_encode([
+            'with' => [
+                'details' => [
+                    'material:id,name,brand,unit',
+                    'outDetails',
+                    'stock'
+                ],
+                'outDetails:material_out_details.id'
+            ], 'append' => [
+                'has_out_details',
+                'details' => 'out_total',
+            ]
+        ]);
+
+        return route('api.datatable', ['model_name' => 'MaterialIn', 'params_json' => urlencode($materialInApiParamsJson)]);
+    }
+
+    private function getMaterialOutDatatableApiUrl(): string
+    {
+        $materialInApiParamsJson = json_encode([
+            'with' => [
+                'details' => [
+                    'material:id,name,brand,unit',
+                    'outDetails',
+                    'stock'
+                ],
+                'outDetails:material_out_details.id'
+            ], 'append' => [
+                'has_out_details',
+                'details' => 'out_total',
+            ]
+        ]);
+
+        return route('api.datatable', ['model_name' => 'MaterialIn', 'params_json' => urlencode($materialInApiParamsJson)]);
+    }
+
+    public function index(): View
     {
         $materialInTypes = DB::table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
         $materialOutTypes = DB::table('material_outs')->select('type')->distinct()->cursor()->pluck('type');
-        return view('pages.materials.index', compact('materialInTypes', 'materialOutTypes'));
+
+        $datatableAjaxUrl = [
+            'material' => $this->getMaterialDatatableApiUrl(),
+            'material_in' => $this->getMaterialInDatatableApiUrl(),
+            'material_out' => $this->getMaterialOutDatatableApiUrl()
+        ];
+
+        return view('pages.materials.index', compact('materialInTypes', 'materialOutTypes', 'datatableAjaxUrl'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $materialFromInput = $this->validateInput($request);
 
         $material = Material::create($materialFromInput);
 
-        return $this->getResponse($material->code ?? $material->name, 'store');
+        return Helper::getSuccessCrudResponse('added', __('material'), $material->id_for_human);
     }
 
     /**
@@ -78,32 +111,23 @@ class MaterialController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Material $material)
+    public function update(Request $request, Material $material): RedirectResponse|JsonResponse
     {
         $materialFromInput = $this->validateInput($request, $material->id);
 
         $material->update($materialFromInput);
 
-        return $this->getResponse($material->code ?? $material->name, 'update');
+        return Helper::getSuccessCrudResponse('updated', __('material'), $material->id_for_human);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Material $material)
+    public function destroy(Material $material): RedirectResponse|JsonResponse
     {
-
         if ($material->inDetails()->count() > 0) {
-            return redirect(route('materials.index'))->with('notifications', [
-                ['<b>' . ($material->code ?? $material->name) . '</b> ' . __('cannot be deleted. Material(s) has been used'), 'danger']
-            ]);
+            throw new \Exception('Material has in details');
         }
 
         $material->delete();
 
-        return $this->getResponse($material->code ?? $material->name, 'delete');
+        return Helper::getSuccessCrudResponse('deleted', __('material'), $material->id_for_human);
     }
 }
