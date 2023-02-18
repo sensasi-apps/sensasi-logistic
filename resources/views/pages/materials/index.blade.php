@@ -38,14 +38,6 @@
 
 @push('js')
     <script>
-        window.onhashchange = function() {
-            $(`#pageTab a[href="#${activeTab || 'list'}"].nav-link`).tab('show')
-        }
-
-        window.onhashchange()
-
-        $('#pageTab a.nav-link').on('click', function(e) {
-            window.history.pushState(null, null, `materials${e.target.hash}`)
-        })
+        tab_system_init();
     </script>
 @endpush

@@ -134,3 +134,16 @@ function intToCurrency(number) {
 function csrf_token() {
 	return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
+
+function tab_system_init() {
+	window.onhashchange = function () {
+		const activeTab = location.hash.replace(/^#/, '');
+		$(`#pageTab a[href="#${activeTab || 'list'}"].nav-link`).tab('show')
+	}
+
+	window.onhashchange()
+
+	$('#pageTab a.nav-link').on('click', function (e) {
+		window.history.pushState(null, null, `materials${e.target.hash}`)
+	})
+}
