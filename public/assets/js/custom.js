@@ -120,8 +120,8 @@ const addAlert = (parentEl, message, color = 'danger') => {
 }
 
 const handleNotifications = notifications =>
-	notifications.map(notif =>
-		addAlert(document.querySelector('.section-body'), notif.messageHtml, notif.color))
+	notifications?.map(notif =>
+		addAlert(document.querySelector('.section-body'), notif.messageHtml || notif.message, notif.color))
 
 function intToCurrency(number) {
 	return number.toLocaleString('id', {
