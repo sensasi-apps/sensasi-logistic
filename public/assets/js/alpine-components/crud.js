@@ -46,6 +46,12 @@ document.addEventListener('alpine:init', () => {
 		},
 
 		openDeleteModal() {
+			// prevent opening delete modal on create
+			if (!this.formData.id) {
+				console.error('No data id');
+				return;
+			}
+
 			this.htmlElements.deleteModal.setTitle(this.getDeleteTitle());
 			$(this.htmlElements.deleteModal).modal('show');
 		},
@@ -98,16 +104,9 @@ document.addEventListener('alpine:init', () => {
 			return untouchedJsonData !== currentJsonData;
 		},
 
-		get isDetailsUsed() {
-			return this.formData.id && this.formData.details.filter(detail => detail
-				.out_details
-				?.length >
-				0).length > 0;
-		},
-
 		async submitForm() {
 			const endpoint = this.formData.id ? CONFIG.routes.update + this.formData.id :
-			CONFIG.routes.store;
+				CONFIG.routes.store;
 
 			this.setIsLoading(true);
 
@@ -117,6 +116,12 @@ document.addEventListener('alpine:init', () => {
 		},
 
 		async submitDelete() {
+			// prevent submit delete form on create
+			if (!this.formData.id) {
+				console.error('No data id');
+				return;
+			}
+
 			this.setIsLoading(true);
 			await this.fetch(CONFIG.routes.destroy + this.formData.id, 'DELETE');
 			this.setIsLoading(false);
@@ -138,7 +143,7 @@ document.addEventListener('alpine:init', () => {
 			// if error
 			if (response.status !== 200) {
 				let modalEl;
-				
+
 				if (method === 'DELETE') {
 					modalEl = this.htmlElements.deleteModal;
 				} else {
@@ -175,9 +180,7 @@ document.addEventListener('alpine:init', () => {
 				// clear form
 				this.setFormData(CONFIG.blankData);
 
-				// show alert
-				addAlert(document.querySelector('.section-body'), responseBody.message,
-					method === 'DELETE' ? 'warning' : 'success')
+				handleNotifications(responseBody.notifications);
 			}
 		}
 	}));
