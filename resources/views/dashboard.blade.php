@@ -4,6 +4,8 @@
 
 @include('components.assets._datatable')
 
+{{-- TODO: implement alpinejs --}}
+
 @push('css-lib')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"
         integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g=="
@@ -177,8 +179,8 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-2">
                         <div class="card-stats">
-                            <div class="card-stats-title">{{ __("{$key1} {$key2}") }} -
-
+                            <div class="card-stats-title">
+                                {{ __("{$key1} {$key2}") }}
                             </div>
                             <div class="card-stats-items owl-carousel">
                                 @foreach ($item['nCategories'] as $nCat)
@@ -191,7 +193,7 @@
                         </div>
                         <div
                             class="card-icon shadow-{{ $item['color'] ?? 'secondary' }} bg-{{ $item['color'] ?? 'secondary' }}">
-                            <i class="fas fa-{{ $key2 === 'in' ? 'arrow-down' : 'arrow-up' }}"></i>
+                            <i class="fas fa-{{ $key1 === 'material' ? 'seedling' : 'box' }}"></i>
                         </div>
                         <div class="card-wrap">
                             <div class="card-header">
