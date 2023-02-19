@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Helper;
+use App\Models\Traits\CUDLogTrait;
 use Illuminate\Contracts\Auth\CanResetPassword;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements CanResetPassword
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, CUDLogTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -46,19 +46,6 @@ class User extends Authenticatable implements CanResetPassword
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::created(function (self $user) {
-            Helper::logAction('created', $user);
-        });
-
-        static::updated(function (self $user) {
-            Helper::logAction('updated', $user);
-        });
-    }
 
     public function getHasDefaultPasswordAttribute()
     {

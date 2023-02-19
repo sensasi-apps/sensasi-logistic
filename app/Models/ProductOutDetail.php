@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductOutDetail extends Model
 {
-    use HasFactory;
-    protected $connection = 'mysql';
-    protected $fillable = ['product_in_detail_id', 'product_out_id', 'qty', 'price'];
+    use HasFactory, CUDLogTrait;
+
+    protected $guarded = ['id'];
     public $timestamps = false;
 
     public function productInDetail()

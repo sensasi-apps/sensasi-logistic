@@ -21,7 +21,6 @@ class CreateMaterialInsTable extends Migration
             $table->string('type');
             $table->text('note')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

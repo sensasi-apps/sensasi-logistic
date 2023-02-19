@@ -52,7 +52,6 @@ class CreateProductOutDetailsTable extends Migration
                     LEFT JOIN product_outs AS po ON pod.product_out_id = po.id
                     WHERE
                         pid.product_id = productID AND
-                        po.deleted_at IS NULL AND
                         YEAR(po.at) = yearAt AND
                         MONTH(po.at) = monthAt AND
                         pod.qty > 0
@@ -92,18 +91,7 @@ class CreateProductOutDetailsTable extends Migration
             ON product_outs
             FOR EACH ROW
             BEGIN
-                -- TODO: optimize this IF
                 -- TODO: fix this like material_in_details
-                IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
-                    CALL product_out_details__product_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT product_in_detail_id
-                            FROM product_out_details
-                            WHERE product_out_id = OLD.id
-                        )
-                    );
-                END IF;
 
                 IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
                     CALL product_monthly_movements_upsert_out_procedure(

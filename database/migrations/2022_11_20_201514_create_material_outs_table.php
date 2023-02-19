@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateMaterialOutsTable extends Migration
@@ -21,7 +20,6 @@ class CreateMaterialOutsTable extends Migration
             $table->string('type');
             $table->text('note')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

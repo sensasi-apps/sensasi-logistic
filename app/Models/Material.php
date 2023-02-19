@@ -3,31 +3,17 @@
 namespace App\Models;
 
 use Helper;
+use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Material extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, CUDLogTrait;
 
     protected $fillable = ['code', 'name', 'tags', 'unit', 'low_qty', 'brand'];
     protected $appends = ['tags', 'qty', 'id_for_human'];
     protected $with = ['monthlyMovements'];
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::created(function (self $material) {
-            Helper::logAction('created', $material);
-        });
-
-        static::updated(function (self $material) {
-            Helper::logAction('updated', $material);
-        });
-    }
 
     public function setTagsAttribute(array $tags)
     {

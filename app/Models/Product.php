@@ -3,35 +3,19 @@
 namespace App\Models;
 
 use Helper;
+use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, CUDLogTrait;
 
-    protected $connection = 'mysql';
-    protected $fillable = ['code', 'name', 'tags', 'default_price','unit'];
+    protected $fillable = ['code', 'name', 'tags', 'default_price', 'low_qty', 'unit'];
     protected $appends = ['tags', 'qty'];
     protected $with = ['monthlyMovements'];
 
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::created(function (self $product) {
-            Helper::logAction('created', $product);
-        });
-
-        static::updated(function (self $product) {
-            Helper::logAction('updated', $product);
-        });
-    }
-
-    public function setTagsAttribute(Array $tags)
+    public function setTagsAttribute(array $tags)
     {
         $this->tags_json = json_encode($tags);
     }

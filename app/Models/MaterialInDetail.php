@@ -3,17 +3,15 @@
 namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
+use App\Models\Views\MaterialInDetailsStockView;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-use App\Models\Views\MaterialInDetailsStockView;
 
 class MaterialInDetail extends Model
 {
     use HasFactory, CUDLogTrait;
-
-    protected $connection = 'mysql';
-    protected $fillable = ['material_in_id', 'material_id', 'qty', 'price'];
+    
+    protected $guarded = ['id'];
 
     public $timestamps = false;
 

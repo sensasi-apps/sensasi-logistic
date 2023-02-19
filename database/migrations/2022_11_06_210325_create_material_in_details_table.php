@@ -51,7 +51,6 @@ class CreateMaterialInDetailsTable extends Migration
                 JOIN material_in_details mid ON mi.id = mid.material_in_id
                 WHERE
                     mid.material_id = materialID AND
-                    mi.deleted_at IS NULL AND
                     mid.qty > 0 AND
                     YEAR(mi.at) = yearAt AND
                     MONTH(mi.at) = monthAt
@@ -87,7 +86,6 @@ class CreateMaterialInDetailsTable extends Migration
                 DECLARE cur CURSOR FOR SELECT material_id FROM material_in_details WHERE material_in_id = OLD.id;
                 DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-                SET @is_deleted_at_changed = (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL);
                 SET @is_at_changed = YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at);
 
                 OPEN cur;
@@ -96,10 +94,6 @@ class CreateMaterialInDetailsTable extends Migration
                     FETCH cur INTO material_id;
                     IF done THEN
                         LEAVE read_loop;
-                    END IF;
-
-                    IF @is_deleted_at_changed OR @is_at_changed THEN
-                        CALL material_in_details__material_monthly_movements_procedure(OLD.id, material_id);
                     END IF;
 
                     IF @is_at_changed THEN

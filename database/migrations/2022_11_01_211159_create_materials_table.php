@@ -22,7 +22,6 @@ class CreateMaterialsTable extends Migration
             $table->string('unit', 10);
             $table->integer('low_qty')->nullable();
             $table->timestamps();
-            $table->softDeletes();
 
             $table->unique(['name', 'brand']);
         });

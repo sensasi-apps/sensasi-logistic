@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MaterialOutDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, CUDLogTrait;
 
-    protected $connection = 'mysql';
-    protected $fillable = ['material_in_detail_id', 'material_out_id', 'qty'];
+    protected $guarded = ['id'];
     public $timestamps = false;
 
     public function materialInDetail()

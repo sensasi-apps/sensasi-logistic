@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\CUDLogTrait;
+use App\Models\Views\ProductInDetailsStockView;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Views\ProductInDetailsStockView;
-
 class ProductInDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, CUDLogTrait;
 
-    protected $connection = 'mysql';
-    protected $fillable = ['product_in_id', 'product_id', 'qty'];
+    protected $guarded = ['id'];
     public $timestamps = false;
 
     public function product()

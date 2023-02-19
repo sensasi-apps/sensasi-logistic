@@ -50,7 +50,6 @@ class CreateProductInDetailsTable extends Migration
                     LEFT JOIN product_ins AS `pi` ON pid.product_in_id = `pi`.id
                     WHERE
                         pid.product_id = productID AND
-                        `pi`.deleted_at IS NULL AND
                         YEAR(`pi`.at) = yearAt AND
                         MONTH(`pi`.at) = monthAt AND
                         pid.qty > 0
@@ -83,18 +82,7 @@ class CreateProductInDetailsTable extends Migration
                 ON product_ins
                 FOR EACH ROW
             BEGIN
-                -- TODO: optimize this IF
                 -- TODO: fix this like material_in_details
-                IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
-                    CALL product_in_details__product_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT product_id
-                            FROM product_in_details
-                            WHERE product_in_id = OLD.id
-                        )
-                    );
-                END IF;
 
                 IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
                     CALL product_monthly_movements_upsert_in_procedure(

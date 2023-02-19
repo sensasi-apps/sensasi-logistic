@@ -22,7 +22,6 @@ class CreateProductsTable extends Migration
             $table->integer('low_qty')->nullable();
             $table->string('unit', 10);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

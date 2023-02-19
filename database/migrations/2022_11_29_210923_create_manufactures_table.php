@@ -27,7 +27,6 @@ class CreateManufacturesTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
