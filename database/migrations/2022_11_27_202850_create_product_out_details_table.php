@@ -70,13 +70,11 @@ class CreateProductOutDetailsTable extends Migration
                 DECLARE monthAt int;
                 DECLARE productID int;
 
-                SELECT YEAR(`at`), MONTH(`at`) INTO yearAt, monthAt
-                FROM product_outs
-                WHERE id = productOutId;
-
-                SELECT `pid`.`product_id` INTO productID
-                FROM product_in_details AS `pid`
-                WHERE id = productInDetailId;
+                SELECT YEAR(`po`.`at`), MONTH(`po`.`at`), `pid`.product_id INTO yearAt, monthAt, productID
+                FROM product_out_details as `pod`
+                LEFT JOIN product_outs AS po ON `pod`.product_out_id = po.id
+                LEFT JOIN product_in_details AS pid ON `pod`.product_in_detail_id = pid.id
+                WHERE `pod`.product_out_id = productOutId AND `pod`.product_in_detail_id = productInDetailId;
 
                 CALL product_monthly_movements_upsert_out_procedure(
                     productID,
@@ -91,28 +89,34 @@ class CreateProductOutDetailsTable extends Migration
             ON product_outs
             FOR EACH ROW
             BEGIN
-                -- TODO: fix this like material_in_details
+                DECLARE done INT DEFAULT FALSE;
+                DECLARE product_id INT;
 
-                IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
-                    CALL product_monthly_movements_upsert_out_procedure(
-                        (
-                            SELECT product_in_detail_id
-                            FROM product_out_details
-                            WHERE product_out_id = OLD.id
-                        ),
-                        YEAR(OLD.at),
-                        MONTH(OLD.at)
-                    );
+                DECLARE cur CURSOR FOR SELECT
+                    `pid`.product_id
+                FROM product_out_details AS `pod`
+                LEFT JOIN product_in_details AS pid ON `pod`.product_in_detail_id = pid.id
+                WHERE product_out_id = OLD.id;
 
-                    CALL product_out_details__product_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT product_in_detail_id
-                            FROM product_out_details
-                            WHERE product_out_id = OLD.id
-                        )
-                    );
-                END IF;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+                SET @is_at_changed = YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at);
+
+                OPEN cur;
+
+                read_loop: LOOP
+                    FETCH cur INTO product_id;
+                    IF done THEN
+                        LEAVE read_loop;
+                    END IF;
+
+                    IF @is_at_changed THEN
+                        CALL product_monthly_movements_upsert_out_procedure(product_id, YEAR(OLD.at), MONTH(OLD.at));
+                        CALL product_monthly_movements_upsert_out_procedure(product_id, YEAR(NEW.at), MONTH(NEW.at));
+                    END IF;
+                END LOOP;
+
+                CLOSE cur;
             END;
         ');
 

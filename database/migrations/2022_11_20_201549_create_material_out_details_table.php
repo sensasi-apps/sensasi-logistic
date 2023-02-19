@@ -50,7 +50,6 @@ class CreateMaterialOutDetailsTable extends Migration
                 JOIN material_outs AS mo ON `mod`.material_out_id = mo.id
                 WHERE
                     mid.material_id = materialID AND
-                    mo.deleted_at IS NULL AND
                     YEAR(mo.at) = yearAt AND
                     MONTH(mo.at) = monthAt AND
                     `mod`.qty > 0
@@ -68,13 +67,11 @@ class CreateMaterialOutDetailsTable extends Migration
                 DECLARE monthAt int;
                 DECLARE materialID int;
 
-                SELECT YEAR(`at`), MONTH(`at`) INTO yearAt, monthAt
-                FROM material_outs
-                WHERE id = materialOutId;
-
-                SELECT `mid`.`material_id` INTO materialID
-                FROM material_in_details AS mid
-                WHERE id = materialInDetailId;
+                SELECT YEAR(`mo`.`at`), MONTH(`mo`.`at`), `mid`.material_id INTO yearAt, monthAt, materialID
+                FROM material_out_details as `mod`
+                LEFT JOIN material_outs AS mo ON `mod`.material_out_id = mo.id
+                LEFT JOIN material_in_details AS mid ON `mod`.material_in_detail_id = mid.id
+                WHERE `mod`.material_out_id = materialOutId AND `mod`.material_in_detail_id = materialInDetailId;
 
                 CALL material_monthly_movements_upsert_out_procedure(
                     materialID,
@@ -89,39 +86,34 @@ class CreateMaterialOutDetailsTable extends Migration
             ON material_outs
             FOR EACH ROW
             BEGIN
-                -- TODO: optimize this IF
-                -- TODO: fix this like material_in_details
-                IF (OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL) OR (NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL) THEN
-                    CALL material_out_details__material_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT material_in_detail_id
-                            FROM material_out_details
-                            WHERE material_out_id = OLD.id
-                        )
-                    );
-                END IF;
+                DECLARE done INT DEFAULT FALSE;
+                DECLARE material_id INT;
 
-                IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
-                    CALL material_monthly_movements_upsert_out_procedure(
-                        (
-                            SELECT material_in_detail_id
-                            FROM material_out_details
-                            WHERE material_out_id = OLD.id
-                        ),
-                        YEAR(OLD.at),
-                        MONTH(OLD.at)
-                    );
+                DECLARE cur CURSOR FOR SELECT
+                    `mid`.material_id
+                FROM material_out_details AS `mod`
+                LEFT JOIN material_in_details AS mid ON `mod`.material_in_detail_id = mid.id
+                WHERE material_out_id = OLD.id;
 
-                    CALL material_out_details__material_monthly_movements_procedure(
-                        OLD.id,
-                        (
-                            SELECT material_in_detail_id
-                            FROM material_out_details
-                            WHERE material_out_id = OLD.id
-                        )
-                    );
-                END IF;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+                SET @is_at_changed = YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at);
+
+                OPEN cur;
+
+                read_loop: LOOP
+                    FETCH cur INTO material_id;
+                    IF done THEN
+                        LEAVE read_loop;
+                    END IF;
+
+                    IF @is_at_changed THEN
+                        CALL material_monthly_movements_upsert_out_procedure(material_id, YEAR(OLD.at), MONTH(OLD.at));
+                        CALL material_monthly_movements_upsert_out_procedure(material_id, YEAR(NEW.at), MONTH(NEW.at));
+                    END IF;
+                END LOOP;
+
+                CLOSE cur;
             END;
         ');
 

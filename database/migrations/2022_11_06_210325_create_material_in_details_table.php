@@ -98,6 +98,7 @@ class CreateMaterialInDetailsTable extends Migration
 
                     IF @is_at_changed THEN
                         CALL material_monthly_movements_upsert_in_procedure(material_id, YEAR(OLD.at), MONTH(OLD.at));
+                        CALL material_monthly_movements_upsert_in_procedure(material_id, YEAR(NEW.at), MONTH(NEW.at));
                     END IF;
                 END LOOP;
 

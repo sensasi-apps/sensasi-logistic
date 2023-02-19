@@ -82,20 +82,29 @@ class CreateProductInDetailsTable extends Migration
                 ON product_ins
                 FOR EACH ROW
             BEGIN
-                -- TODO: fix this like material_in_details
+                DECLARE done INT DEFAULT FALSE;
+                DECLARE product_id INT;
 
-                IF YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at) THEN
-                    CALL product_monthly_movements_upsert_in_procedure(
-                        (SELECT product_id FROM product_in_details WHERE product_in_id = OLD.id),
-                        YEAR(OLD.at),
-                        MONTH(OLD.at)
-                    );
+                DECLARE cur CURSOR FOR SELECT product_id FROM product_in_details WHERE product_in_id = OLD.id;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-                    CALL product_in_details__product_monthly_movements_procedure(
-                        OLD.id,
-                        (SELECT product_id FROM product_in_details WHERE product_in_id = OLD.id)
-                    );
-                END IF;
+                SET @is_at_changed = YEAR(NEW.at) <> YEAR(OLD.at) OR MONTH(NEW.at) <> MONTH(OLD.at);
+
+                OPEN cur;
+
+                read_loop: LOOP
+                    FETCH cur INTO product_id;
+                    IF done THEN
+                        LEAVE read_loop;
+                    END IF;
+
+                    IF @is_at_changed THEN
+                        CALL product_monthly_movements_upsert_in_procedure(product_id, YEAR(OLD.at), MONTH(OLD.at));
+                        CALL product_monthly_movements_upsert_in_procedure(product_id, YEAR(NEW.at), MONTH(NEW.at));
+                    END IF;
+                END LOOP;
+
+                CLOSE cur;
             END;
         ');
 
