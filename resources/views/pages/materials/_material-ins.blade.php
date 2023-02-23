@@ -100,8 +100,11 @@
                                             dropdownParent: $el.closest('.modal-body'),
                                             data: materials.map(material => ({
                                                 id: material.id,
-                                                text: material.name + ` (${material.brand})` + (material.code ? ` (${material.code})` : ''),
-                                            }))
+                                                text: null,
+                                                material: material
+                                            })),
+                                            templateResult: materialSelect2TemplateResultAndSelection,
+                                            templateSelection: materialSelect2TemplateResultAndSelection,
                                         }).on('select2:select', (e) => {
                                             detail.material_id = e.target.value;
                                         });"
@@ -186,6 +189,27 @@
         // page scripts
 
         const materials = @json(App\Models\Material::all());
+
+        function materialSelect2TemplateResultAndSelection(data) {
+
+            const material = data.material;
+
+            const codePrinted = material?.code ?
+                '<small class=\'text-muted\'><b>' +
+                material?.code + '</b></small> - ' : '';
+            const brandPrinted = material?.code ?
+                '<small class=\'text-muted\'>(' +
+                material?.brand + ')</small>' : '';
+            const namePrinted = material?.name;
+
+            return $(`
+                <div>
+                    ${codePrinted}
+                    ${namePrinted}
+                    ${brandPrinted}
+                </div>
+            `);
+        }
 
         const materialInCrudConfig = {
             blankData: {
