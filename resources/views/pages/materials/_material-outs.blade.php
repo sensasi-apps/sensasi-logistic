@@ -1,317 +1,325 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="materialOutsCrudDiv">
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Material Out List') }}
-            <button type="button" id="addMaterialOutsButton" class="ml-2 btn btn-danger" data-toggle="modal"
-                data-target="#materialOutFormModal">
-                <i class="fas fa-plus-circle"></i> Tambah
-            </button>
-        </h2>
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="materialOutDatatable" style="width:100%">
-                    </table>
-                </div>
-            </div>
+<h2 class="section-title">
+    {{ __('Material Out List') }}
+    <button x-data type="button" @@click="$dispatch('material-out:open-modal', null)"
+        class="ml-2 btn btn-danger">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(materialOutDataTableConfig)" @@material-out:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <div class="modal fade" id="materialOutFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-        aria-hidden="">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialOutFormModalLabel"></h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <div x-data="crud(materialOutCrudConfig)" @@material-out:open-modal.document="openModal"
+        @@material-out:set-data-list.document="setDataList">
+        <x-_modal size="xl" centered>
+            <p x-show="formData.manufacture && formData.id" class="text-danger">
+                *{{ __('This data can be edit only from manufacture menu') }}</p>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
+                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+
+                <div class="row">
+                    <div class="col form-group" x-id="['text-input']">
+                        <label :for="$id('text-input')">{{ __('Code') }}</label>
+                        <input type="text" class="form-control" x-model="formData.code" :id="$id('text-input')">
+                    </div>
+
+                    <div class="col form-group" x-id="['select']">
+                        <label :for="$id('select')">{{ __('Type') }}</label>
+                        <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
+                            x-effect="$($el).val(formData.type).change()"
+                            @@readystatechange.document="$($el).select2({
+                                tags: true,
+                                dropdownParent: $el.closest('.modal-body'),
+                                data: {{ Js::from($materialOutTypes) }}.map(type => ({
+                                    id: type,
+                                    text: type
+                                }))
+                            }).on('select2:select', (e) => {
+                                formData.type = e.target.value;
+                            })"></select>
+                    </div>
                 </div>
-                <div class="modal-body" id="materialOutFormModalBody">
 
-                    <form method="POST" id="materialOutForm">
-                        @csrf
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('Date') }}</label>
+                    <input type="date" class="form-control" required :id="$id('input')"
+                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        @@change="formData.at = $event.target.value">
+                </div>
 
-                        <input type="hidden" name="id" id="materialOutIdInput">
+                <div class="form-group" x-id="['textarea']">
+                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
+                        style="height:100%;"></textarea>
+                </div>
 
+                <div class="d-flex justify-content-center my-2">
+                    <a href="javascript:;" @@click="formData.details.push({})"
+                        class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add material') }}</a>
+                </div>
 
-                        <div class="row">
-                            <div class="col form-group">
-                                <label for="materialOutCodeInput">{{ __('Code') }}</label>
-                                <input type="text" class="form-control" name="code" id="materialOutCodeInput">
-                            </div>
-
-                            <div class="col form-group">
-                                <label for="materialOutTypeSelect">{{ __('Type') }}</label>
-                                <select id="materialOutTypeSelect" name="type" required class="form-control select2"
-                                    data-select2-opts='{"tags": "true"}'>
-                                    @foreach ($materialOutTypes as $type)
-                                        <option>{{ $type }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
+                    x-effect="total = 0; formData.details?.forEach(detail => total += (detail.qty * detail.material_in_detail?.price || 0));">
+                    <div style="width: 100%">
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="materialOutAtInput">{{ __('Date') }}</label>
-                            <input type="date" class="form-control" name="at" required id="materialOutAtInput">
-                        </div>
+                        {{-- DETAILS LOOP --}}
+                        <template x-for="(detail, $i) in formData.details">
+                            <div class="form-group row mx-0 mb-4 align-items-center">
+                                <div class="col-5 px-0">
+                                    <select class="form-control" x-init="initMaterialInDetailSelect2;
+                                    $($el).on('select2:select', (e) => {
+                                        detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
+                                        detail.material_in_detail_id = e.target.value;
+                                    })"
+                                        x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
+                                        required></select>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="materialOutNoteInput">{{ __('Note') }}</label>
-                            <textarea class="form-control" name="note" id="materialOutNoteInput" rows="3" style="height:100%;"></textarea>
-                        </div>
+                                <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
+                                    x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
+                                    x-text="priceText">
+                                </div>
 
-                        <div class="px-1" style="overflow-x: auto">
-                            <div id="materialOutDetailsParent" style="width: 100%">
-                                <div class="row m-0">
-                                    <label class="col-6">{{ __('Name') }}</label>
-                                    <label class="col-5">{{ __('Qty') }}</label>
+                                <div class="col-2 pl-4 pr-0 input-group">
+                                    <input class="form-control" type="number" x-model="detail.qty" min="1" required>
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" x-data="{ unit: '' }"
+                                            x-effect="unit = detail.material_in_detail?.material.unit" x-show="unit"
+                                            x-text="unit"></span>
+                                    </div>
+                                </div>
+
+                                {{-- TODO: restyled time date on template --}}
+
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
+                                    x-effect="subtotal = (detail.qty * detail.material_in_detail?.price || 0)"
+                                    x-text="intToCurrency(subtotal)">
+                                </div>
+
+                                <div class="col-1 pl-4 pr-0">
+                                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                        @@click.prevent="removeDetail($i)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </template>
+                        {{-- END DETAILS LOOP --}}
 
-
-                        <div class="">
-                            <a href="#" id="addMaterialOutDetailButton" class="btn btn-success btn-sm mr-2"><i
-                                    class="fas fa-plus"></i> {{ __('More') }}</a>
-                            <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
+                        {{-- TOTAL --}}
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <div>
-                        <button type="submit" form="materialOutForm"
-                            class="btn btn-outline-success">{{ __('Save') }}</button>
                     </div>
-                    <form method="post" id="deleteMaterialOutForm">
-                        @csrf
-                        @method('delete')
-                        <button type="submit" class="btn btn-icon btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
                 </div>
-            </div>
-        </div>
+            </form>
+
+            @slot('footer')
+                <div>
+                    {{-- TODO: bug on save button, text not hide on loading --}}
+                    <button class="btn btn-success" :disabled="formData.manufacture && formData.id"
+                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                        {{ __('Save') }}
+                    </button>
+
+                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
+                            class="fas fa-undo"></i></button>
+                </div>
+
+                <div>
+                    <button x-show="!formData.manufacture && formData.id" class="btn btn-icon btn-outline-danger"
+                        tabindex="-1" @@click="openDeleteModal">
+                        <i class="fas fa-trash"></i>
+                    </button>
+
+                </div>
+            @endslot
+        </x-_modal>
+
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
     </div>
 @endpush
 
 @push('js')
     <script>
-        {
-            if (materialOutsCrudDiv) {
-                $(function() {
-                    $('#materialOutTypeSelect').select2({
-                        tags: true,
-                        dropdownParent: $('#materialOutFormModalBody')
-                    })
-                })
-
-                const initMaterialSelects = $selectDom => $selectDom.select2({
-                    dropdownParent: $('#materialOutFormModalBody'),
-                    placeholder: '{{ __('Material') }}',
-                    ajax: {
-                        url: '/api/select2/MaterialInDetail',
-                        dataType: 'json',
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        processResults: function(data) {
-                            const theResults = data.map(materialInDetail => {
-
-                                return {
-                                    id: materialInDetail.id,
-                                    text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${materialInDetail.material_in?.at ? moment(materialInDetail.material_in?.at).format('DD-MM-YYYY') : null}`
-                                }
-                            })
-
-                            return {
-                                results: theResults
-                            }
-                        }
-                    },
-                    minimumInputLength: 3
-                })
-
-                function addMaterialOutDetailRow(detail) {
-                    const nDetailInputSet = $('.detailInputSetDiv').length
-                    const materialSelectParentDiv = document.createElement('div')
-                    materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
-                    const $selectDom = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
-                        .addClass('form-control select2 listSelect')
-                        .attr('name', `details[${nDetailInputSet}][material_in_detail_id]`)
-                    $(materialSelectParentDiv).append($selectDom)
-
-                    if (detail.material_in_detail_id) {
-                        $selectDom.append(
-                            `<option value="${detail.material_in_detail_id}">${detail.material_in_detail?.material.name}</option>`
+        function initMaterialInDetailSelect2() {
+            $(this.$el).select2({
+                dropdownParent: $(this.$el).closest('.modal-body'),
+                placeholder: '{{ __('Material') }}',
+                ajax: {
+                    delay: 500,
+                    cache: true,
+                    url: '/api/select2/MaterialInDetail',
+                    dataType: 'json',
+                    beforeSend: function(request) {
+                        request.setRequestHeader(
+                            'Authorization',
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
                         )
-                    }
-
-                    initMaterialSelects($selectDom)
-                    $selectDom.val(detail.material_in_detail_id).change()
-
-
-                    const qtyInputParentDiv = document.createElement('div')
-                    qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
-                    $(qtyInputParentDiv).append(
-                        `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-                    )
-
-                    const removeRowButtonParentDiv = document.createElement('div')
-                    removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
-                    $(removeRowButtonParentDiv).append($(
-                        '<button class="btn btn-outline-danger btn-icon" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>'
-                    ))
-
-                    const detailRowDiv = document.createElement('div')
-                    detailRowDiv.setAttribute('class',
-                        'form-group row materialOutDetailRowDiv mx-0 align-items-center detailInputSetDiv')
-                    $(detailRowDiv).append(materialSelectParentDiv)
-                    $(detailRowDiv).append(qtyInputParentDiv)
-
-                    if (nDetailInputSet > 0) {
-                        $(detailRowDiv).append(removeRowButtonParentDiv)
-                    }
-
-                    materialOutDetailsParent.append(detailRowDiv)
-                }
-
-
-                const setMaterialOutFormValue = materialOut => {
-                    const materialOutTypeSelect = $('#materialOutTypeSelect')
-                    materialOutTypeSelect.val(materialOut.type || null).change()
-                    materialOutIdInput.value = materialOut.id || null
-                    materialOutCodeInput.value = materialOut.code || null
-                    materialOutNoteInput.value = materialOut.note || null
-
-                    if (materialOut.at) {
-                        materialOutAtInput.value = `${moment(materialOut.at).format('YYYY-MM-DD')}`
-                    } else {
-                        materialOutAtInput.value = '{{ date('Y-m-d') }}'
-                    }
-
-
-                    if (materialOut.details && materialOut.details.length > 0) {
-                        materialOut.details.map(detail => addMaterialOutDetailRow(detail))
-                    } else {
-                        addMaterialOutDetailRow({})
-                        addMaterialOutDetailRow({})
-                        addMaterialOutDetailRow({})
-                    }
-
-                }
-
-
-                $(document).on('click', '#addMaterialOutsButton', function() {
-                    $('[name="_method"][value="put"]').remove()
-                    $('.materialOutDetailRowDiv').remove()
-
-                    setMaterialOutFormValue({})
-
-                    deleteMaterialOutForm.style.display = "none"
-                    materialOutFormModalLabel.innerHTML = '{{ __('Add New Material Out') }}'
-                    materialOutForm.action = "{{ route('material-outs.store') }}"
-                })
-
-                $(document).on('click', '.editMaterialOutButton', function() {
-                    $('.materialOutDetailRowDiv').remove()
-                    $('[name="_method"][value="put"]').remove()
-                    $('#materialOutForm').append($('@method('put')'))
-
-                    const materialOutId = $(this).data('material-out-id')
-                    const materialOut = materialOutsCrudDiv.materialOuts.find(materialOut => materialOut.id ===
-                        materialOutId)
-
-                    setMaterialOutFormValue(materialOut)
-
-                    deleteMaterialOutForm.style.display = "block"
-                    materialOutFormModalLabel.innerHTML =
-                        `{{ __('Edit Material Out') }}: ${moment(materialOut.at).format('DD-MM-YYYY')}`
-                    materialOutForm.action = `{{ route('material-outs.update', '') }}/${materialOut.id}`
-                    deleteMaterialOutForm.action = `{{ route('material-outs.destroy', '') }}/${materialOut.id}`
-                })
-
-                const renderTagButton = text =>
-                    `<a href="#" class="m-1 badge badge-danger materialOutDetailTag">${text}</a>`
-
-
-                $(document).on('click', '.materialOutDetailTag', function() {
-                    const materialName = this.innerHTML.split(' ')[0]
-                    materialOutsCrudDiv.materialOutDatatable.DataTable().search(materialName).draw()
-                })
-
-                materialOutsCrudDiv.materialOutDatatable = $(materialOutDatatable).dataTable({
-                    processing: true,
-                    search: {
-                        return: true,
                     },
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                    },
-                    serverSide: true,
-                    ajax: {
-                        url: '/api/datatable/MaterialOut?with=details.materialInDetail.material',
-                        dataSrc: json => {
-                            materialOutsCrudDiv.materialOuts = json.data
-                            return json.data
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        cache: true
-                    },
-                    order: [1, 'desc'],
-                    columns: [{
-                        data: 'code',
-                        title: '{{ __('validation.attributes.code') }}'
-                    }, {
-                        data: 'at',
-                        title: '{{ __('validation.attributes.at') }}',
-                        render: at => moment(at).format('DD-MM-YYYY')
-                    }, {
-                        data: 'type',
-                        title: '{{ __('validation.attributes.type') }}',
-                    }, {
-                        data: 'note',
-                        title: '{{ __('validation.attributes.note') }}',
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Items') }}',
-                        data: 'details',
-                        name: 'details.materialInDetail.material.name',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagButton(
-                                `${detail.material_in_detail?.material.name} (${detail.qty})`
-                            )).join('')
-                    }, {
-                        render: function(data, type, row) {
-                            const editButton = $(
-                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
-                            editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#materialOutFormModal')
-                            editButton.addClass('editMaterialOutButton')
-                            editButton.attr('data-material-out-id', row.id)
-                            return editButton.prop('outerHTML')
-                        },
-                        orderable: false
-                    }]
-                })
+                    processResults: materialInDetail => {
+                        const data = materialInDetail.map(materialInDetail => {
+                            return {
+                                id: materialInDetail.id,
+                                text: null,
+                                materialInDetail: materialInDetail
+                            }
+                        });
+
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
+                    }
+
+                    const datePrinted = data.materialInDetail?.material_in.at ? moment(data.materialInDetail
+                        .material_in.at).format('DD-MM-YYYY') : null;
+
+                    return $(`
+                        <div style='line-height: 1em;'>
+                            <small>${datePrinted}</small>
+                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
+                            <small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
+                        </div>
+                    `);
+                },
+                templateSelection: function(data) {
+                    if (data.text === '{{ __('Material') }}') {
+                        return data.text;
+                    }
+
+                    const materialInDetail = data.materialInDetail || data.element.materialInDetail;
+
+                    const codePrinted = materialInDetail.material?.code ?
+                        '<small class=\'text-muted\'><b>' +
+                        materialInDetail.material?.code + '</b></small> - ' : '';
+                    const brandPrinted = materialInDetail.material?.code ?
+                        '<small class=\'text-muted\'>(' +
+                        materialInDetail.material?.brand + ')</small>' : '';
+                    const namePrinted = materialInDetail.material?.name;
+                    const atPrinted = materialInDetail.material_in?.at ? moment(materialInDetail.material_in
+                        ?.at).format('DD-MM-YYYY') : null;
+
+                    return $(`
+                        <div>
+                            ${codePrinted}
+                            ${namePrinted}
+                            ${brandPrinted}
+                            <small class='text-muted ml-2'>
+                                ${atPrinted}
+                            </small>
+                        </div>
+                    `);
+                },
+                minimumInputLength: 3
+            });
+        }
+
+        function materialInDetailSelect2Effect($el, material_in_detail_id, material_in_detail) {
+            if ($($el).find(`option[value="${material_in_detail_id}"]`).length) {
+                $($el).val(material_in_detail_id).trigger('change');
+            } else {
+                var newOption = new Option('', material_in_detail_id, true, true);
+                newOption.materialInDetail = material_in_detail;
+                $($el).append(newOption);
             }
         }
+
+        const materialOutCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'type': null,
+                'at': null,
+                'note': null,
+                'details': [{}],
+                'manufacture': {}
+            },
+
+            refreshDatatableEventName: 'material-out:datatable-draw',
+
+            routes: {
+                store: '{{ route('material-outs.store') }}',
+                update: '{{ route('material-outs.update', '') }}/',
+                destroy: '{{ route('material-outs.destroy', '') }}/',
+            },
+
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Material Out') }}` : `{{ __('Edit Material Out') }}: ` + this
+                    .formData.id_for_human;
+            },
+
+            getDeleteTitle() {
+                return `{{ __('Delete Material Out') }}: ` + this.formData.id_for_human;
+            }
+        };
+
+        const materialOutDataTableConfig = {
+            locale: '{{ app()->getLocale() }}',
+            setDataListEventName: 'material-out:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $datatableAjaxUrl['material_out'] }}',
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'at',
+                title: '{{ __('validation.attributes.at') }}',
+                render: at => at ? moment(at).format('DD-MM-YYYY') : null
+            }, {
+                data: 'type',
+                title: '{{ __('validation.attributes.type') }}',
+            }, {
+                data: 'note',
+                width: '40%',
+                title: '{{ __('validation.attributes.note') }}',
+            }, {
+                orderable: false,
+                title: '{{ __('Items') }}',
+                data: 'details',
+                name: 'details.materialInDetail.material.name',
+                width: '20%',
+                render: details => details.map(detail => {
+                    const materialName = detail.material_in_detail.material?.name;
+                    const detailQty = detail.qty;
+
+                    const text = `${materialName} (${detailQty})`;
+                    return `<a href="javascript:;" class="m-1 badge badge-danger" @click="search('${materialName}')">${text}</a>`;
+                }).join('')
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('material-out:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
+                },
+                orderable: false
+            }],
+        };
     </script>
 @endpush

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Material;
 use Helper;
+use App\Models\Material;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +35,7 @@ class MaterialController extends Controller
     private function getMaterialDatatableApiUrl(): string
     {
         $materialApiParamsJson = json_encode([
-            'append' => [
+            'appends' => [
                 'has_children'
             ]
         ]);
@@ -48,14 +48,13 @@ class MaterialController extends Controller
         $materialInApiParamsJson = json_encode([
             'with' => [
                 'details' => [
-                    'material:id,name,brand,unit',
+                    'material',
                     'outDetails',
                     'stock'
                 ],
-                'outDetails:material_out_details.id'
-            ], 'append' => [
-                'has_out_details',
-                'details' => 'out_total',
+                'outDetails'
+            ], 'appends' => [
+                'has_out_details'
             ]
         ]);
 
@@ -64,23 +63,21 @@ class MaterialController extends Controller
 
     private function getMaterialOutDatatableApiUrl(): string
     {
+        // TODO: optimize columns to be selected
         $materialInApiParamsJson = json_encode([
             'with' => [
-                'details' => [
-                    'material:id,name,brand,unit',
-                    'outDetails',
-                    'stock'
+                'manufacture',
+                'details.materialInDetail' => [
+                    'material',
+                    'materialIn'
                 ],
-                'outDetails:material_out_details.id'
-            ], 'append' => [
-                'has_out_details',
-                'details' => 'out_total',
             ]
         ]);
 
-        return route('api.datatable', ['model_name' => 'MaterialIn', 'params_json' => urlencode($materialInApiParamsJson)]);
+        return route('api.datatable', ['model_name' => 'MaterialOut', 'params_json' => urlencode($materialInApiParamsJson)]);
     }
 
+    // TODO: move index to another controller
     public function index(): View
     {
         $materialInTypes = DB::table('material_ins')->select('type')->distinct()->cursor()->pluck('type');
@@ -104,13 +101,6 @@ class MaterialController extends Controller
         return Helper::getSuccessCrudResponse('added', __('material'), $material->id_for_human);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Material $material): RedirectResponse|JsonResponse
     {
         $materialFromInput = $this->validateInput($request, $material->id);
