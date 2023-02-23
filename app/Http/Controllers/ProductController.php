@@ -2,90 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
+use Helper;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class ProductController extends Controller
 {
-    private function validateInput(Request $request, int $productId = null)
-    {
-        return $request->validate([
-            'code' => 'nullable|string|unique:mysql.products,code' . ($productId ? ",$productId,id" : null),
-            'name' => 'required|string|unique:mysql.products,name' . ($productId ? ",$productId,id" : null),
-            'low_qty' => 'numeric',
-            'unit' => 'required|string',
-            'default_price' => 'required|numeric',
-            'tags' => 'nullable|array'
-        ]);
-
-    }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $productInTypes = DB::table('product_ins')->select('type')->distinct()->cursor()->pluck('type');
-        $productOutTypes = DB::table('product_outs')->select('type')->distinct()->cursor()->pluck('type');
-        return view('pages.products.index', compact('productInTypes', 'productOutTypes'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $productFromInput = $this->validateInput($request);
-        
+
         $product = Product::create($productFromInput);
 
-        return redirect(route('products.index'))->with('notifications', [
-            [($product->code ?? $product->name) . ' ' . __('was added successfully'), 'success']
-        ]);
-
-
+        return Helper::getSuccessCrudResponse('added', __('product'), $product->id_for_human);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $productFromInput = $this->validateInput($request, $product->id);
 
         $product->update($productFromInput);
 
-        return redirect(route('products.index'))->with('notifications', [
-          [($product->code ?? $product->name) . ' ' . __('was updated successfully'), 'success']
-        ]);
+        return Helper::getSuccessCrudResponse('updated', __('product'), $product->id_for_human);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(Product $product): RedirectResponse|JsonResponse
     {
-        $product = Product::find($id);
+        if ($product->has_children) {
+            throw new \Exception('Product has in details');
+        }
+
         $product->delete();
 
-        return redirect(route('products.index'))->with('notifications', [
-          [($product->code ?? $product->name) . ' ' . __('was deleted successfully'), 'warning']
+        return Helper::getSuccessCrudResponse('deleted', __('product'), $product->id_for_human);
+    }
+
+    private function validateInput(Request $request): array
+    {
+        return $request->validate([
+            'code' => "nullable|string|unique:mysql.products,code,{$request->id}",
+            'name' => "required|string|unique:mysql.products,name,{$request->id}",
+            'low_qty' => 'nullable|numeric',
+            'unit' => 'required|string',
+            'default_price' => 'required|numeric',
+            'tags' => 'nullable|array'
         ]);
     }
 }

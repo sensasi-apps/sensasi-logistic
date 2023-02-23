@@ -1,211 +1,192 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="productsCrudDiv">
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Product List') }}
-            <button type="button" class="ml-2 btn btn-primary addProductButton" data-toggle="modal"
-                data-target="#productFormModal">
-                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-            </button>
-        </h2>
+{{-- TODO: clearer name for all push and stack --}}
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="productDatatable" style="width:100%"></table>
-                </div>
-            </div>
+<h2 class="section-title">
+    {{ __('Product List') }}
+    <button x-data type="button" @@click="$dispatch('product:open-modal', null)"
+        class="ml-2 btn btn-primary">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(productListDataTableConfig)" @@product:datatable-reload.document="reload"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <x-_modal id="productFormModal" centered>
-        <form method="POST" id="productForm">
-            @csrf
+    <div x-data="crud(productListCrudConfig)" @@product:open-modal.document="openModal"
+        @@product:set-data-list.document="setDataList">
+        <x-_modal centered>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
 
-            <div class="form-group">
-                <label for="codeInput">{{ __('validation.attributes.code') }}</label>
-                <input type="text" class="form-control" name="code" id="codeInput">
-            </div>
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.code') }}</label>
+                    <input type="text" class="form-control" x-model="formData.code" :id="$id('input')">
+                </div>
 
-            <div class="form-group">
-                <label for="nameInput">{{ __('validation.attributes.name') }}</label>
-                <input type="text" class="form-control" name="name" required id="nameInput">
-            </div>
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.name') }}</label>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.name" required>
+                </div>
 
-            <div class="form-group">
-                <label for="unitInput">{{ __('Unit') }}</label>
-                <input type="text" class="form-control" name="unit" required id="unitInput">
-            </div>
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.unit') }}</label>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.unit" required>
+                </div>
 
-            <div class="form-group">
-                <label for="priceInput">{{ __('validation.attributes.default_price') }}</label>
-                <input type="number" min="0" class="form-control" name="default_price" required id="priceInput">
-            </div>
+                <div class="form-group" x-id="['input']">
+                    <label for="priceInput" :for="$id('input')">{{ __('validation.attributes.default_price') }}</label>
+                    <input type="number" min="0" class="form-control" :id="$id('input')"
+                        x-model="formData.default_price" required>
+                </div>
 
-            <div class="form-group">
-                <label for="lowQty">{{ __('validation.attributes.low_qty') }}</label>
-                <input type="number" min="0" class="form-control" name="low_qty" required id="lowQty">
-            </div>
-            
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.low_qty') }}</label>
 
-            <div class="form-group">
-                <label for="tagsSelect">{{ __('Tags') }}</label>
-                <select id="tagsSelect" name="tags[]" class="form-control select2" multiple
-                    data-select2-opts='{"tags": "true", "tokenSeparators": [",", " "]}'>
-                </select>
-            </div>
-        </form>
+                    <div class="input-group">
+                        <input type="number" min="0" class="form-control" :id="$id('input')"
+                            x-model="formData.low_qty">
+                        <div class="input-group-append">
+                            <span class="input-group-text" x-show="formData.unit" x-text="formData.unit"></span>
+                        </div>
+                    </div>
+                </div>
 
-        @slot('footer')
-            <button type="submit" form="productForm" class="btn btn-primary">{{ __('Save') }}</button>
+                <div class="form-group" x-id="['select']">
+                    <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
+                    <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
+                        formData.tags = $($el).val();
+                    })" :data-select2-opts="select2Opts"
+                        x-effect="addOptionIfNotExists($el, formData.tags); $($el).val(formData.tags).change()"
+                        :id="$id('select')">
+                    </select>
+                </div>
+            </form>
 
-            <button id="deleteFormManufacture" type="submit" class="btn btn-icon btn-outline-danger" data-toggle="tooltip"
-                title="{{ __('Delete') }}" onclick="$('#productDeleteConfirmationModal').modal('show');">
-                <i class="fas fa-trash" style="font-size: 1rem !important"></i>
-            </button>
-        @endslot
-    </x-_modal>
+            @slot('footer')
+                <div>
+                    {{-- TODO: bug on save button, text not hide on loading --}}
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" type="submit"
+                        :form="htmlElements.form.id">
+                        {{ __('Save') }}
+                    </button>
 
-    <x-_modal id="productDeleteConfirmationModal" :title="__('Are you sure')" color="danger">
-        {{ __('This action can not be undone') }}.
-        {{ __('Do you still want to delete') }} <b style="font-size: 1.5rem" id="deleteProductName"></b>
-        <form method="post" id="deleteForm">
-            @csrf
-            @method('delete')
-            <input type="hidden" name="id" id="deleteId">
-        </form>
+                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
+                            class="fas fa-undo"></i></button>
+                </div>
 
-        @slot('footer')
-            <button type="submit" form="deleteForm" class="btn btn-danger" id="">{{ __('Yes') }}</button>
-            <button data-dismiss="modal" class="btn btn-secondary" id="">{{ __('Cancel') }}</button>
-        @endslot
-    </x-_modal>
+                <div>
+                    <x-_disabled-delete-button x-show="formData.has_children" x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+
+                    <template x-if="formData.id && !formData.has_children">
+                        <button class="btn btn-icon btn-outline-danger" tabindex="-1"
+                            @@click="openDeleteModal">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </template>
+                </div>
+            @endslot
+        </x-_modal>
+
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
+    </div>
 @endpush
 
 @push('js')
     <script>
-        let products
-        const tagsSelect = $('#tagsSelect')
-        let productDatatable = $('#productDatatable')
+        // page scripts
 
-        const deletePutMethodInput = () => {
-            $('[name="_method"][value="put"]').remove()
-        }
+        const select2Opts = JSON.stringify({
+            tags: true,
+            tokenSeparators: [',', ' ']
+        });
 
-        const addPutMethodInput = () => {
-            $('#productForm').append($('@method('put')'))
-        }
+        function addOptionIfNotExists($el, tags) {
+            const selectOpts = $($el).find('option')
+            const optValues = selectOpts.map((i, select) => select.innerText)
 
-        const setFormValue = product => {
-            const selectOpts = tagsSelect.find('option');
-            const optValues = selectOpts.map((i, select) => select.innerText);
-
-            product.tags?.map(tag => {
+            tags?.map(tag => {
                 if ($.inArray(tag, optValues) === -1) {
-                    tagsSelect.append(`<option>${tag}</option>`);
-                };
+                    $($el).append(`<option>${tag}</option>`)
+                }
             })
-
-            tagsSelect.val(product.tags || []).change()
-            nameInput.value = product.name || null
-            unitInput.value = product.unit || null
-            priceInput.value = product.default_price || null
-            lowQty.value = product.low_qty || null
-            codeInput.value = product.code || null
-            deleteId.value = product.id
         }
 
+        const productListCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'name': null,
+                'default_price': null,
+                'unit': null,
+                'low_qty': null,
+                'tags': []
+            },
 
-        const datatableSearch = tag =>
-            productDatatable.search(tag).draw()
+            // TODO: chaining refresh datatable
+            refreshDatatableEventName: 'product:datatable-reload',
 
+            routes: {
+                store: '{{ route('products.store') }}',
+                update: '{{ route('products.update', '') }}/',
+                destroy: '{{ route('products.destroy', '') }}/',
+            },
 
-        $(document).on('click', '.addProductButton', function() {
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Product') }}` : `{{ __('Edit Product') }}: ` + this
+                    .formData.id_for_human;
+            },
 
-            deletePutMethodInput();
-            setFormValue({});
+            getDeleteTitle() {
+                return `{{ __('Delete Product') }}: ` + this.formData.id_for_human;
+            }
+        };
 
-            productFormModal.setTitle('{{ __('Add new product') }}')
-            deleteFormManufacture.style.display = "none";
-            productForm.action = "{{ route('products.store') }}";
-        })
+        const productListDataTableConfig = {
+            setDataListEventName: 'product:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $datatableAjaxUrl['product_list'] }}',
+            order: [1, 'asc'],
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'name',
+                title: '{{ __('validation.attributes.name') }}'
+            }, {
+                data: 'qty',
+                title: '{{ __('validation.attributes.qty') }}',
+                orderable: false,
+                searchable: false,
+                render: (data, type, row) => `${data} ${row.unit}`
+            }, {
+                data: 'tags',
+                name: 'tags_json',
+                width: '15%',
+                orderable: false,
 
-        $(document).on('click', '.editProductButton', function() {
-            const productId = $(this).data('product-id');
-            const product = productsCrudDiv.products.find(product => product.id === productId);
-
-            setFormValue(product);
-            deletePutMethodInput();
-            addPutMethodInput();
-
-            productFormModal.setTitle(`{{ __('Edit') }} ${product.name}`)
-            deleteFormManufacture.style.display = "block";
-
-            productForm.action = "{{ route('products.update', '') }}/" + product.id;
-
-            deleteProductName.innerText = product.name
-            deleteForm.action = "{{ route('products.destroy', '') }}/" + product.id;
-        });
-
-        $(document).ready(function() {
-            productsCrudDiv.productDatatable = $(productDatatable).DataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
+                title: '{{ __('validation.attributes.tags') }}',
+                render: data => data?.map(tag =>
+                    `<a href="javascript:;" class="m-1 badge badge-primary" @click="search('${tag}')">${tag}</a>`
+                ).join(''),
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('product:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
                 },
-                serverSide: true,
-                ajax: {
-                    url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'Product') }}',
-                    dataSrc: json => {
-                        productsCrudDiv.products = json.data;
-                        return json.data;
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                        )
-                    },
-                    cache: true
-                },
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('validation.attributes.code') }}'
-                }, {
-                    data: 'name',
-                    title: '{{ __('validation.attributes.name') }}'
-                }, {
-                    data: 'unit',
-                    title: '{{ __('Unit') }}'
-                }, {
-                    data: 'default_price',
-                    title: '{{ __('validation.attributes.default_price') }}',
-                    render: data => data.toLocaleString()
-                }, {
-                    data: 'tags',
-                    name: 'tags_json',
-                    title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag =>
-                        `<a href="#" onclick="datatableSearch('${tag}')" class="m-1 badge badge-primary">${tag}</a>`
-                    ).join('') || null,
-                }, {
-                    render: function(data, type, row) {
-                        const editButton = $(
-                            '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                        )
-                        editButton.attr('data-toggle', 'modal')
-                        editButton.attr('data-target', '#productFormModal')
-                        editButton.addClass('editProductButton');
-                        editButton.attr('data-product-id', row.id)
-                        return editButton.prop('outerHTML')
-                    },
-                    orderable: false
-                }]
-            });
-        });
+                orderable: false
+            }]
+        };
     </script>
 @endpush

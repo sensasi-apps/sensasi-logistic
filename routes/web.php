@@ -16,6 +16,7 @@ use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\ManufactureReportController;
 use App\Http\Controllers\MaterialIndexController;
+use App\Http\Controllers\ProductIndexController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -111,16 +112,18 @@ Route::middleware('auth')->group(function () {
         'store', 'update', 'destroy'
     ]);
 
-    Route::resource('products', ProductController::class)->except([
-        'create', 'show', 'edit'
+    Route::get('products', ProductIndexController::class);
+
+    Route::resource('products', ProductController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
-    Route::resource('product-ins', ProductInController::class)->except([
-        'create', 'show', 'edit'
+    Route::resource('product-ins', ProductInController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
-    Route::resource('product-outs', ProductOutController::class)->except([
-        'create', 'show', 'edit'
+    Route::resource('product-outs', ProductOutController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
     Route::resource('manufactures', ManufactureController::class)->except([

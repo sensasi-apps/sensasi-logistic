@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Helper;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,8 +10,8 @@ class Product extends Model
 {
     use HasFactory, CUDLogTrait;
 
-    protected $fillable = ['code', 'name', 'tags', 'default_price', 'low_qty', 'unit'];
-    protected $appends = ['tags', 'qty'];
+    protected $guarded = ['id'];
+    protected $appends = ['tags', 'qty', 'id_for_human'];
     protected $with = ['monthlyMovements'];
 
     public function setTagsAttribute(array $tags)
@@ -22,7 +21,7 @@ class Product extends Model
 
     public function getTagsAttribute()
     {
-        return json_decode($this->tags_json);
+        return json_decode($this->tags_json) ?? [];
     }
 
     public function monthlyMovements()
@@ -39,5 +38,17 @@ class Product extends Model
         }
 
         return $qty;
+    }
+
+    public function getIdForHumanAttribute()
+    {
+        $codePrinted = $this->code ? "{$this->code} - " : null;
+
+        return "{$codePrinted}{$this->name}";
+    }
+
+    public function getHasChildrenAttribute()
+    {
+        return $this->monthlyMovements->count() > 0;
     }
 }
