@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\ManufactureReportController;
+use App\Http\Controllers\MaterialIndexController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 
@@ -76,7 +77,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard'))->name('/');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     Route::controller(AppSystemController::class)->group(function () {
@@ -88,16 +89,18 @@ Route::middleware('auth')->group(function () {
             ]);
         });
 
-        Route::prefix('report')->name('report.')->group(function(){
+        Route::prefix('report')->name('report.')->group(function () {
             route::resource('materials', MaterialReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
             route::resource('products', ProductReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
             route::resource('manufactures', ManufactureReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
         });
     });
     Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
-    
-    Route::resource('materials', MaterialController::class)->except([
-        'create', 'show', 'edit'
+
+    Route::get('materials', MaterialIndexController::class);
+
+    Route::resource('materials', MaterialController::class)->only([
+        'store', 'update', 'destroy'
     ]);
 
     Route::resource('material-ins', MaterialInController::class)->only([
