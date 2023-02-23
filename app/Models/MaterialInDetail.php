@@ -32,7 +32,7 @@ class MaterialInDetail extends Model
 
     public function getOutTotalAttribute()
     {
-        return $this->outDetails->sum('qty');
+        return $this->outDetails->sum('qty') ?? 0;
     }
 
     public function getQtyRemainAttribute()
