@@ -17,7 +17,7 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table x-data="dataTable(materialListDataTableConfig)" @@material:datatable-draw.document="draw"
+            <table x-data="dataTable(materialListDataTableConfig)" @@material:datatable-reload.document="reload"
                 class="table table-striped" style="width:100%">
             </table>
         </div>
@@ -57,13 +57,13 @@
                     </div>
                 </div>
 
-                <div class="form-group" x-id="['input']">
-                    <label :for="$id('input')">{{ __('validation.attributes.tags') }}</label>
+                <div class="form-group" x-id="['select']">
+                    <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
                     <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
                         formData.tags = $($el).val();
                     })" :data-select2-opts="select2Opts"
                         x-effect="addOptionIfNotExists($el, formData.tags); $($el).val(formData.tags).change()"
-                        :id="$id('input')">
+                        :id="$id('select')">
                     </select>
                 </div>
             </form>
@@ -128,7 +128,7 @@
                 'tags': []
             },
 
-            refreshDatatableEventName: 'material:datatable-draw',
+            refreshDatatableEventName: 'material:datatable-reload',
 
             routes: {
                 store: '{{ route('materials.store') }}',
@@ -147,7 +147,6 @@
         };
 
         const materialListDataTableConfig = {
-            locale: '{{ app()->getLocale() }}',
             setDataListEventName: 'material:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
             ajaxUrl: '{{ $datatableAjaxUrl['material'] }}',
