@@ -19,6 +19,10 @@ document.addEventListener('alpine:init', () => {
 				return this.dataTable.DataTable().draw();
 			},
 
+			reload() {
+				return this.dataTable.DataTable().ajax.reload();
+			},
+
 			initDataTable($el) {
 				return $($el).dataTable({
 					processing: true,
@@ -26,9 +30,9 @@ document.addEventListener('alpine:init', () => {
 						return: true,
 					},
 					language: {
-						url: `https://cdn.datatables.net/plug-ins/1.13.1/i18n/${CONFIG.locale}.json`
+						url: `https://cdn.datatables.net/plug-ins/1.13.1/i18n/${CONFIG.locale || 'id'}.json`
 					},
-					serverSide: true,
+					serverSide: Boolean(CONFIG.serverSide),
 					ajax: {
 						url: CONFIG.ajaxUrl,
 						dataSrc: json => {
