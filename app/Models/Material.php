@@ -29,6 +29,10 @@ class Material extends Model
         return $this->hasMany(MaterialMonthlyMovement::class)->orderByDesc('year')->orderByDesc('month');
     }
 
+    /**
+     * UNUSED RELATION ON THIS MODEL
+     *
+     **/
     public function inDetails()
     {
         return $this->hasMany(MaterialInDetail::class);
