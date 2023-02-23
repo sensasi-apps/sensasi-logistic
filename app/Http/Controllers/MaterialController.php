@@ -31,7 +31,7 @@ class MaterialController extends Controller
 
     public function destroy(Material $material): RedirectResponse|JsonResponse
     {
-        if ($material->inDetails()->count() > 0) {
+        if ($material->has_children) {
             throw new \Exception('Material has in details');
         }
 
