@@ -18,11 +18,11 @@ class CreateManufacturesTable extends Migration
             $table->string('code', 15)->nullable()->unique();
             $table->dateTime('at');
             $table->text('note')->nullable();
-            $table->foreignId('material_out_id')
+            $table->foreignId('material_out_id')->unique()
                 ->constrained('material_outs')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
-            $table->foreignId('product_in_id')
+            $table->foreignId('product_in_id')->unique()
                 ->constrained('product_ins')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
