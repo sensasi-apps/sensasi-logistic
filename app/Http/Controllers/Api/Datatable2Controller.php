@@ -23,21 +23,14 @@ class Datatable2Controller extends Controller
 				$queryBuilder->orderByDesc('id');
 			}
 
-			$eloquentCollection = $queryBuilder->get();
+			// TODO: fix search by date is reversed like 2020-01-01 to 01-01-2020
+			$tmp = DataTables::eloquent($queryBuilder);
 
-			if (isset($params['append'])) {
-				foreach ($params['append'] as $key => $append) {
-					if (is_numeric($key)) {
-						$eloquentCollection->append($append);
-					} else {
-						$eloquentCollection->each(function ($item) use ($key, $append) {
-							$item->$key->append($append);
-						});
-					}
-				}
+			if (isset($params['appends'])) {
+				$tmp->addColumns($params['appends']);
 			}
 
-			return DataTables::of($eloquentCollection)->make();
+			return $tmp->make();
 		}
 	}
 }
