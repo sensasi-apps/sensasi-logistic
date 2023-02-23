@@ -26,8 +26,8 @@ class CreateMaterialInDetailsTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->integer('qty');
-            $table->integer('price');
+            $table->float('qty');
+            $table->decimal('price');
             $table->unique(['material_id', 'material_in_id']);
         });
 
@@ -39,14 +39,14 @@ class CreateMaterialInDetailsTable extends Migration
             )
             BEGIN
                 INSERT INTO material_monthly_movements
-                    (material_id, year, month, `in`, avg_in, avg_price)
+                    (material_id, year, month, `in`, avg_in, avg_in_price)
                 SELECT
                     mid.material_id,
                     yearAt,
                     monthAt,
                     @total_qty := SUM(mid.qty),
                     @avg_qty := AVG(mid.qty),
-                    @avg_price := AVG(CASE WHEN price > 0 THEN price ELSE NULL END)
+                    @avg_in_price := AVG(CASE WHEN mid.price > 0 THEN mid.price ELSE NULL END)
                 FROM material_ins mi
                 JOIN material_in_details mid ON mi.id = mid.material_in_id
                 WHERE
@@ -55,7 +55,7 @@ class CreateMaterialInDetailsTable extends Migration
                     YEAR(mi.at) = yearAt AND
                     MONTH(mi.at) = monthAt
                 GROUP BY mid.material_id
-                ON DUPLICATE KEY UPDATE `in` = @total_qty, avg_in = @avg_qty, avg_price = @avg_price;
+                ON DUPLICATE KEY UPDATE `in` = @total_qty, avg_in = @avg_qty, avg_in_price = @avg_in_price;
             END;
         ');
 

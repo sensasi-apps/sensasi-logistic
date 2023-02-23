@@ -26,8 +26,8 @@ class CreateProductOutDetailsTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->integer('qty');
-            $table->integer('price');
+            $table->float('qty');
+            $table->decimal('price');
             $table->unique(['product_in_detail_id', 'product_out_id'], 'product_out_details_unique');
         });
 
@@ -36,28 +36,26 @@ class CreateProductOutDetailsTable extends Migration
             IN yearAt int,
             IN monthAt int
         )
-        BEGIN
-                INSERT INTO
-                    product_monthly_movements (product_id, year, month, `out`, avg_out, avg_price)
+            BEGIN
+                INSERT INTO product_monthly_movements
+                    (product_id, year, month, `out`, avg_out, avg_out_price)
                 SELECT
-                    product_id,
+                    pid.product_id,
                     yearAt,
                     monthAt,
-                    @total_qty := SUM(qty),
-                    @avg_qty := AVG(qty),
-                    @avg_price := AVG(CASE WHEN price > 0 THEN price ELSE NULL END)
-                FROM (SELECT productID as product_id, pod.qty, price
-                    FROM product_in_details AS pid
-                    LEFT JOIN product_out_details AS pod ON pid.id = pod.product_in_detail_id
-                    LEFT JOIN product_outs AS po ON pod.product_out_id = po.id
-                    WHERE
-                        pid.product_id = productID AND
-                        YEAR(po.at) = yearAt AND
-                        MONTH(po.at) = monthAt AND
-                        pod.qty > 0
-                    UNION SELECT productID, 0, 0) AS qty_temp
-                GROUP BY product_id
-                ON DUPLICATE KEY UPDATE `out` = @total_qty, avg_out = @avg_qty, avg_price = @avg_price;
+                    @total_qty := SUM(`pod`.qty),
+                    @avg_qty := AVG(`pod`.qty),
+                    @avg_out_price := AVG(CASE WHEN `pod`.price > 0 THEN `pod`.price ELSE NULL END)
+                FROM product_in_details AS pid
+                JOIN product_out_details AS `pod` ON pid.id = `pod`.product_in_detail_id
+                JOIN product_outs AS po ON `pod`.product_out_id = po.id
+                WHERE
+                    pid.product_id = productID AND
+                    YEAR(po.at) = yearAt AND
+                    MONTH(po.at) = monthAt AND
+                    `pod`.qty > 0
+                GROUP BY pid.product_id
+                ON DUPLICATE KEY UPDATE `out` = @total_qty, avg_out = @avg_qty;
             END;
         ');
 

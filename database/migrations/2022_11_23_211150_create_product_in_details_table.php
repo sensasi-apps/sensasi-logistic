@@ -26,7 +26,8 @@ class CreateProductInDetailsTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->integer('qty');
+            $table->float('qty');
+            $table->decimal('price');
             $table->unique(['product_id', 'product_in_id']);
         });
 
@@ -38,25 +39,23 @@ class CreateProductInDetailsTable extends Migration
             )
             BEGIN
                 INSERT INTO
-                    product_monthly_movements (product_id, year, month, `in`, avg_in)
+                    product_monthly_movements (product_id, year, month, `in`, avg_in, avg_in_price)
                 SELECT
                     product_id,
                     yearAt,
                     monthAt,
                     @total_qty := SUM(qty),
-                    @avg_qty := AVG(qty)
-                FROM (SELECT productID as product_id, pid.qty
-                    FROM product_in_details AS pid
-                    LEFT JOIN product_ins AS `pi` ON pid.product_in_id = `pi`.id
-                    WHERE
-                        pid.product_id = productID AND
-                        YEAR(`pi`.at) = yearAt AND
-                        MONTH(`pi`.at) = monthAt AND
-                        pid.qty > 0
-                UNION SELECT productID, 0
-                ) AS qty_temp
-                GROUP BY product_id
-                ON DUPLICATE KEY UPDATE `in` = @total_qty, avg_in = @avg_qty;
+                    @avg_qty := AVG(qty),
+                    @avg_in_price := AVG(CASE WHEN pid.price > 0 THEN pid.price ELSE NULL END)
+                FROM product_ins pi
+                LEFT JOIN product_in_details pid ON pi.id = pid.product_in_id
+                WHERE
+                    pid.product_id = productID AND
+                    YEAR(`pi`.at) = yearAt AND
+                    MONTH(`pi`.at) = monthAt AND
+                    pid.qty > 0
+                GROUP BY pid.product_id
+                ON DUPLICATE KEY UPDATE `in` = @total_qty, avg_in = @avg_qty, avg_in_price = @avg_in_price;
             END;
         ');
 

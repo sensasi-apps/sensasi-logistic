@@ -38,13 +38,14 @@ class CreateMaterialOutDetailsTable extends Migration
             )
             BEGIN
                 INSERT INTO material_monthly_movements
-                    (material_id, year, month, `out`, avg_out)
+                    (material_id, year, month, `out`, avg_out, avg_out_price)
                 SELECT
                     mid.material_id,
                     yearAt,
                     monthAt,
                     @total_qty := SUM(`mod`.qty),
-                    @avg_qty := AVG(`mod`.qty)
+                    @avg_out := AVG(`mod`.qty),
+                    @avg_out_price := AVG(CASE WHEN `mid`.price > 0 THEN `mid`.price ELSE NULL END)
                 FROM material_in_details AS mid
                 JOIN material_out_details AS `mod` ON mid.id = `mod`.material_in_detail_id
                 JOIN material_outs AS mo ON `mod`.material_out_id = mo.id
@@ -54,7 +55,7 @@ class CreateMaterialOutDetailsTable extends Migration
                     MONTH(mo.at) = monthAt AND
                     `mod`.qty > 0
                 GROUP BY mid.material_id
-                ON DUPLICATE KEY UPDATE `out` = @total_qty, avg_out = @avg_qty;
+                ON DUPLICATE KEY UPDATE `out` = @total_qty, avg_out = @avg_out, avg_out_price = @avg_out_price;
             END;
         ');
 
