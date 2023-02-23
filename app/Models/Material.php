@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Helper;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -48,7 +47,10 @@ class Material extends Model
 
     public function getIdForHumanAttribute()
     {
-        return "[{$this->code}] {$this->name}" . ($this->brand ? " ({$this->brand})" : null);
+        $codePrinted = $this->code ? "{$this->code} - " : null;
+        $brandPrinted = $this->brand ? " ({$this->brand})" : null;
+
+        return "{$codePrinted}{$this->name}{$brandPrinted}";
     }
 
     public function getHasChildrenAttribute()
