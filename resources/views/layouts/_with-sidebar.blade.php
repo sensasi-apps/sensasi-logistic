@@ -2,12 +2,15 @@
     <div class="navbar-bg"></div>
     <nav class="navbar navbar-expand-lg main-navbar">
         <div class="form-inline mr-auto">
-            <ul class="navbar-nav mr-3">
+            <ul class="navbar-nav mr-3 align-items-center">
                 <li>
                     <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg">
                         <i class="fas fa-bars"></i>
-                        <span id="currentDate" class="ml-4"></span>
                     </a>
+                </li>
+                <li class="text-job text-white text-monospace" style="line-height: 1.3em; font-size: 0.9em;">
+                    <div id="currentTime" class="mt-2" style="font-size: 1.4em"></div>
+                    <small id="currentDate"></small>
                 </li>
             </ul>
         </div>
@@ -97,10 +100,13 @@
     <script>
         {
             const serverMoment = moment.unix({{ time() }});
+            const currentTime = document.getElementById('currentTime');
+            const currentDate = document.getElementById('currentDate');
 
             setInterval(() => {
                 serverMoment.add(1, 'second');
-                currentDate.innerHTML = serverMoment.format('DD-MM-YYYY HH:mm:ss');
+                currentTime.innerText = serverMoment.format('HH:mm:ss');
+                currentDate.innerText = serverMoment.format('DD-MM-YYYY');
             }, 1000);
         };
     </script>
