@@ -6,28 +6,26 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
-<div>
-    <h2 class="section-title">
-        {{ __('Material List') }}
-        <button x-data type="button" @@click="$dispatch('material:open-modal', null)"
-            class="ml-2 btn btn-primary">
-            <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-        </button>
-    </h2>
+<h2 class="section-title">
+    {{ __('Material List') }}
+    <button x-data type="button" @@click="$dispatch('material:open-modal', null)"
+        class="ml-2 btn btn-primary">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table x-data="dataTable(materialDataTableConfig)" @@material:datatable-draw.document="draw"
-                    class="table table-striped" style="width:100%">
-                </table>
-            </div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(materialListDataTableConfig)" @@material:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <div x-data="crud(materialCrudConfig)" @@material:open-modal.document="openModal"
+    <div x-data="crud(materialListCrudConfig)" @@material:open-modal.document="openModal"
         @@material:set-data-list.document="setDataList">
         <x-_modal centered>
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
@@ -119,7 +117,7 @@
             })
         }
 
-        const materialCrudConfig = {
+        const materialListCrudConfig = {
             blankData: {
                 'id': null,
                 'code': null,
@@ -148,7 +146,7 @@
             }
         };
 
-        const materialDataTableConfig = {
+        const materialListDataTableConfig = {
             locale: '{{ app()->getLocale() }}',
             setDataListEventName: 'material:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',

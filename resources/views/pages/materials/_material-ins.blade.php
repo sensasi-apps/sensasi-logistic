@@ -6,28 +6,26 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
-<div>
-    <h2 class="section-title">
-        {{ __('Material In List') }}
-        <button x-data type="button" @@click="$dispatch('material-in:open-modal', null)"
-            class="ml-2 btn btn-success">
-            <i class="fas fa-plus-circle"></i> Tambah
-        </button>
-    </h2>
+<h2 class="section-title">
+    {{ __('Material In List') }}
+    <button x-data type="button" @@click="$dispatch('material-in:open-modal', null)"
+        class="ml-2 btn btn-success">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table x-data="dataTable(dataTableConfig)" @@material-in:datatable-draw.document="draw"
-                    class="table table-striped" style="width:100%">
-                </table>
-            </div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(materialInDatatableConfig)" @@material-in:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <div x-data="crud(metrialInCrudConfig)" @@material-in:open-modal.document="openModal"
+    <div x-data="crud(materialInCrudConfig)" @@material-in:open-modal.document="openModal"
         @@material-in:set-data-list.document="setDataList">
         <x-_modal size="xl" centered>
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
@@ -41,8 +39,15 @@
                     <div class="col form-group" x-id="['select']">
                         <label :for="$id('select')">{{ __('Type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
-                            x-effect="$($el).val(formData.type).change()" x-on:readystatechange.document="initSelect2"
-                            x-init="$($el).on('select2:select', (e) => {
+                            x-effect="$($el).val(formData.type).change()"
+                            x-on:readystatechange.document="$($el).select2({
+                                tags: true,
+                                dropdownParent: $el.closest('.modal-body'),
+                                data: {{ Js::from($materialInTypes) }}.map(type => ({
+                                    id: type,
+                                    text: type
+                                }))
+                            }).on('select2:select', (e) => {
                                 formData.type = e.target.value;
                             })"></select>
                     </div>
@@ -55,9 +60,9 @@
                         @@change="formData.at = $event.target.value">
                 </div>
 
-                <div class="form-group">
-                    <label for="materialInNoteInput">{{ __('Note') }}</label>
-                    <textarea x-model="formData.note" class="form-control" name="note" id="materialInNoteInput" rows="3"
+                <div class="form-group" x-id="['textarea']">
+                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
                         style="height:100%;"></textarea>
                 </div>
 
@@ -67,27 +72,30 @@
 
                     <span>
                         {{ __('Material is not on the list') }}?
-                        <a href="javascript:;" tabindex="-1" @@click="$dispatch('material:open-modal', null)"
+                        <a href="javascript:;" tabindex="-1"
+                            @@click="$dispatch('material:open-modal', null)"
                             class="badge badge-secondary ml-1">{{ __('Add New Material') }}</a>
                     </span>
                 </div>
 
-
-                <div class="px-0" style="overflow-x: auto">
+                {{-- TODO: SELECT2 detailed preview --}}
+                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
+                    x-effect="total = 0; formData.details?.forEach(detail => total += detail.qty * detail.price);">
                     <div style="width: 100%">
                         <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-6 pl-0 ">{{ __('Name') }}</div>
-                            <div class="font-weight-bold col-1">{{ __('Qty') }}</div>
-                            <div class="font-weight-bold col-2">{{ __('Price') }}</div>
-                            <div class="font-weight-bold col-2 pr-0">{{ __('Subtotal') }}</div>
+                            <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
+                            <div class="font-weight-bold col-1 pl-4 pr-0">{{ __('Subtotal') }}</div>
                         </div>
 
                         {{-- DETAILS LOOP --}}
                         <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center">
+                            <div class="form-group row mx-0 mb-4 align-items-center" x-data="{ out_total: 0 }"
+                                x-effect="formData.id; out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0);">
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="detail.out_total > 0"
-                                        :data-exclude-enabling="detail.out_total > 0"
+                                    <select class="form-control" :disabled="out_total > 0"
+                                        :data-exclude-enabling="out_total > 0"
                                         x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             data: materials.map(material => ({
@@ -102,7 +110,7 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
+                                    <input class="form-control" type="number" x-model="detail.qty" :min="out_total"
                                         required>
 
                                     <div class="input-group-append">
@@ -117,24 +125,29 @@
                                         required>
                                 </div>
 
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: detail.price * detail.qty }"
-                                    x-effect="subtotal = detail.price * detail.qty"
-                                    x-text="subtotal ? intToCurrency(subtotal) : ''">
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
+                                    x-effect="subtotal = detail.price * detail.qty" x-text="intToCurrency(subtotal)">
                                 </div>
 
                                 <div class="col-1 pl-4 pr-0">
 
-                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
+                                    <x-_disabled-delete-button x-show="out_total > 0" x-init="$($el).tooltip()"
                                         :title="__('cannot be deleted. Material(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
+                                        x-show="!(out_total > 0)" :disabled="out_total > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         </template>
+
+                        {{-- TOTAL --}}
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -142,12 +155,13 @@
             @slot('footer')
                 <div>
                     {{-- TODO: bug on save button, text not hide on loading --}}
-                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''"
+                        :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
-                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
-                            class="fas fa-undo"></i></button>
+                    <button @@click="restore()" x-show="isDirty"
+                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
                 </div>
 
                 <div>
@@ -173,19 +187,7 @@
 
         const materials = @json(App\Models\Material::all());
 
-        function initSelect2() {
-            // this = Alpine
-            $(this.$el).select2({
-                tags: true,
-                dropdownParent: this.$el.closest('.modal-body'),
-                data: @json($materialInTypes).map(type => ({
-                    id: type,
-                    text: type
-                }))
-            })
-        }
-
-        const metrialInCrudConfig = {
+        const materialInCrudConfig = {
             blankData: {
                 'id': null,
                 'code': null,
@@ -213,7 +215,7 @@
             }
         };
 
-        const dataTableConfig = {
+        const materialInDatatableConfig = {
             locale: '{{ app()->getLocale() }}',
             setDataListEventName: 'material-in:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
@@ -239,7 +241,7 @@
                 width: '20%',
                 render: details => details.map(detail => {
                     const materialName = detail.material?.name;
-                    const stockQty = detail.stock?.qty;
+                    const stockQty = detail.stock?.qty || 0;
                     const detailQty = detail.qty;
 
                     const text = `${materialName} (${stockQty}/${detailQty})`;
