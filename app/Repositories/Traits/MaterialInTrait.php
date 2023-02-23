@@ -6,6 +6,7 @@ use App\Models\MaterialIn;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+
 trait MaterialInTrait
 {
 	private MaterialIn $workingInstance;
@@ -19,8 +20,7 @@ trait MaterialInTrait
 	private function validateData(array $data): array
 	{
 		return Validator::make($data, [
-			'id' => 'nullable|numeric',
-			'code' => 'nullable|string|unique:material_ins,code' . ($this->workingInstance->id ? ",{$this->workingInstance->id}" : null),
+			'code' => "nullable|string|unique:material_ins,code,{$this->workingInstance->id}",
 			'type' => 'required|string',
 			'note' => 'nullable|string',
 			'at' => 'required|date'
