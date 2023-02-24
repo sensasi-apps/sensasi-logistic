@@ -1,385 +1,325 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="productOutCrudDiv">
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Product Out List') }}
-            <button type="button" class="ml-2 btn btn-danger addProductOutsButton" data-toggle="modal"
-                data-target="#productOutFormModal">
-                <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-            </button>
-        </h2>
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="productOutDatatable" style="width:100%">
-                    </table>
-                </div>
-            </div>
+<h2 class="section-title">
+    {{ __('Product Out List') }}
+    <button x-data type="button" @@click="$dispatch('product-out:open-modal', null)"
+        class="ml-2 btn btn-danger">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(productOutDataTableConfig)" @@product-out:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <x-_modal size="lg" id="productOutFormModal" centered>
-        <form method="POST" id="productOutForm" onsubmit="return validateInputs();">
-            @csrf
+    <div x-data="crud(productOutCrudConfig)" @@product-out:open-modal.document="openModal"
+        @@product-out:set-data-list.document="setDataList">
+        <x-_modal size="xl" centered>
+            <p x-show="formData.manufacture && formData.id" class="text-danger">
+                *{{ __('This data can be edit only from manufacture menu') }}</p>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
+                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
 
-            <div class="row">
-                <div class="col form-group">
-                    <label for="codeOutsInput">{{ __('Code') }}</label>
-                    <input type="text" class="form-control" name="code" id="codeOutsInput">
-                </div>
+                <div class="row">
+                    <div class="col form-group" x-id="['text-input']">
+                        <label :for="$id('text-input')">{{ __('Code') }}</label>
+                        <input type="text" class="form-control" x-model="formData.code" :id="$id('text-input')">
+                    </div>
 
-                <div class="col form-group">
-                    <label for="typeProductOutSelect">{{ __('Type') }}</label>
-                    <select id="typeProductOutSelect" name="type" required class="form-control select2"
-                        data-select2-opts='{"tags": "true"}'>
-                        @foreach ($productOutTypes as $type)
-                            <option>{{ $type }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="atProductOutInput">{{ __('Date') }}</label>
-                <input type="date" class="form-control" name="at" required id="atProductOutInput">
-            </div>
-
-            <div class="form-group">
-                <label for="noteOutsInput">{{ __('Note') }}</label>
-                <textarea class="form-control" name="note" id="noteOutsInput" rows="3" style="height:100%;"></textarea>
-            </div>
-
-            <div class="px-1" style="overflow-x: auto">
-                <div id="productOutDetailsParent" style="width: 100%">
-                    <div class="row m-0">
-                        <label class="col-4">{{ __('Name') }}</label>
-                        <label class="col-2">{{ __('Qty') }}</label>
-                        <label class="col-3">{{ __('Price') }}</label>
-                        <label class="col-2">{{ __('Subtotal') }}</label>
+                    <div class="col form-group" x-id="['select']">
+                        <label :for="$id('select')">{{ __('Type') }}</label>
+                        <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
+                            x-effect="$($el).val(formData.type).change()"
+                            @@readystatechange.document="$($el).select2({
+                                tags: true,
+                                dropdownParent: $el.closest('.modal-body'),
+                                data: {{ Js::from($productOutTypes) }}.map(type => ({
+                                    id: type,
+                                    text: type
+                                }))
+                            }).on('select2:select', (e) => {
+                                formData.type = e.target.value;
+                            })"></select>
                     </div>
                 </div>
-            </div>
 
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('Date') }}</label>
+                    <input type="date" class="form-control" required :id="$id('input')"
+                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        @@change="formData.at = $event.target.value">
+                </div>
 
-            <div class="">
-                <a href="#" id="addProductOutsButton" class="btn btn-success btn-sm mr-2"><i class="fas fa-plus"></i>
-                    {{ __('More') }}</a>
-                <a href="#" data-toggle="modal" data-target="#productInFormModal">{{ __('New product in') }}?</a>
-            </div>
-        </form>
+                <div class="form-group" x-id="['textarea']">
+                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
+                        style="height:100%;"></textarea>
+                </div>
 
-        @slot('footer')
-            <div>
-                <button type="submit" form="productOutForm" class="btn btn-outline-success">{{ __('Save') }}</button>
-            </div>
-            <form action="" method="post" id="deleteFormOuts">
-                @csrf
-                @method('delete')
-                <input type="hidden" name="id" id="deleteOutsId">
-                <button type="submit" class="btn btn-icon btn-outline-danger">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="d-flex justify-content-center my-2">
+                    <a href="javascript:;" @@click="formData.details.push({})"
+                        class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add product') }}</a>
+                </div>
+
+                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
+                    x-effect="total = 0; formData.details?.forEach(detail => total += (detail.qty * detail.product_in_detail?.price || 0));">
+                    <div style="width: 100%">
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
+                        </div>
+
+                        {{-- DETAILS LOOP --}}
+                        <template x-for="(detail, $i) in formData.details">
+                            <div class="form-group row mx-0 mb-4 align-items-center">
+                                <div class="col-5 px-0">
+                                    <select class="form-control" x-init="initProductInDetailSelect2;
+                                    $($el).on('select2:select', (e) => {
+                                        detail.product_in_detail = $(e.target).select2('data')[0].productInDetail;
+                                        detail.product_in_detail_id = e.target.value;
+                                    })"
+                                        x-effect="productInDetailSelect2Effect($el, detail.product_in_detail_id, detail.product_in_detail)"
+                                        required></select>
+                                </div>
+
+                                <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
+                                    x-effect="priceText = intToCurrency(detail.product_in_detail?.price || 0)"
+                                    x-text="priceText">
+                                </div>
+
+                                <div class="col-2 pl-4 pr-0 input-group">
+                                    <input class="form-control" type="number" x-model="detail.qty" min="1" required>
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" x-data="{ unit: '' }"
+                                            x-effect="unit = detail.product_in_detail?.product.unit" x-show="unit"
+                                            x-text="unit"></span>
+                                    </div>
+                                </div>
+
+                                {{-- TODO: restyled time date on template --}}
+
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
+                                    x-effect="subtotal = (detail.qty * detail.product_in_detail?.price || 0)"
+                                    x-text="intToCurrency(subtotal)">
+                                </div>
+
+                                <div class="col-1 pl-4 pr-0">
+                                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                        @@click.prevent="removeDetail($i)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        {{-- END DETAILS LOOP --}}
+
+                        {{-- TOTAL --}}
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
+                        </div>
+                    </div>
+                </div>
             </form>
-        @endslot
-    </x-_modal>
+
+            @slot('footer')
+                <div>
+                    {{-- TODO: bug on save button, text not hide on loading --}}
+                    <button class="btn btn-success" :disabled="formData.manufacture && formData.id"
+                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                        {{ __('Save') }}
+                    </button>
+
+                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
+                            class="fas fa-undo"></i></button>
+                </div>
+
+                <div>
+                    <button x-show="!formData.manufacture && formData.id" class="btn btn-icon btn-outline-danger"
+                        tabindex="-1" @@click="openDeleteModal">
+                        <i class="fas fa-trash"></i>
+                    </button>
+
+                </div>
+            @endslot
+        </x-_modal>
+
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
+    </div>
 @endpush
 
 @push('js')
     <script>
-        if (productOutCrudDiv) {
-            let productOuts
-            let productInDetails
-            let productOutDatatable = $('#productOutDatatable')
-            let selectedProductOutsIds = [];
-
-            const typeProductOutSelect = $('#typeProductOutSelect')
-            const productOutsFormModalLabel = $('#productOutsFormModalLabel')
-
-            const datatableSearchProductOuts = tag => productOutDatatable.DataTable().search(tag).draw()
-            const renderTagProductOutButton = text =>
-                `<a href="#" onclick="datatableSearchProductOuts('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
-
-            function addProductOutDetailRow(detail) {
-                const nDetailInputSet = $('.detailInputSetDiv').length
-
-                const detailRowDiv = document.createElement('div')
-                detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
-                productOutDetailsParent.append(detailRowDiv);
-
-                function getProductSelect() {
-
-                    const initProductsSelect = $selectDom => $selectDom.select2({
-                        dropdownParent: $('#productOutForm'),
-                        placeholder: '{{ __('Product') }}',
-                        ajax: {
-                            url: '/api/select2/ProductInDetail',
-                            dataType: 'json',
-                            beforeSend: function(request) {
-                                request.setRequestHeader(
-                                    "Authorization",
-                                    'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                                )
-                            },
-                            processResults: function(data) {
-                                productInDetails = data;
-                                const theResults = data.map(productInDetail => {
-
-                                    return {
-                                        id: productInDetail.id,
-                                        text: `${productInDetail.product?.name} (${productInDetail.stock?.qty}) ${moment(productInDetail.at).format('DD-MM-YYYY')}`
-                                    }
-                                })
-
-                                return {
-                                    results: theResults
-                                };
+        function initProductInDetailSelect2() {
+            $(this.$el).select2({
+                dropdownParent: $(this.$el).closest('.modal-body'),
+                placeholder: '{{ __('Product') }}',
+                ajax: {
+                    delay: 500,
+                    cache: true,
+                    url: '/api/select2/ProductInDetail',
+                    dataType: 'json',
+                    beforeSend: function(request) {
+                        request.setRequestHeader(
+                            'Authorization',
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
+                        )
+                    },
+                    processResults: productInDetail => {
+                        const data = productInDetail.map(productInDetail => {
+                            return {
+                                id: productInDetail.id,
+                                text: null,
+                                productInDetail: productInDetail
                             }
-                        },
-                        minimumInputLength: 3
-                    });
+                        });
 
-                    const productSelectParentDiv = document.createElement('div')
-                    productSelectParentDiv.setAttribute('class', 'col-4 pl-0 pr-2')
-                    const $selectDom = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
-                        .addClass('form-control productSelect')
-                        .attr('name', `details[${nDetailInputSet}][product_in_detail_id]`)
-                    $(productSelectParentDiv).append($selectDom)
-
-                    if (detail.product_in_detail_id) {
-                        $selectDom.append(
-                            `<option value="${detail.product_in_detail_id}">${detail.product_in_detail?.product.name}</option>`
-                        );
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
                     }
 
-                    initProductsSelect($selectDom);
-                    $selectDom.val(detail.product_in_detail_id).change();
+                    const datePrinted = data.productInDetail?.product_in.at ? moment(data.productInDetail
+                        .product_in.at).format('DD-MM-YYYY') : null;
 
-                    $selectDom.on('select2:select', function() {
-                        const i = parseInt(this.getAttribute('name').replace('details[','').replace('][product_in_detail_id]',''))
-                        const productInDetail = productInDetails.find(productInDetail => productInDetail.id === parseInt(this.value))
-
-                        document.querySelector(`input[name="details[${i}][price]"]`).value = productInDetail.product?.default_price
-                    })
-
-                    return productSelectParentDiv
-                }
-
-                function getSubtotalDiv() {
-                    const temp = document.createElement('div')
-                    temp.setAttribute('class', 'col-2 px-2')
-
-                    const subtotal = detail.qty * detail.price
-                    if (subtotal) {
-                        temp.innerHTML = subtotal.toLocaleString('id', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            maximumFractionDigits: 0
-                        })
+                    return $(`
+                        <div style='line-height: 1em;'>
+                            <small>${datePrinted}</small>
+                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.productInDetail.product.id_for_human}<b></p>
+                            <small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.price)}</small>
+                        </div>
+                    `);
+                },
+                templateSelection: function(data) {
+                    if (data.text === '{{ __('Product') }}') {
+                        return data.text;
                     }
 
-                    return temp;
-                }
+                    const productInDetail = data.productInDetail || data.element.productInDetail;
 
+                    const codePrinted = productInDetail.product?.code ?
+                        '<small class=\'text-muted\'><b>' +
+                        productInDetail.product?.code + '</b></small> - ' : '';
+                    const brandPrinted = productInDetail.product?.code ?
+                        '<small class=\'text-muted\'>(' +
+                        productInDetail.product?.brand + ')</small>' : '';
+                    const namePrinted = productInDetail.product?.name;
+                    const atPrinted = productInDetail.product_in?.at ? moment(productInDetail.product_in
+                        ?.at).format('DD-MM-YYYY') : null;
 
-                $(detailRowDiv).append(getProductSelect())
-
-
-                const qtyInputParentDiv = document.createElement('div')
-                qtyInputParentDiv.setAttribute('class', 'col-2 px-2')
-                $(qtyInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-                )
-
-                const priceInputParentDiv = document.createElement('div')
-                priceInputParentDiv.setAttribute('class', 'col-3 px-2')
-                $(priceInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][price]" min="0" type="number" required placeholder="{{ __('Price') }}" value="${detail.price || detail.productInDetail?.product.default_price || ''}">`
-                )
-
-                const getRemoveRowButtonParentDiv = () => {
-                    const temp = document.createElement('div')
-                    temp.setAttribute('class', 'col-1 pl-2 pr-0')
-                    $(temp).append($(
-                        `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
-                    ))
-
-                    return temp;
-                }
-
-
-                $(detailRowDiv).append(qtyInputParentDiv)
-                    .append(priceInputParentDiv)
-                    .append(getSubtotalDiv())
-
-                if (nDetailInputSet !== 0) {
-                    $(detailRowDiv).append(getRemoveRowButtonParentDiv())
-                }
-            }
-
-            const deletePutMethodInputProductOuts = () => {
-                $('[name="_method"][value="put"]').remove()
-            }
-
-            const addPutMethodProductOutsInputInsert = () => {
-                $('#productOutForm').append($('@method('put')'))
-            }
-
-
-            const setProductOutFormValue = productOut => {
-
-                if (productOut.type) {
-                    const selectOpts = typeProductOutSelect.find('option');
-                    const optValues = selectOpts.map((i, select) => select.innerHTML);
-                    if ($.inArray(productOut.type, optValues) === -1) {
-                        typeProductOutSelect.append(`<option>${productOut.type}</option>`);
-                    };
-                }
-
-                typeProductOutSelect.val(productOut.type || null).trigger('change');
-                codeOutsInput.value = productOut.code || null
-                noteOutsInput.value = productOut.note || null
-                deleteOutsId.value = productOut.id || null
-
-                atProductOutInput.value = moment(productOut.at).format('YYYY-MM-DD')
-
-                productOut.details?.map(function(detail) {
-                    addProductOutDetailRow(detail)
-                })
-            }
-
-
-            $(document).on('click', '.addProductOutsButton', function() {
-                deletePutMethodInputProductOuts();
-                setProductOutFormValue({});
-                deleteFormOuts.style.display = "none";
-
-                $('.detailInputSetDiv').remove()
-
-
-                for (let i = 0; i < 3; i++) {
-                    addProductOutDetailRow({})
-                }
-
-                productOutFormModal.setTitle('{{ __('Add product out') }}')
-
-                productOutForm.action = "{{ route('product-outs.store') }}"
-            });
-
-            $(document).on('click', '.editProductOutButton', function() {
-                const productOutId = $(this).data('product-id');
-                const productOut = productOutCrudDiv.productOuts.find(productOut => productOut.id === productOutId);
-
-                deleteFormOuts.style.display = "block";
-
-                $('.detailInputSetDiv').remove()
-
-                addPutMethodProductOutsInputInsert();
-                setProductOutFormValue(productOut);
-
-                productOutFormModal.setTitle(
-                    `{{ __('Edit product out') }}: ${moment(productOut.at).format('DD-MM-YYYY')}`)
-
-                productOutForm.action = "{{ route('product-outs.update', '') }}/" + productOut.id;
-
-                deleteFormOuts.action = "{{ route('product-outs.destroy', '') }}/" + productOut
-                    .id;
-            })
-
-            $(document).on('click', '#addProductOutsButton', function() {
-                addProductOutDetailRow({})
-            })
-
-            function validateInputs() {
-                const selectedProductOutsIds = []
-                let isValid = true;
-
-                $('.text-danger').remove();
-
-                [...document.getElementsByClassName('productSelect')].map(selectEl => {
-                    if (selectedProductOutsIds.includes(selectEl.value)) {
-                        const errorTextDiv = document.createElement('div');
-                        errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
-                        errorTextDiv.classList.add('text-danger')
-
-                        selectEl.parentNode.append(errorTextDiv)
-                        isValid = false;
-                    } else {
-                        selectedProductOutsIds.push(selectEl.value)
-                    }
-                })
-
-                return isValid;
-            }
-
-            $(document).ready(function() {
-                $('#typeProductOutSelect').select2('destroy').select2({
-                    tags: true,
-                    dropdownParent: $('#productOutForm')
-                })
-
-                productOutCrudDiv.productOutDatatable = productOutDatatable.dataTable({
-                    processing: true,
-                    search: {
-                        return: true,
-                    },
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                    },
-                    serverSide: true,
-                    ajax: {
-                        url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductOut') }}?with=details.productInDetail.product',
-                        dataSrc: json => {
-                            productOutCrudDiv.productOuts = json.data;
-                            return json.data;
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        cache: true
-                    },
-                    order: [1, 'desc'],
-                    columns: [{
-                        data: 'code',
-                        title: '{{ __('Code') }}'
-                    }, {
-                        data: 'at',
-                        title: '{{ __('At') }}',
-                        render: at => moment(at).format('DD-MM-YYYY')
-                    }, {
-                        data: 'type',
-                        title: '{{ __('Type') }}',
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Items') }}',
-                        data: 'details',
-                        name: 'details',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagProductOutButton(
-                            `${detail.product_in_detail?.product.name} (${detail.qty})`)).join(
-                            '')
-                    }, {
-                        render: function(data, type, row) {
-                            const editButton = $(
-                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
-                            editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#productOutFormModal')
-                            editButton.addClass('editProductOutButton');
-                            editButton.attr('data-product-id', row.id)
-                            return editButton.prop('outerHTML')
-                        },
-                        orderable: false
-                    }]
-                });
+                    return $(`
+                        <div>
+                            ${codePrinted}
+                            ${namePrinted}
+                            ${brandPrinted}
+                            <small class='text-muted ml-2'>
+                                ${atPrinted}
+                            </small>
+                        </div>
+                    `);
+                },
+                minimumInputLength: 3
             });
         }
+
+        function productInDetailSelect2Effect($el, product_in_detail_id, product_in_detail) {
+            if ($($el).find(`option[value="${product_in_detail_id}"]`).length) {
+                $($el).val(product_in_detail_id).trigger('change');
+            } else {
+                var newOption = new Option('', product_in_detail_id, true, true);
+                newOption.productInDetail = product_in_detail;
+                $($el).append(newOption);
+            }
+        }
+
+        const productOutCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'type': null,
+                'at': null,
+                'note': null,
+                'details': [{}],
+                'manufacture': {}
+            },
+
+            refreshDatatableEventName: 'product-out:datatable-draw',
+
+            routes: {
+                store: '{{ route('product-outs.store') }}',
+                update: '{{ route('product-outs.update', '') }}/',
+                destroy: '{{ route('product-outs.destroy', '') }}/',
+            },
+
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Product Out') }}` : `{{ __('Edit Product Out') }}: ` + this
+                    .formData.id_for_human;
+            },
+
+            getDeleteTitle() {
+                return `{{ __('Delete Product Out') }}: ` + this.formData.id_for_human;
+            }
+        };
+
+        const productOutDataTableConfig = {
+            locale: '{{ app()->getLocale() }}',
+            setDataListEventName: 'product-out:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $datatableAjaxUrl['product_out'] }}',
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'at',
+                title: '{{ __('validation.attributes.at') }}',
+                render: at => at ? moment(at).format('DD-MM-YYYY') : null
+            }, {
+                data: 'type',
+                title: '{{ __('validation.attributes.type') }}',
+            }, {
+                data: 'note',
+                width: '40%',
+                title: '{{ __('validation.attributes.note') }}',
+            }, {
+                orderable: false,
+                title: '{{ __('Items') }}',
+                data: 'details',
+                name: 'details.productInDetail.product.name',
+                width: '20%',
+                render: details => details.map(detail => {
+                    const productName = detail.product_in_detail.product?.name;
+                    const detailQty = detail.qty;
+
+                    const text = `${productName} (${detailQty})`;
+                    return `<a href="javascript:;" class="m-1 badge badge-danger" @click="search('${productName}')">${text}</a>`;
+                }).join('')
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('product-out:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
+                },
+                orderable: false
+            }],
+        };
     </script>
 @endpush
