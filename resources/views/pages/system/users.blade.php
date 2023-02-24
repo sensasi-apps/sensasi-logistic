@@ -165,7 +165,7 @@
                     },
                     serverSide: true,
                     ajax: {
-                        url: '/api/datatable/User?with=roles',
+                        url: '{{ $userDatatableApiUrl }}',
                         dataSrc: json => {
                             users = json.data;
                             return json.data;

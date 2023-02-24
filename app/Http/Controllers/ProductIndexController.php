@@ -22,7 +22,7 @@ class ProductIndexController extends Controller
     {
         // TODO: implement check manufacture
         $productInApiParamsJson = json_encode([
-            'with' => [
+            'withs' => [
                 'details' => [
                     'product',
                     'outDetails',
@@ -41,7 +41,7 @@ class ProductIndexController extends Controller
     {
         // TODO: optimize columns to be selected
         $productInApiParamsJson = json_encode([
-            'with' => [
+            'withs' => [
                 'details.productInDetail' => [
                     'product',
                     'productIn'

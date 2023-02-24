@@ -67,7 +67,7 @@
 
 
                 ajax: {
-                    url: 'api/datatable/Material',
+                    url: '{{ route('api.datatable', ['model_name' => 'Material']) }}',
                     dataSrc: json => {
                         materials = json.data
                         return json.data
@@ -111,7 +111,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: 'api/datatable/Product',
+                    url: '{{ route('api.datatable', ['model_name' => 'Product']) }}',
                     dataSrc: json => {
                         products = json.data;
                         return json.data;

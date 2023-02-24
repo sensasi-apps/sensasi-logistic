@@ -64,23 +64,23 @@ class DashboardController extends Controller
             ->whereHas(
                 'monthlyMovements',
                 fn ($q) => $q
-                    ->select('in', 'out', 'avg_price')
+                    ->select('in', 'out', 'avg_in_price')
                     ->where('month', '<=', $currentMonth)
                     ->where('year', '<=', $currentYear)
             )
             ->get()
-            ->map(fn ($material) => ($material->monthlyMovements->sum('in') - $material->monthlyMovements->sum('out')) * $material->monthlyMovements->avg('avg_price'))->sum();
+            ->map(fn ($material) => ($material->monthlyMovements->sum('in') - $material->monthlyMovements->sum('out')) * $material->monthlyMovements->avg('avg_in_price'))->sum();
 
-        $worths['products'] = Product::select('id')->with('monthlyMovements')
+        $worths['products'] = Product::select('id', 'default_price')->with('monthlyMovements')
             ->whereHas(
                 'monthlyMovements',
                 fn ($q) => $q
-                    ->select('in', 'out', 'avg_price')
+                    ->select('in', 'out', 'default_price')
                     ->where('month', '<=', $currentMonth)
                     ->where('year', '<=', $currentYear)
             )
             ->get()
-            ->map(fn ($product) => ($product->monthlyMovements->sum('in') - $product->monthlyMovements->sum('out')) * $product->monthlyMovements->avg('avg_price'))->sum();
+            ->map(fn ($product) => ($product->monthlyMovements->sum('in') - $product->monthlyMovements->sum('out')) * $product->default_price)->sum();
 
         return view('dashboard', compact('months', 'stats', 'currentMonth', 'worths'));
     }

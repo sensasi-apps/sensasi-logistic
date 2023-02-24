@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
@@ -13,7 +15,7 @@ class UserController extends Controller
     {
         $validationRules = [
             'name' => 'required|max:255',
-            'email' => 'required|email:dns|unique:users,email' . ($user ? ",$user->id,id" : null)
+            'email' => "required|email:dns|unique:users,email,{$user->id}"
         ];
 
         if (!$user || $user->has_default_password || $request->password) {
@@ -29,23 +31,19 @@ class UserController extends Controller
         return $validatedInput;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(): View
     {
-        return view('pages.system.users');
+        return view('pages.system.users', [
+            'userDatatableApiUrl' => route('api.datatable', [
+                'model_name' => 'User',
+                'params_json' => urlencode(json_encode([
+                    'withs' => ['roles']
+                ]))
+            ])
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validatedInput = $this->validateInput($request);
         $user = User::create($validatedInput)->assignRole($request->roles);
@@ -58,14 +56,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): RedirectResponse
     {
         $validatedInput = $this->validateInput($request, $user);
 
@@ -73,18 +64,10 @@ class UserController extends Controller
 
         return redirect()->back()->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been updated successfully'), 'success']
-
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function selfUpdate(Request $request)
+    public function selfUpdate(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $validatedInput = $this->validateInput($request, $user);
@@ -96,19 +79,12 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
-        $user->delete();
+        // $user->delete();
 
         return redirect()->back()->with('notifications', [
             [__('User') . " <b>$user->name</b> " . __('has been deleted successfully'), 'warning']
-
         ]);
     }
 }
