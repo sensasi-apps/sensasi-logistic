@@ -39,6 +39,6 @@
 
 @push('js')
     <script>
-        tab_system_init();
+        tab_system_init('products');
     </script>
 @endpush
