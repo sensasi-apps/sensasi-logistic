@@ -16,14 +16,14 @@ class CreateMaterialsTable extends Migration
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
             $table->string('code', 10)->nullable()->unique();
-            $table->string('name');
             $table->string('brand')->nullable();
+            $table->string('name');
             $table->json('tags_json')->nullable();
             $table->string('unit', 10);
             $table->integer('low_qty')->nullable();
             $table->timestamps();
 
-            $table->unique(['name', 'brand']);
+            $table->unique(['brand', 'name']);
         });
     }
 

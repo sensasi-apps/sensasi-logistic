@@ -37,6 +37,11 @@
                 </div>
 
                 <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('validation.attributes.brand') }}</label>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.brand">
+                </div>
+
+                <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.name') }}</label>
                     <input type="text" class="form-control" :id="$id('input')" x-model="formData.name" required>
                 </div>
@@ -128,6 +133,7 @@
             blankData: {
                 'id': null,
                 'code': null,
+                'brand': null,
                 'name': null,
                 'default_price': null,
                 'unit': null,
