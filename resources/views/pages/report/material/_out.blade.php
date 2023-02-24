@@ -1,4 +1,3 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
 @include('components.assets._datepicker')
 
@@ -12,16 +11,21 @@
             <div class="table-responsive">
                 <div class="card">
                     <ul class="nav nav-tabs" id="outTable-tab" role="tablist">
-                      <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="notaOut-tab" data-toggle="tab" data-target="#notaOut" type="button" role="tab" aria-controls="notaOut" aria-selected="true">Per Nota</button>
-                      </li>
-                      <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="itemOut-tab" data-toggle="tab" data-target="#itemOut" type="button" role="tab" aria-controls="itemOut" aria-selected="false">Per Item</button>
-                      </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="notaOut-tab" data-toggle="tab" data-target="#notaOut"
+                                type="button" role="tab" aria-controls="notaOut" aria-selected="true">Per
+                                Nota</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="itemOut-tab" data-toggle="tab" data-target="#itemOut"
+                                type="button" role="tab" aria-controls="itemOut" aria-selected="false">Per
+                                Item</button>
+                        </li>
                     </ul>
 
-                    <form method="get" action="{{route('report.materials.index')}}#out">
-                        <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon" id="datepickerout"><i class="fas fa-calendar"></i> Choose Date</a>
+                    <form method="get" action="{{ route('report.materials.index') }}#out">
+                        <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon"
+                            id="datepickerout"><i class="fas fa-calendar"></i> Choose Date</a>
                         <input type="hidden" name="daterange" id="daterangeout">
                         <button class="btn btn-info" type="submit">Filter</button>
                     </form>
@@ -41,10 +45,9 @@
 </div>
 
 @push('js')
-
     <script>
         if (materialOutsCrudDiv) {
-            $( function() {
+            $(function() {
                 var start = moment().subtract(29, 'days');
                 var end = moment();
 
@@ -57,18 +60,18 @@
                     startDate: start,
                     endDate: end,
                     ranges: {
-                       'Today': [moment(), moment()],
-                       'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                       'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                       'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                       'This Month': [moment().startOf('month'), moment().endOf('month')],
-                       'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
+                            'month').endOf('month')]
                     }
                 }, cb);
 
                 cb(start, end);
-              });
+            });
         }
     </script>
 @endpush
-
