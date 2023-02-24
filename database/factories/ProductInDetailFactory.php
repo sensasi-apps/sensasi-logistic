@@ -31,7 +31,8 @@ class ProductInDetailFactory extends Factory
         return [
             'product_in_id' => $productInId,
             'product_id' => $productId,
-            'qty' => $this->faker->randomNumber(3, true)
+            'qty' => $this->faker->randomNumber(3, true),
+            'price' => $this->faker->randomNumber(2, true) . '000'
         ];
     }
 }
