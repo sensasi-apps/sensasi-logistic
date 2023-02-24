@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductOutDetail extends Model
 {
@@ -13,12 +14,12 @@ class ProductOutDetail extends Model
     protected $guarded = ['id'];
     public $timestamps = false;
 
-    public function productInDetail()
+    public function productInDetail(): BelongsTo
     {
         return $this->belongsTo(productInDetail::class);
     }
 
-    public function productOut()
+    public function productOut(): BelongsTo
     {
         return $this->belongsTo(ProductOut::class);
     }
