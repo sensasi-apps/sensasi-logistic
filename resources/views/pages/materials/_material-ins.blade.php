@@ -78,9 +78,7 @@
                     </span>
                 </div>
 
-                {{-- TODO: SELECT2 detailed preview --}}
-                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
-                    x-effect="total = 0; formData.details?.forEach(detail => total += detail.qty * detail.price);">
+                <div class="px-0" style="overflow-x: auto">
                     <div style="width: 100%">
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
@@ -91,11 +89,12 @@
 
                         {{-- DETAILS LOOP --}}
                         <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center" x-data="{ out_total: 0 }"
-                                x-effect="formData.id; out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0);">
+                            <div class="form-group row mx-0 mb-4 align-items-center"
+                                x-effect="detail.id ? detail.out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0) : null">
+
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="out_total > 0"
-                                        :data-exclude-enabling="out_total > 0"
+                                    <select class="form-control" :disabled="detail.out_total > 0"
+                                        :data-exclude-enabling="detail.out_total > 0"
                                         x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             data: materials.map(material => ({
@@ -113,7 +112,7 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty" :min="out_total"
+                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
                                         required>
 
                                     <div class="input-group-append">
@@ -128,17 +127,18 @@
                                         required>
                                 </div>
 
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
-                                    x-effect="subtotal = detail.price * detail.qty" x-text="intToCurrency(subtotal)">
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                    x-effect="subtotal_price = detail.price * detail.qty"
+                                    x-text="intToCurrency(subtotal_price || 0)">
                                 </div>
 
                                 <div class="col-1 pl-4 pr-0">
 
-                                    <x-_disabled-delete-button x-show="out_total > 0" x-init="$($el).tooltip()"
+                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
                                         :title="__('cannot be deleted. Material(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(out_total > 0)" :disabled="out_total > 0"
+                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -149,7 +149,9 @@
                         {{-- TOTAL --}}
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-data="{ total_price: 0 }"
+                                x-effect="total_price = formData.details?reduce((a, b) => a + b.qty * b.price, 0)"
+                                x-text="intToCurrency(total_price || 0)"></div>
                         </div>
                     </div>
                 </div>
@@ -197,7 +199,7 @@
             const codePrinted = material?.code ?
                 '<small class=\'text-muted\'><b>' +
                 material?.code + '</b></small> - ' : '';
-            const brandPrinted = material?.code ?
+            const brandPrinted = material?.brand ?
                 '<small class=\'text-muted\'>(' +
                 material?.brand + ')</small>' : '';
             const namePrinted = material?.name;
