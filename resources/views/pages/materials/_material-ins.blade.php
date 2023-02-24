@@ -97,6 +97,7 @@
                                         :data-exclude-enabling="detail.out_total > 0"
                                         x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
+                                            placeholder: '{{ __('Material') }}',
                                             data: materials.map(material => ({
                                                 id: material.id,
                                                 text: null,
@@ -193,6 +194,9 @@
         const materials = @json(App\Models\Material::all());
 
         function materialSelect2TemplateResultAndSelection(data) {
+            if (!data.id) {
+                return data.text;
+            }
 
             const material = data.material;
 

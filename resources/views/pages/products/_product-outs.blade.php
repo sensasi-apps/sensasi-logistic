@@ -81,8 +81,6 @@
                         </div>
 
                         {{-- DETAILS LOOP --}}
-                        {{-- TODO: add placholder in all select2 --}}
-
                         <template x-for="(detail, $i) in formData.details">
                             <div class="form-group row mx-0 mb-4 align-items-center">
                                 <div class="col-5 px-0">

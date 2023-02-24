@@ -130,6 +130,7 @@
                                         :data-exclude-enabling="detail.out_total > 0"
                                         x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
+                                            placeholder: '{{ __('Product') }}',
                                             data: products.map(product => ({
                                                 id: product.id,
                                                 text: null,
@@ -224,6 +225,10 @@
         const products = @json(App\Models\Product::all());
 
         function productSelect2TemplateResultAndSelection(data) {
+
+            if (!data.id) {
+                return data.text;
+            }
 
             const product = data.product;
 
