@@ -52,7 +52,6 @@ class MaterialIndexController extends Controller
         return route('api.datatable', ['model_name' => 'MaterialOut', 'params_json' => urlencode($materialInApiParamsJson)]);
     }
 
-    // TODO: move index to another controller
     public function __invoke(): View
     {
         $materialInTypes = DB::table('material_ins')->select('type')->distinct()->cursor()->pluck('type');

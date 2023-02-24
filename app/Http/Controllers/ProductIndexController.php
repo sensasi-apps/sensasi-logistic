@@ -52,7 +52,6 @@ class ProductIndexController extends Controller
         return route('api.datatable', ['model_name' => 'ProductOut', 'params_json' => urlencode($productInApiParamsJson)]);
     }
 
-    // TODO: move index to another controller
     public function __invoke(): View
     {
         $productInTypes = DB::table('product_ins')->select('type')->distinct()->cursor()->pluck('type');
