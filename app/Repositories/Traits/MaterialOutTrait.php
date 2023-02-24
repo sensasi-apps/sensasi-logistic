@@ -15,7 +15,7 @@ trait MaterialOutTrait
 	private function validateData(array $data): array
 	{
 		return Validator::make($data, [
-			'code' => "nullable|string|unique:mysql.material_outs,code,{$this->workingInstance->id}",
+			'code' => "nullable|string|unique:material_outs,code,{$this->workingInstance->id}",
 			'type' => 'required|string',
 			'note' => 'nullable|string',
 			'at' => 'required|date'
