@@ -53,6 +53,7 @@ trait MaterialInTrait
 
 				return [
 					'required',
+					'distinct',
 					'exists:materials,id',
 					$rule
 				];
