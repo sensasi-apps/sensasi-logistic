@@ -141,7 +141,6 @@
                 'tags': []
             },
 
-            // TODO: chaining refresh datatable
             refreshDatatableEventName: 'product:datatable-reload',
 
             routes: {
