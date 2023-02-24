@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\MaterialOutDetail;
 use App\Models\MaterialOut;
-use App\Repositories\Traits\MaterialOutTrait;
+use App\Models\MaterialOutDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Repositories\Traits\MaterialOutTrait;
 
 class MaterialOutRepository
 {
@@ -91,7 +91,7 @@ class MaterialOutRepository
 
 		try {
 			DB::beginTransaction();
-			
+
 			$this->workingInstance->update($validatedData);
 
 			$forUpsert = $forInsert->merge($forUpdate)->toArray();
