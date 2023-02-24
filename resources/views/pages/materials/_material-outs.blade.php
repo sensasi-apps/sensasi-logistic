@@ -281,7 +281,7 @@
         };
 
         const materialOutDataTableConfig = {
-            locale: '{{ app()->getLocale() }}',
+            serverSide: true,
             setDataListEventName: 'material-out:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
             ajaxUrl: '{{ $datatableAjaxUrl['material_out'] }}',

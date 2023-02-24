@@ -242,7 +242,7 @@
         };
 
         const materialInDatatableConfig = {
-            locale: '{{ app()->getLocale() }}',
+            serverSide: true,
             setDataListEventName: 'material-in:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
             ajaxUrl: '{{ $datatableAjaxUrl['material_in'] }}',
