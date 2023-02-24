@@ -74,8 +74,8 @@
                         class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add material') }}</a>
                 </div>
 
-                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
-                    x-effect="total = 0; formData.details?.forEach(detail => total += (detail.qty * detail.material_in_detail?.price || 0));">
+                <div class="px-0" style="overflow-x: auto" x-data="{ total_price: 0 }"
+                    x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
                     <div style="width: 100%">
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
@@ -112,11 +112,9 @@
                                     </div>
                                 </div>
 
-                                {{-- TODO: restyled time date on template --}}
-
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
-                                    x-effect="subtotal = (detail.qty * detail.material_in_detail?.price || 0)"
-                                    x-text="intToCurrency(subtotal)">
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                    x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
+                                    x-text="intToCurrency(subtotal_price)">
                                 </div>
 
                                 <div class="col-1 pl-4 pr-0">
@@ -132,7 +130,7 @@
                         {{-- TOTAL --}}
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total_price || 0)"></div>
                         </div>
                     </div>
                 </div>
