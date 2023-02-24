@@ -21,7 +21,7 @@ class MaterialIndexController extends Controller
     private function getMaterialInDatatableApiUrl(): string
     {
         $materialInApiParamsJson = json_encode([
-            'with' => [
+            'withs' => [
                 'details' => [
                     'material',
                     'outDetails',
@@ -40,7 +40,7 @@ class MaterialIndexController extends Controller
     {
         // TODO: optimize columns to be selected
         $materialInApiParamsJson = json_encode([
-            'with' => [
+            'withs' => [
                 'manufacture',
                 'details.materialInDetail' => [
                     'material',

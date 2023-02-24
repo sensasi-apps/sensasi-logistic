@@ -150,7 +150,7 @@
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
                             <div class="font-weight-bold col-2 pl-4 pr-0" x-data="{ total_price: 0 }"
-                                x-effect="total_price = formData.details?reduce((a, b) => a + b.qty * b.price, 0)"
+                                x-effect="total_price = formData.details?.reduce((a, b) => a + b.qty * b.price, 0)"
                                 x-text="intToCurrency(total_price || 0)"></div>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
                 data: 'details',
                 name: 'details.material.name',
                 width: '20%',
-                render: details => details.map(detail => {
+                render: details => details?.map(detail => {
                     const materialName = detail.material?.name;
                     const stockQty = detail.stock?.qty || 0;
                     const detailQty = detail.qty;

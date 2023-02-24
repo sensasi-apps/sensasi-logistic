@@ -305,7 +305,7 @@
                 data: 'details',
                 name: 'details.materialInDetail.material.name',
                 width: '20%',
-                render: details => details.map(detail => {
+                render: details => details?.map(detail => {
                     const materialName = detail.material_in_detail.material?.name;
                     const detailQty = detail.qty;
 
