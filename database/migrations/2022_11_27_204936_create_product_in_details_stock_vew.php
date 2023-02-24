@@ -16,7 +16,7 @@ class CreateProductInDetailsStockVew extends Migration
             OR REPLACE VIEW product_in_details_stock_view AS
             SELECT
                 pid.id as product_in_detail_id,
-                `pid`.`qty` - SUM(`pod`.`qty`) as qty
+                `pid`.`qty` - COALESCE(SUM(`pod`.`qty`), 0) as qty
             FROM
                 product_in_details AS `pid`
                 LEFT JOIN product_out_details AS `pod` ON pid.id = `pod`.product_in_detail_id
