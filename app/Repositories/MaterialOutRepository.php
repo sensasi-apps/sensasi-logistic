@@ -62,6 +62,7 @@ class MaterialOutRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance->fresh();
@@ -108,6 +109,7 @@ class MaterialOutRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance->fresh();
@@ -128,6 +130,7 @@ class MaterialOutRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance;

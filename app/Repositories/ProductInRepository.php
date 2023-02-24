@@ -59,7 +59,6 @@ class ProductInRepository
 			$this->workingInstance->details()->insert($validatedDetailsData);
 		} catch (\Throwable $th) {
 			DB::rollBack();
-			// TODO: add throw to all repo
 			throw $th;
 		}
 
@@ -106,6 +105,7 @@ class ProductInRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance->fresh();
@@ -127,6 +127,7 @@ class ProductInRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance;

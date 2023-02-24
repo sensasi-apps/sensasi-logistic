@@ -71,6 +71,7 @@ class MaterialInRepository
 			$this->workingInstance->details()->insert($validatedDetailsData);
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		DB::commit();
@@ -123,6 +124,7 @@ class MaterialInRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance->fresh();
@@ -149,6 +151,7 @@ class MaterialInRepository
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
+			throw $th;
 		}
 
 		return $this->workingInstance;
