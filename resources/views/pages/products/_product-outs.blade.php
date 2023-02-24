@@ -28,11 +28,8 @@
     <div x-data="crud(productOutCrudConfig)" @@product-out:open-modal.document="openModal"
         @@product-out:set-data-list.document="setDataList">
         <x-_modal size="xl" centered>
-            <p x-show="formData.manufacture && formData.id" class="text-danger">
-                *{{ __('This data can be edit only from manufacture menu') }}</p>
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
-                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
-
+            {{-- TODO:: add manufacture check on productin  --}}
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
                         <label :for="$id('text-input')">{{ __('Code') }}</label>
@@ -70,12 +67,11 @@
                 </div>
 
                 <div class="d-flex justify-content-center my-2">
-                    <a href="javascript:;" @@click="formData.details.push({})"
+                    <a href="javascript:;" @@click="formData.details.push({...defaultDetail})"
                         class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add product') }}</a>
                 </div>
 
-                <div class="px-0" style="overflow-x: auto" x-data="{ total: 0 }"
-                    x-effect="total = 0; formData.details?.forEach(detail => total += (detail.qty * detail.product_in_detail?.price || 0));">
+                <div class="px-0" style="overflow-x: auto">
                     <div style="width: 100%">
                         <div class="row mx-0 my-4">
                             <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
@@ -85,6 +81,8 @@
                         </div>
 
                         {{-- DETAILS LOOP --}}
+                        {{-- TODO: add placholder in all select2 --}}
+
                         <template x-for="(detail, $i) in formData.details">
                             <div class="form-group row mx-0 mb-4 align-items-center">
                                 <div class="col-5 px-0">
@@ -97,9 +95,10 @@
                                         required></select>
                                 </div>
 
-                                <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
-                                    x-effect="priceText = intToCurrency(detail.product_in_detail?.price || 0)"
-                                    x-text="priceText">
+                                <div class="col-2 pl-4 pr-0">
+                                    <input x-model="detail.price" class="form-control"
+                                        x-effect="detail.price = detail.price ? detail.price : detail.product_in_detail.product.default_price"
+                                        min="0" type="number" required>
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
@@ -112,11 +111,9 @@
                                     </div>
                                 </div>
 
-                                {{-- TODO: restyled time date on template --}}
-
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal: 0 }"
-                                    x-effect="subtotal = (detail.qty * detail.product_in_detail?.price || 0)"
-                                    x-text="intToCurrency(subtotal)">
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                    x-effect="subtotal_price = (detail.qty * detail.price || 0)"
+                                    x-text="intToCurrency(subtotal_price)">
                                 </div>
 
                                 <div class="col-1 pl-4 pr-0">
@@ -130,9 +127,10 @@
                         {{-- END DETAILS LOOP --}}
 
                         {{-- TOTAL --}}
-                        <div class="row mx-0 my-4">
+                        <div class="row mx-0 my-4" x-data="{ total_price: 0 }"
+                            x-effect="total_price = formData.details?.reduce((a, b) => a + b.price * b.qty, 0)">
                             <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total)"></div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total_price || 0)"></div>
                         </div>
                     </div>
                 </div>
@@ -141,8 +139,7 @@
             @slot('footer')
                 <div>
                     {{-- TODO: bug on save button, text not hide on loading --}}
-                    <button class="btn btn-success" :disabled="formData.manufacture && formData.id"
-                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
@@ -151,8 +148,8 @@
                 </div>
 
                 <div>
-                    <button x-show="!formData.manufacture && formData.id" class="btn btn-icon btn-outline-danger"
-                        tabindex="-1" @@click="openDeleteModal">
+                    <button x-show="formData.id" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                        @@click="openDeleteModal">
                         <i class="fas fa-trash"></i>
                     </button>
 
@@ -200,14 +197,14 @@
                         return data.text;
                     }
 
-                    const datePrinted = data.productInDetail?.product_in.at ? moment(data.productInDetail
+                    const datePrinted = data.productInDetail.product_in.at ? moment(data.productInDetail
                         .product_in.at).format('DD-MM-YYYY') : null;
 
                     return $(`
                         <div style='line-height: 1em;'>
                             <small>${datePrinted}</small>
                             <p class='my-0' stlye='font-size: 1.1em'><b>${data.productInDetail.product.id_for_human}<b></p>
-                            <small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.price)}</small>
+                            <small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.product.default_price)}</small>
                         </div>
                     `);
                 },
@@ -253,6 +250,12 @@
             }
         }
 
+        const defaultDetail = {
+            product_in_detail: {
+                product: {}
+            }
+        }
+
         const productOutCrudConfig = {
             blankData: {
                 'id': null,
@@ -260,8 +263,9 @@
                 'type': null,
                 'at': null,
                 'note': null,
-                'details': [{}],
-                'manufacture': {}
+                'details': [{
+                    ...defaultDetail
+                }]
             },
 
             refreshDatatableEventName: 'product-out:datatable-draw',
@@ -283,7 +287,7 @@
         };
 
         const productOutDataTableConfig = {
-            locale: '{{ app()->getLocale() }}',
+            serverSide: true,
             setDataListEventName: 'product-out:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
             ajaxUrl: '{{ $datatableAjaxUrl['product_out'] }}',
