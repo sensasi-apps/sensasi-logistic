@@ -24,6 +24,11 @@ class ProductInDetail extends Model
         return $this->belongsTo(ProductIn::class);
     }
 
+    public function outDetails()
+    {
+        return $this->hasMany(ProductOutDetail::class);
+    }
+
     public function getQtyRemainAttribute()
     {
         return $this->stock->qty;
@@ -39,8 +44,8 @@ class ProductInDetail extends Model
         return self::with(['product', 'productIn', 'stock'])
             ->has('productIn')
             ->whereRelation('stock', 'qty', '>', 0)
-            ->whereRelation('product', 'name', 'LIKE', "%${q}%")
-            ->orWhereRelation('productIn', 'at', 'LIKE', "%${q}%")
+            ->whereRelation('product', 'name', 'LIKE', "%{$q}%")
+            ->orWhereRelation('productIn', 'at', 'LIKE', "%{$q}%")
             ->orderBy('product_in_id')->limit(25);;
     }
 }
