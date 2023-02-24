@@ -1,23 +1,25 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="productInsCrudDiv">
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Product In List') }}
-            <button type="button" class="ml-2 btn btn-success addProductInsButton" data-toggle="modal"
-                data-target="#productInFormModal">
-                <i class="fas fa-plus-circle"></i> Tambah
-            </button>
-        </h2>
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="productInDatatable" style="width:100%">
-                    </table>
-                </div>
-            </div>
+<h2 class="section-title">
+    {{ __('Product In List') }}
+    <button x-data type="button" @@click="$dispatch('product-in:open-modal', null)"
+        class="ml-2 btn btn-success">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(productInDatatableConfig)" @@product-in:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
@@ -30,41 +32,7 @@
             <input type="hidden" name="id" id="idIns">
 
 
-            <div class="row">
-                <div class="col form-group">
-                    <label for="codeInsInput">{{ __('Code') }}</label>
-                    <input type="text" class="form-control" name="code" id="codeInsInput">
-                </div>
 
-                <div class="col form-group">
-                    <label for="typeProductInsSelect">{{ __('Type') }}</label>
-                    <select id="typeProductInsSelect" name="type" required class="form-control select2"
-                        data-select2-opts='{"tags": "true"}'>
-                        @foreach ($productInTypes as $type)
-                            <option>{{ $type }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="atInput">{{ __('Date') }}</label>
-                <input type="date" class="form-control" name="at" required id="atInput">
-            </div>
-
-            <div class="form-group">
-                <label for="noteInsInput">{{ __('Note') }}</label>
-                <textarea class="form-control" name="note" id="noteInsInput" rows="3" style="height:100%;"></textarea>
-            </div>
-
-            <div class="px-1" style="overflow-x: auto">
-                <div id="productInDetailsParent" style="width: 100%">
-                    <div class="row m-0">
-                        <label class="col-7">{{ __('Name') }}</label>
-                        <label class="col-4">{{ __('Qty') }}</label>
-                    </div>
-                </div>
-            </div>
 
 
             <div class="">
@@ -90,233 +58,253 @@
     </x-_modal>
 @endpush
 
+@push('modal')
+    <div x-data="crud(productInCrudConfig)" @@product-in:open-modal.document="openModal"
+        @@product-in:set-data-list.document="setDataList">
+        <x-_modal size="xl" centered>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
+
+                <div class="row">
+                    <div class="col form-group" x-id="['text-input']">
+                        <label :for="$id('text-input')">{{ __('Code') }}</label>
+                        <input type="text" class="form-control" x-model="formData.code" :id="$id('text-input')">
+                    </div>
+
+                    <div class="col form-group" x-id="['select']">
+                        <label :for="$id('select')">{{ __('Type') }}</label>
+                        <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
+                            x-effect="$($el).val(formData.type).change()"
+                            x-on:readystatechange.document="$($el).select2({
+                                tags: true,
+                                dropdownParent: $el.closest('.modal-body'),
+                                data: {{ Js::from($productInTypes) }}.map(type => ({
+                                    id: type,
+                                    text: type
+                                }))
+                            }).on('select2:select', (e) => {
+                                formData.type = e.target.value;
+                            })"></select>
+                    </div>
+                </div>
+
+                <div class="form-group" x-id="['input']">
+                    <label :for="$id('input')">{{ __('Date') }}</label>
+                    <input type="date" class="form-control" required :id="$id('input')"
+                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        @@change="formData.at = $event.target.value">
+                </div>
+
+                <div class="form-group" x-id="['textarea']">
+                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
+                        style="height:100%;"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-center my-2">
+                    <a href="javascript:;" @@click="formData.details.push({})"
+                        class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add product') }}</a>
+
+                    <span>
+                        {{ __('Product is not on the list') }}?
+                        <a href="javascript:;" tabindex="-1"
+                            @@click="$dispatch('product:open-modal', null)"
+                            class="badge badge-secondary ml-1">{{ __('Add New Product') }}</a>
+                    </span>
+                </div>
+
+                <div class="px-0" style="overflow-x: auto">
+                    <div style="width: 100%">
+                        <div class="row mx-0 my-4">
+                            <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
+                            <div class="font-weight-bold col-1 pl-4 pr-0">{{ __('Subtotal') }}</div>
+                        </div>
+
+                        {{-- DETAILS LOOP --}}
+                        <template x-for="(detail, $i) in formData.details">
+                            <div class="form-group row mx-0 mb-4 align-items-center"
+                                x-effect="detail.id ? detail.out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0) : null">
+                                <div class="col-5 px-0">
+                                    <select class="form-control" :disabled="detail.out_total > 0"
+                                        :data-exclude-enabling="detail.out_total > 0"
+                                        x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
+                                            dropdownParent: $el.closest('.modal-body'),
+                                            data: products.map(product => ({
+                                                id: product.id,
+                                                text: null,
+                                                product: product
+                                            })),
+                                            templateResult: productSelect2TemplateResultAndSelection,
+                                            templateSelection: productSelect2TemplateResultAndSelection,
+                                        }).on('select2:select', (e) => {
+                                            detail.product_id = e.target.value;
+                                        });" required>
+                                    </select>
+                                </div>
+
+                                <div class="col-2 pl-4 pr-0 input-group">
+                                    <input class="form-control" type="number" x-model="detail.qty"
+                                        :min="detail.out_total" required>
+
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" x-data="{ unit: '' }"
+                                            x-effect="unit = products.find(product => detail.product_id == product.id)?.unit"
+                                            x-show="unit" x-text="unit"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-2 pl-4 pr-0">
+                                    <input x-model="detail.price" class="form-control" min="0" type="number"
+                                        required>
+                                </div>
+
+                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                    x-effect="subtotal_price = detail.price * detail.qty"
+                                    x-text="intToCurrency(subtotal_price || 0)">
+                                </div>
+
+                                <div class="col-1 pl-4 pr-0">
+
+                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
+                                        :title="__('cannot be deleted. Product(s) has been used')" />
+
+                                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
+                                        @@click.prevent="removeDetail($i)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- TOTAL --}}
+                        <div class="row mx-0 my-4" x-data="{ total_price: 0 }"
+                            x-effect="total_price = formData.details?.reduce((a, b) => a + b.qty * b.price, 0)">
+                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total_price || 0)"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            @slot('footer')
+                <div>
+                    {{-- TODO: bug on save button, text not hide on loading --}}
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''"
+                        :form="htmlElements.form.id">
+                        {{ __('Save') }}
+                    </button>
+
+                    <button @@click="restore()" x-show="isDirty"
+                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
+                </div>
+
+                <div>
+                    <x-_disabled-delete-button x-show="formData.has_out_details" x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+
+                    <template x-if="formData.id && !formData.has_out_details">
+                        <button class="btn btn-icon btn-outline-danger" tabindex="-1"
+                            @@click="openDeleteModal">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </template>
+                </div>
+            @endslot
+        </x-_modal>
+
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
+    </div>
+@endpush
+
 @push('js')
     <script>
-        if (productInsCrudDiv) {
-            let productIns
-            let productInDatatable = $('#productInDatatable')
-            let selectedProductInsIds = [];
+        // page scripts
 
-            const typeProductInsSelect = $('#typeProductInsSelect')
-            const productInsFormModalLabel = $('#productInsFormModalLabel')
+        const products = @json(App\Models\Product::all());
 
-            const renderTagProductInsButton = text =>
-                `<a href="#" onclick="datatableSearchProductIns('${text.split(' ')[0]}')" class="m-1 badge badge-success">${text}</a>`
+        function productSelect2TemplateResultAndSelection(data) {
 
-            function addProductInDetailRow(detail) {
-                const nDetailInputSet = $('.detailInputSetDiv').length
+            const product = data.product;
 
-                const detailRowDiv = document.createElement('div')
-                detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetDiv')
-                productInDetailsParent.append(detailRowDiv);
+            const codePrinted = product?.code ?
+                '<small class=\'text-muted\'><b>' +
+                product?.code + '</b></small> - ' : '';
 
-                function getProductSelect() {
-                    const products = {{ Js::from(App\Models\Product::all()) }};
-
-                    const initProductsSelect = $selectDom => $selectDom.select2({
-                        dropdownParent: $('#productInForm'),
-                        placeholder: '{{ __('Product') }}',
-                        data: products.map(product => {
-                            return {
-                                id: product.id,
-                                text: product.name
-                            }
-                        })
-                    });
-
-                    const productSelectParentDiv = document.createElement('div')
-                    productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
-                    const $selectDom = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
-                        .addClass('form-control productSelect')
-                        .attr('name', `details[${nDetailInputSet}][product_id]`)
-                    $(productSelectParentDiv).append($selectDom)
-                    initProductsSelect($selectDom);
-                    $selectDom.val(detail.product_id).change();
-
-                    return productSelectParentDiv
-                }
-
-
-                $(detailRowDiv).append(getProductSelect())
-
-
-                const qtyInputParentDiv = document.createElement('div')
-                qtyInputParentDiv.setAttribute('class', 'col-4 px-2')
-                $(qtyInputParentDiv).append(
-                    `<input class="form-control" name="details[${nDetailInputSet}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-                )
-
-
-
-
-                const getRemoveRowButtonParentDiv = () => {
-                    const temp = document.createElement('div')
-                    temp.setAttribute('class', 'col-1 pl-2 pr-0')
-                    $(temp).append($(
-                        `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
-                    ))
-
-                    return temp;
-                }
-
-
-                $(detailRowDiv).append(qtyInputParentDiv)
-
-                if (nDetailInputSet !== 0) {
-                    $(detailRowDiv).append(getRemoveRowButtonParentDiv())
-                }
-            }
-
-
-            const setProductInFormValue = productIn => {
-
-                if (productIn.type) {
-                    const selectOpts = typeProductInsSelect.find('option');
-                    const optValues = selectOpts.map((i, select) => select.innerHTML);
-                    if ($.inArray(productIn.type, optValues) === -1) {
-                        typeProductInsSelect.append(`<option>${productIn.type}</option>`);
-                    };
-                }
-
-                typeProductInsSelect.val(productIn.type || null).trigger('change');
-                idIns.value = productIn.id || null
-                codeInsInput.value = productIn.code || null
-                noteInsInput.value = productIn.note || null
-                deleteInsId.value = productIn.id || null
-                atInput.value = moment(productIn.at).format('YYYY-MM-DD')
-
-
-                if (productIn.details) {
-                    productIn.details?.map(function(detail) {
-                        addProductInDetailRow(detail)
-                    })
-                } else {
-                    addProductInDetailRow({})
-                }
-
-            }
-
-
-            $(document).on('click', '.addProductInsButton', function() {
-                $('[name="_method"][value="put"]').remove()
-
-                setProductInFormValue({});
-                deleteFormIns.style.display = "none"
-
-                $('.detailInputSetDiv').remove()
-
-                productInFormModal.setTitle(`{{ __('Add new product in') }}`)
-                productInForm.action = "{{ route('product-ins.store') }}";
-            });
-
-            $(document).on('click', '.editProductInButton', function() {
-                const productInId = $(this).data('product-id');
-                const productIn = productInsCrudDiv.productIns.find(productIn => productIn.id === productInId);
-                deleteFormIns.style.display = "block";
-
-                $('.detailInputSetDiv').remove()
-
-                $('[name="_method"][value="put"]').remove()
-                $('#productInForm').append($('@method('put')'))
-                setProductInFormValue(productIn);
-
-                productInFormModal.setTitle(`{{ __('Edit product in') }}: ${moment(productIn.at).format('DD-MM-YYYY')}`)
-                productInForm.action = "{{ route('product-ins.update', '') }}/" + productIn.id;
-                deleteFormIns.action = "{{ route('product-ins.destroy', '') }}/" + productIn
-                    .id;
-            })
-
-            $(document).on('click', '#addProductInsButton', function() {
-                addProductInDetailRow({})
-            })
-
-            function validateInputs() {
-                const selectedProductInsIds = []
-                let isValid = true;
-
-                $('.text-danger').remove();
-
-                [...document.getElementsByClassName('productSelect')].map(selectEl => {
-                    if (selectedProductInsIds.includes(selectEl.value)) {
-                        const errorTextDiv = document.createElement('div');
-                        errorTextDiv.innerHTML = '{{ __('Product is duplicated') }}';
-                        errorTextDiv.classList.add('text-danger')
-
-                        selectEl.parentNode.append(errorTextDiv)
-                        isValid = false;
-                    } else {
-                        selectedProductInsIds.push(selectEl.value)
-                    }
-                })
-
-                return isValid;
-            }
-
-            const datatableSearchProductIns = tag => productInDatatable.DataTable().search(tag).draw()
-
-            $(document).ready(function() {
-                $('#typeProductInsSelect').select2('destroy').select2({
-                    tags: true,
-                    dropdownParent: $('#productInForm')
-                })
-
-                productInsCrudDiv.productInDatatable = $(productInDatatable).dataTable({
-                    processing: true,
-                    search: {
-                        return: true,
-                    },
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                    },
-                    serverSide: true,
-                    ajax: {
-                        url: '{{ action('\App\Http\Controllers\Api\DatatableController', 'ProductIn') }}?with=details.product',
-                        dataSrc: json => {
-                            productInsCrudDiv.productIns = json.data;
-                            return json.data;
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        cache: true
-                    },
-                    order: [1, 'desc'],
-                    columns: [{
-                        data: 'code',
-                        title: '{{ __('Code') }}'
-                    }, {
-                        data: 'at',
-                        title: '{{ __('At') }}',
-                        render: at => moment(at).format('DD-MM-YYYY')
-                    }, {
-                        data: 'type',
-                        title: '{{ __('Type') }}',
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Items') }}',
-                        data: 'details',
-                        name: 'details.product.name',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagProductInsButton(
-                            `${detail.product?.name} (${detail.qty})`)).join('')
-                    }, {
-                        render: function(data, type, row) {
-                            const editButton = $(
-                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
-                            editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#productInFormModal')
-                            editButton.addClass('editProductInButton');
-                            editButton.attr('data-product-id', row.id)
-                            return editButton.prop('outerHTML')
-                        },
-                        orderable: false
-                    }]
-                });
-            });
+            return $(`
+                <div>
+                    ${codePrinted}
+                    ${product?.name}
+                </div>
+            `);
         }
+
+        const productInCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'type': null,
+                'at': null,
+                'note': null,
+                'details': [{}]
+            },
+
+            refreshDatatableEventName: 'product-in:datatable-draw',
+
+            routes: {
+                store: '{{ route('product-ins.store') }}',
+                update: '{{ route('product-ins.update', '') }}/',
+                destroy: '{{ route('product-ins.destroy', '') }}/',
+            },
+
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Product In') }}` : `{{ __('Edit Product In') }}: ` + this
+                    .formData.id_for_human;
+            },
+
+            getDeleteTitle() {
+                return `{{ __('Delete Product In') }}: ` + this.formData.id_for_human;
+            }
+        };
+
+        const productInDatatableConfig = {
+            serverSide: true,
+            setDataListEventName: 'product-in:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $datatableAjaxUrl['product_in'] }}',
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'at',
+                title: '{{ __('validation.attributes.at') }}',
+                render: at => moment(at).format('DD-MM-YYYY')
+            }, {
+                data: 'type',
+                title: '{{ __('validation.attributes.type') }}',
+            }, {
+                data: 'note',
+                title: '{{ __('validation.attributes.note') }}'
+            }, {
+                orderable: false,
+                title: '{{ __('Items') }}',
+                data: 'details',
+                name: 'details.product.name',
+                width: '20%',
+                render: details => details.map(detail => {
+                    const productName = detail.product?.name;
+                    const stockQty = detail.stock?.qty || 0;
+                    const detailQty = detail.qty;
+
+                    const text = `${productName} (${stockQty}/${detailQty})`;
+                    return `<a href="javascript:;" class="m-1 badge badge-success" @click="search('${productName}')">${text}</a>`;
+                }).join('')
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('product-in:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
+                },
+                orderable: false
+            }]
+        };
     </script>
 @endpush
