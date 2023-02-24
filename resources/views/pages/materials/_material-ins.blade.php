@@ -69,13 +69,6 @@
                 <div class="d-flex justify-content-center my-2">
                     <a href="javascript:;" @@click="formData.details.push({})"
                         class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add material') }}</a>
-
-                    <span>
-                        {{ __('Material is not on the list') }}?
-                        <a href="javascript:;" tabindex="-1"
-                            @@click="$dispatch('material:open-modal', null)"
-                            class="badge badge-secondary ml-1">{{ __('Add New Material') }}</a>
-                    </span>
                 </div>
 
                 <div class="px-0" style="overflow-x: auto">

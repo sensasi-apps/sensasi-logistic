@@ -103,13 +103,6 @@
                 <div class="d-flex justify-content-center my-2">
                     <a href="javascript:;" @@click="formData.details.push({})"
                         class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add product') }}</a>
-
-                    <span>
-                        {{ __('Product is not on the list') }}?
-                        <a href="javascript:;" tabindex="-1"
-                            @@click="$dispatch('product:open-modal', null)"
-                            class="badge badge-secondary ml-1">{{ __('Add New Product') }}</a>
-                    </span>
                 </div>
 
                 <div class="px-0" style="overflow-x: auto">
@@ -145,8 +138,8 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty"
-                                        :min="detail.out_total" required>
+                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
+                                        required>
 
                                     <div class="input-group-append">
                                         <span class="input-group-text" x-data="{ unit: '' }"
