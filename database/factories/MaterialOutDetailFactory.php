@@ -2,31 +2,35 @@
 
 namespace Database\Factories;
 
+use App\Models\MaterialOut;
+use App\Models\MaterialInDetail;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MaterialOutDetailFactory extends Factory
 {
-    private $usedNumbers = [];
+    private array $usedCombinationIds = [];
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    private array $materialOutIds = [];
+    private array $materialInDetailIds = [];
+
+    public function definition(): array
     {
-        $materialOutIds = \App\Models\MaterialOut::all()->pluck('id');
-        $materialInDetailIds = \App\Models\MaterialInDetail::all()->pluck('id');
-        
+        if (!$this->materialOutIds) {
+            $this->materialOutIds = MaterialOut::all()->pluck('id')->toArray();
+        }
+
+        if (!$this->materialInDetailIds) {
+            $this->materialInDetailIds = MaterialInDetail::all()->pluck('id')->toArray();
+        }
+
         do {
-            $materialOutId = $this->faker->randomElement($materialOutIds);
-            $materialInDetailId = $this->faker->randomElement($materialInDetailIds);
+            $materialOutId = $this->faker->randomElement($this->materialOutIds);
+            $materialInDetailId = $this->faker->randomElement($this->materialInDetailIds);
 
-            $uniqueIds = $materialOutId . $materialInDetailId;
-            
-        } while (in_array($uniqueIds, $this->usedNumbers));
+            $randomCombinationId = "{$materialOutId}-{$materialInDetailId}";
+        } while (in_array($randomCombinationId, $this->usedCombinationIds));
 
-        array_push($this->usedNumbers, $uniqueIds);
+        array_push($this->usedCombinationIds, $randomCombinationId);
 
         return [
             'material_out_id' => $materialOutId,

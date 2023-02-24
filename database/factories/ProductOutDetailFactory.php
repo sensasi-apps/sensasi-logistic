@@ -2,30 +2,35 @@
 
 namespace Database\Factories;
 
+use App\Models\ProductInDetail;
+use App\Models\ProductOut;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductOutDetailFactory extends Factory
 {
-    private $usedNumbers = [];
+    private array $usedCombinationIds = [];
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    private array $productOutIds = [];
+    private array $productInDetailIds = [];
+
+    public function definition(): array
     {
-        $productOutIds = \App\Models\ProductOut::all()->pluck('id');
-        $productInDetailIds = \App\Models\ProductInDetail::all()->pluck('id');
+        if (!$this->productOutIds) {
+            $this->productOutIds = ProductOut::all()->pluck('id')->toArray();
+        }
+
+        if (!$this->productInDetailIds) {
+            $this->productInDetailIds = ProductInDetail::all()->pluck('id')->toArray();
+        }
 
         do {
-            $productOutId = $this->faker->randomElement($productOutIds);
-            $productInDetailId = $this->faker->randomElement($productInDetailIds);
+            $productOutId = $this->faker->randomElement($this->productOutIds);
+            $productInDetailId = $this->faker->randomElement($this->productInDetailIds);
 
-            $uniqueIds = $productOutId . $productInDetailId;
-        } while (in_array($uniqueIds, $this->usedNumbers));
+            $randomCombinationId = "{$productOutId}-{$productInDetailId}";
+        } while (in_array($randomCombinationId, $this->usedCombinationIds));
 
-        array_push($this->usedNumbers, $uniqueIds);
+        array_push($this->usedCombinationIds, $randomCombinationId);
 
         return [
             'product_out_id' => $productOutId,

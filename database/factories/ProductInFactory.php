@@ -6,12 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductInFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'code' => $this->faker->unique()->numerify('P-IN-#####'),

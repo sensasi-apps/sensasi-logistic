@@ -2,8 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\Manufacture;
 use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
+use App\Models\MaterialOut;
+use App\Models\MaterialOutDetail;
+use App\Models\ProductIn;
+use App\Models\ProductInDetail;
+use App\Models\ProductOut;
+use App\Models\ProductOutDetail;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
@@ -11,12 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         DB::table('users')->insert([
             'name' => 'superman',
@@ -24,13 +26,13 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('superman')
         ]);
 
-        $user = \App\Models\User::where('email', 'super@man.com')
+        $user = User::where('email', 'super@man.com')
             ->first()
             ->assignRole('Super Admin');
 
         Auth::login($user);
 
-        \App\Models\User::factory(10)->create();
+        User::factory(10)->create();
 
         $this->call([
             UserRoleSeeder::class,
@@ -39,30 +41,30 @@ class DatabaseSeeder extends Seeder
         ]);
 
         echo "MaterialIn Factory is working...\n";
-        \App\Models\MaterialIn::factory(50)->create();
+        MaterialIn::factory(50)->create();
 
         echo "MaterialInDetail Factory is working...\n";
-        \App\Models\MaterialInDetail::factory(100)->create();
+        MaterialInDetail::factory(100)->create();
 
         echo "MaterialOut Factory is working...\n";
-        \App\Models\MaterialOut::factory(59)->create();
+        MaterialOut::factory(50)->create();
 
         echo "MaterialOutDetail Factory is working...\n";
-        \App\Models\MaterialOutDetail::factory(100)->create();
+        MaterialOutDetail::factory(100)->create();
 
         echo "ProductIn Factory is working...\n";
-        \App\Models\ProductIn::factory(50)->create();
+        ProductIn::factory(50)->create();
 
         echo "ProductInDetail Factory is working...\n";
-        \App\Models\ProductInDetail::factory(100)->create();
+        ProductInDetail::factory(100)->create();
 
         echo "ProductOut Factory is working...\n";
-        \App\Models\ProductOut::factory(50)->create();
+        ProductOut::factory(50)->create();
 
         echo "ProductOutDetail Factory is working...\n";
-        \App\Models\ProductOutDetail::factory(100)->create();
+        ProductOutDetail::factory(100)->create();
 
         echo "Manufacture Factory is working...\n";
-        \App\Models\Manufacture::factory(50)->create();
+        Manufacture::factory(50)->create();
     }
 }

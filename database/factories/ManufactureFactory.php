@@ -2,29 +2,26 @@
 
 namespace Database\Factories;
 
+use App\Models\MaterialOut;
+use App\Models\ProductIn;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ManufactureFactory extends Factory
 {
-    private $usedMaterialOutIds = [];
-    private $usedProductInIds = [];
-    private $materialOutIds;
-    private $productInIds;
+    private array $usedMaterialOutIds = [];
+    private array $usedProductInIds = [];
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    private array $materialOutIds = [];
+    private array $productInIds = [];
+
+    public function definition(): array
     {
         if (!$this->materialOutIds) {
-            // TODO: do this cache for all factories
-            $this->materialOutIds = \App\Models\MaterialOut::all()->pluck('id');
+            $this->materialOutIds = MaterialOut::all()->pluck('id')->toArray();
         }
 
         if (!$this->productInIds) {
-            $this->productInIds = \App\Models\ProductIn::all()->pluck('id');
+            $this->productInIds = ProductIn::all()->pluck('id')->toArray();
         }
 
         do {
