@@ -121,8 +121,8 @@
                         <template x-for="(detail, $i) in formData.details">
                             <div class="form-group row mx-0 mb-4 align-items-center">
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="detail.out_details"
-                                        :data-exclude-enabling="detail.out_details"
+                                    <select class="form-control" :disabled="detail.out_details?.length > 0"
+                                        :data-exclude-enabling="detail.out_details?.length > 0"
                                         x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             placeholder: '{{ __('Product') }}',
@@ -166,7 +166,7 @@
                                         x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(detail.out_details?.length > 0)" :disabled="detail.out_details"
+                                        x-show="!(detail.out_details?.length > 0)" :disabled="detail.out_details?.length > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>

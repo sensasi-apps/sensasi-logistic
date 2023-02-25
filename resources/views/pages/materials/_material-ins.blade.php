@@ -82,12 +82,11 @@
 
                         {{-- DETAILS LOOP --}}
                         <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center"
-                                x-effect="detail.id ? detail.out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0) : null">
+                            <div class="form-group row mx-0 mb-4 align-items-center">
 
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="detail.out_total > 0"
-                                        :data-exclude-enabling="detail.out_total > 0"
+                                    <select class="form-control" :disabled="detail.out_details?.length > 0"
+                                        :data-exclude-enabling="detail.out_details?.length > 0"
                                         x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             placeholder: '{{ __('Material') }}',
@@ -106,8 +105,8 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
-                                        required>
+                                    <input class="form-control" type="number" x-model="detail.qty"
+                                        :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
 
                                     <div class="input-group-append">
                                         <span class="input-group-text" x-data="{ unit: '' }"
@@ -128,11 +127,11 @@
 
                                 <div class="col-1 pl-4 pr-0">
 
-                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
-                                        :title="__('cannot be deleted. Material(s) has been used')" />
+                                    <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
+                                        x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
+                                        x-show="!(detail.out_details?.length > 0)" :disabled="detail.out_details?.length > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -153,24 +152,21 @@
 
             @slot('footer')
                 <div>
-                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''"
-                        :form="htmlElements.form.id">
+                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
-                    <button @@click="restore()" x-show="isDirty"
-                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
+                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
+                            class="fas fa-undo"></i></button>
                 </div>
 
                 <div>
                     <x-_disabled-delete-button x-show="formData.has_out_details" x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
 
-                    <template x-if="formData.id && !formData.has_out_details">
-                        <button class="btn btn-icon btn-outline-danger" tabindex="-1"
-                            @@click="openDeleteModal">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </template>
+                    <button class="btn btn-icon btn-outline-danger" tabindex="-1"
+                        @@click="openDeleteModal" x-show="formData.id && !formData.has_out_details">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             @endslot
         </x-_modal>
