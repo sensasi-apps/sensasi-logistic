@@ -67,11 +67,16 @@ trait ProductInTrait
 	}
 
 
-	private function validateForDelete(array $detailsData): array
+	private function validateForDelete(array $data, array $detailsData): array
 	{
-		return Validator::make($detailsData, [
-			'*.id' => 'unique:product_out_details,product_in_detail_id'
-		])->validate();
+		return [
+			Validator::make($data, [
+				'id' => 'unique:manufactures,product_in_id',
+			])->validate(),
+			Validator::make($detailsData, [
+				'*.id' => 'unique:product_out_details,product_in_detail_id',
+			])->validate()
+		];
 	}
 
 	private function separateDetailsData(Collection $detailsData): array

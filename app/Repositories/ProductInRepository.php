@@ -80,7 +80,7 @@ class ProductInRepository
 			'forDelete' => $forDelete
 		] = $this->separateDetailsData(collect($validatedDetails));
 
-		$this->validateForDelete($forDelete->toArray());
+		$this->validateForDelete($data, $forDelete->toArray());
 
 		try {
 			DB::beginTransaction();
@@ -116,7 +116,7 @@ class ProductInRepository
 		$this->setWorkingInstance();
 
 		$details = $this->workingInstance->details;
-		$this->validateForDelete($details->toArray());
+		$this->validateForDelete($this->workingInstance->toArray(), $details->toArray());
 
 		try {
 			DB::beginTransaction();

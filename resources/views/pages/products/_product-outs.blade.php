@@ -28,7 +28,6 @@
     <div x-data="crud(productOutCrudConfig)" @@product-out:open-modal.document="openModal"
         @@product-out:set-data-list.document="setDataList">
         <x-_modal size="xl" centered>
-            {{-- TODO:: add manufacture check on productin  --}}
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">

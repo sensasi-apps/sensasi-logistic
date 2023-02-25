@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ProductIn extends Model
 {
@@ -20,22 +23,27 @@ class ProductIn extends Model
         'id_for_human'
     ];
 
-    public function details()
+    public function details(): HasMany
     {
         return $this->hasMany(ProductInDetail::class);
     }
 
-    public function getIdForHumanAttribute()
-    {
-        return $this->code ?? $this->at->format('d-m-Y') ?? null;
-    }
-
-    public function outDetails()
+    public function outDetails(): HasManyThrough
     {
         return $this->hasManyThrough(ProductOutDetail::class, ProductInDetail::class)->has('productOut');
     }
 
-    public function getHasOutDetailsAttribute()
+    public function manufacture(): HasOne
+    {
+        return $this->hasOne(Manufacture::class);
+    }
+
+    public function getIdForHumanAttribute(): string
+    {
+        return $this->code ?? $this->at->format('d-m-Y') ?? null;
+    }
+
+    public function getHasOutDetailsAttribute(): int
     {
         return $this->outDetails->count() > 0;
     }

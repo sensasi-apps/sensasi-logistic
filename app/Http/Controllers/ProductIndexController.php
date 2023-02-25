@@ -20,7 +20,6 @@ class ProductIndexController extends Controller
 
     private function getProductInDatatableApiUrl(): string
     {
-        // TODO: implement check manufacture
         $productInApiParamsJson = json_encode([
             'withs' => [
                 'details' => [
@@ -28,7 +27,8 @@ class ProductIndexController extends Controller
                     'outDetails',
                     'stock'
                 ],
-                'outDetails'
+                'outDetails',
+                'manufacture'
             ], 'appends' => [
                 'has_out_details'
             ]

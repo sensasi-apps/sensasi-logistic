@@ -62,7 +62,10 @@
     <div x-data="crud(productInCrudConfig)" @@product-in:open-modal.document="openModal"
         @@product-in:set-data-list.document="setDataList">
         <x-_modal size="xl" centered>
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
+            <p x-show="formData.manufacture" class="text-danger">
+                *{{ __('This data can be edit only from manufacture menu') }}</p>
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
+                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
@@ -116,11 +119,10 @@
 
                         {{-- DETAILS LOOP --}}
                         <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center"
-                                x-effect="detail.id ? detail.out_total = detail.out_details?.reduce((a, b) => a + b.qty, 0) : null">
+                            <div class="form-group row mx-0 mb-4 align-items-center">
                                 <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="detail.out_total > 0"
-                                        :data-exclude-enabling="detail.out_total > 0"
+                                    <select class="form-control" :disabled="detail.out_details"
+                                        :data-exclude-enabling="detail.out_details"
                                         x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
                                             dropdownParent: $el.closest('.modal-body'),
                                             placeholder: '{{ __('Product') }}',
@@ -138,8 +140,8 @@
                                 </div>
 
                                 <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty" :min="detail.out_total"
-                                        required>
+                                    <input class="form-control" type="number" x-model="detail.qty"
+                                        :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
 
                                     <div class="input-group-append">
                                         <span class="input-group-text" x-data="{ unit: '' }"
@@ -160,11 +162,11 @@
 
                                 <div class="col-1 pl-4 pr-0">
 
-                                    <x-_disabled-delete-button x-show="detail.out_total > 0" x-init="$($el).tooltip()"
-                                        :title="__('cannot be deleted. Product(s) has been used')" />
+                                    <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
+                                        x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(detail.out_total > 0)" :disabled="detail.out_total > 0"
+                                        x-show="!(detail.out_details?.length > 0)" :disabled="detail.out_details"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -184,9 +186,8 @@
 
             @slot('footer')
                 <div>
-                    {{-- TODO: bug on save button, text not hide on loading --}}
-                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''"
-                        :form="htmlElements.form.id">
+                    <button class="btn btn-success" :disabled="!!(formData.manufacture)"
+                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
@@ -197,14 +198,11 @@
                 <div>
                     <x-_disabled-delete-button x-show="formData.has_out_details" x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
 
-                    <template x-if="formData.id && !formData.has_out_details">
-                        <button class="btn btn-icon btn-outline-danger" tabindex="-1"
-                            @@click="openDeleteModal">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </template>
-                </div>
-            @endslot
+                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                        @@click="openDeleteModal" x-show="formData.id && !formData.has_out_details">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                @endslot
         </x-_modal>
 
         <x-_delete-modal x-on:submit.prevent="submitDelete" />
