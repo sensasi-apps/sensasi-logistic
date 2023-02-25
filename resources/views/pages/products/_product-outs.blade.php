@@ -135,7 +135,6 @@
 
             @slot('footer')
                 <div>
-                    {{-- TODO: bug on save button, text not hide on loading --}}
                     <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
