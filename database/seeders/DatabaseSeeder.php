@@ -65,6 +65,6 @@ class DatabaseSeeder extends Seeder
         ProductOutDetail::factory(100)->create();
 
         echo "Manufacture Factory is working...\n";
-        Manufacture::factory(50)->create();
+        Manufacture::factory(10)->create();
     }
 }
