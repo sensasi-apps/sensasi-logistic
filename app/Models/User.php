@@ -6,6 +6,7 @@ use App\Models\Traits\CUDLogTrait;
 use Illuminate\Contracts\Auth\CanResetPassword;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -47,12 +48,12 @@ class User extends Authenticatable implements CanResetPassword
         'email_verified_at' => 'datetime',
     ];
 
-    public function getHasDefaultPasswordAttribute()
+    public function getHasDefaultPasswordAttribute(): bool
     {
         return Hash::check(env('APP_KEY'), $this->password);
     }
 
-    public function activities()
+    public function activities(): HasMany
     {
         return $this->hasMany(UserActivity::class);
     }

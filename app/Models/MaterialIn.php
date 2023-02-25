@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class MaterialIn extends Model
 {
@@ -19,22 +21,22 @@ class MaterialIn extends Model
         'id_for_human'
     ];
 
-    public function details()
+    public function details(): HasMany
     {
         return $this->hasMany(MaterialInDetail::class);
     }
 
-    public function outDetails()
+    public function outDetails(): HasManyThrough
     {
         return $this->hasManyThrough(MaterialOutDetail::class, MaterialInDetail::class)->has('materialOut');
     }
 
-    public function getIdForHumanAttribute()
+    public function getIdForHumanAttribute(): string|null
     {
         return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }
 
-    public function getHasOutDetailsAttribute()
+    public function getHasOutDetailsAttribute(): bool
     {
         return $this->outDetails->count() > 0;
     }

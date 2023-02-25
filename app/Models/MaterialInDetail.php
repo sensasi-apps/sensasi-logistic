@@ -4,52 +4,52 @@ namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
 use App\Models\Views\MaterialInDetailsStockView;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MaterialInDetail extends Model
 {
     use HasFactory, CUDLogTrait;
-    
+
     protected $guarded = ['id'];
 
     public $timestamps = false;
 
-    public function material()
+    public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
 
-    public function materialIn()
+    public function materialIn(): BelongsTo
     {
         return $this->belongsTo(MaterialIn::class);
     }
 
-    public function outDetails()
+    public function outDetails(): HasMany
     {
         return $this->hasMany(MaterialOutDetail::class);
     }
 
-    public function getOutTotalAttribute()
+    public function getOutTotalAttribute(): int
     {
         return $this->outDetails->sum('qty') ?? 0;
     }
 
-    public function getQtyRemainAttribute()
+    public function getQtyRemainAttribute(): int
     {
-        if (!$this->relationLoaded('stock')) {
-            $this->load('stock');
-        }
-
         return $this->stock->qty;
     }
 
-    public function stock()
+    public function stock(): HasOne
     {
         return $this->hasOne(MaterialInDetailsStockView::class);
     }
 
-    public static function search($q)
+    public static function search($q): Builder
     {
         return self::with(['material', 'materialIn', 'stock'])
             ->has('materialIn')

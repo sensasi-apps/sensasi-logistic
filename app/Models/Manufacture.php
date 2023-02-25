@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Helper;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Manufacture extends Model
 {
@@ -17,12 +17,13 @@ class Manufacture extends Model
         'at'
     ];
 
-    public function productIn(){
-        return $this->belongsTo(productIn::class, 'product_in_id', 'id');
+    public function productIn(): BelongsTo
+    {
+        return $this->belongsTo(ProductIn::class);
     }
 
-    public function materialOut(){
-        return $this->belongsTo(materialOut::class, 'material_out_id', 'id');
+    public function materialOut(): BelongsTo
+    {
+        return $this->belongsTo(MaterialOut::class);
     }
 }
-

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Traits\CUDLogTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -14,22 +15,22 @@ class Product extends Model
     protected $appends = ['tags', 'qty', 'id_for_human'];
     protected $with = ['monthlyMovements'];
 
-    public function setTagsAttribute(array $tags)
+    public function setTagsAttribute(array $tags): void
     {
         $this->tags_json = json_encode($tags);
     }
 
-    public function getTagsAttribute()
+    public function getTagsAttribute(): array
     {
         return json_decode($this->tags_json) ?? [];
     }
 
-    public function monthlyMovements()
+    public function monthlyMovements(): HasMany
     {
         return $this->hasMany(ProductMonthlyMovement::class)->orderByDesc('year')->orderByDesc('month');
     }
 
-    public function getQtyAttribute()
+    public function getQtyAttribute(): int
     {
         $qty = 0;
 
@@ -40,14 +41,15 @@ class Product extends Model
         return $qty;
     }
 
-    public function getIdForHumanAttribute()
+    public function getIdForHumanAttribute(): string
     {
         $codePrinted = $this->code ? "{$this->code} - " : null;
+        $brandPrinted = $this->brand ? " ({$this->brand})" : null;
 
-        return "{$codePrinted}{$this->name}";
+        return "{$codePrinted}{$this->name}{$brandPrinted}";
     }
 
-    public function getHasChildrenAttribute()
+    public function getHasChildrenAttribute(): bool
     {
         return $this->monthlyMovements->count() > 0;
     }
