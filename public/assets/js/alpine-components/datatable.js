@@ -25,6 +25,7 @@ document.addEventListener('alpine:init', () => {
 
 			initDataTable($el) {
 				return $($el).dataTable({
+					responsive: true,
 					processing: true,
 					search: {
 						return: true,
