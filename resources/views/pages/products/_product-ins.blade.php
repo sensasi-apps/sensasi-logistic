@@ -25,40 +25,6 @@
 </div>
 
 @push('modal')
-    <x-_modal id="productInFormModal" size="lg" centered>
-        <form method="POST" id="productInForm" onsubmit="return validateInputs();">
-            @csrf
-
-            <input type="hidden" name="id" id="idIns">
-
-
-
-
-
-            <div class="">
-                <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i class="fas fa-plus"></i>
-                    {{ __('More') }}</a>
-                <a href="#" data-toggle="modal" data-target="#productFormModal">{{ __('New product') }}?</a>
-            </div>
-        </form>
-
-        @slot('footer')
-            <div>
-                <button type="submit" form="productInForm" class="btn btn-outline-success">{{ __('Save') }}</button>
-            </div>
-            <form action="" method="post" id="deleteFormIns">
-                @csrf
-                @method('delete')
-                <input type="hidden" name="id" id="deleteInsId">
-                <button type="submit" class="btn btn-icon btn-outline-danger">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </form>
-        @endslot
-    </x-_modal>
-@endpush
-
-@push('modal')
     <div x-data="crud(productInCrudConfig)" @@product-in:open-modal.document="openModal"
         @@product-in:set-data-list.document="setDataList">
         <x-_modal size="xl" centered>
@@ -166,7 +132,8 @@
                                         x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
 
                                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        x-show="!(detail.out_details?.length > 0)" :disabled="detail.out_details?.length > 0"
+                                        x-show="!(detail.out_details?.length > 0)"
+                                        :disabled="detail.out_details?.length > 0"
                                         @@click.prevent="removeDetail($i)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -223,6 +190,10 @@
 
             const product = data.product;
 
+            const brandPrinted = material?.brand ?
+                '<small class=\'text-muted\'>(' +
+                material?.brand + ')</small>' : '';
+
             const codePrinted = product?.code ?
                 '<small class=\'text-muted\'><b>' +
                 product?.code + '</b></small> - ' : '';
@@ -231,6 +202,7 @@
                 <div>
                     ${codePrinted}
                     ${product?.name}
+					${brandPrinted}
                 </div>
             `);
         }
