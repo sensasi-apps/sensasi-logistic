@@ -17,6 +17,10 @@ class Manufacture extends Model
         'at'
     ];
 
+    protected $appends = [
+        'id_for_human'
+    ];
+
     public function productIn(): BelongsTo
     {
         return $this->belongsTo(ProductIn::class);
@@ -25,5 +29,10 @@ class Manufacture extends Model
     public function materialOut(): BelongsTo
     {
         return $this->belongsTo(MaterialOut::class);
+    }
+
+    public function getIdForHumanAttribute(): string
+    {
+        return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }
 }
