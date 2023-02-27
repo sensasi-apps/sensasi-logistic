@@ -71,7 +71,7 @@ trait ProductInTrait
 	{
 		return [
 			Validator::make($data, [
-				'id' => 'unique:manufactures,product_in_id',
+				'id' => "unique:manufactures,product_in_id,{$this->workingInstance->id},product_in_id",
 			])->validate(),
 			Validator::make($detailsData, [
 				'*.id' => 'unique:product_out_details,product_in_detail_id',

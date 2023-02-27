@@ -1,412 +1,474 @@
-@include('components.assets._datatable')
 @include('components.assets._select2')
+@include('components.alpine-data._crud')
+@include('components.alpine-data._datatable')
 
-<div id="manufactureCrudDiv">
-    <div class="section-body">
-        <h2 class="section-title">
-            {{ __('Manufacture List') }}
-            <button type="button" class="ml-2 btn btn-primary addManufactureButton" data-toggle="modal"
-                data-target="#manufactureFormModal">
-                <i class="fas fa-plus-circle"></i> Tambah
-            </button>
-        </h2>
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="materialOutDatatable" style="width:100%">
-                    </table>
-                </div>
-            </div>
+<h2 class="section-title">
+    {{ __('Manufacture List') }}
+    <button x-data type="button" @@click="$dispatch('manufacture:open-modal', null)"
+        class="ml-2 btn btn-primary">
+        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
+    </button>
+</h2>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table x-data="dataTable(manufactureInDatatableConfig)" @@manufacture:datatable-draw.document="draw"
+                class="table table-striped" style="width:100%">
+            </table>
         </div>
     </div>
 </div>
 
 @push('modal')
-    <x-_modal id="manufactureFormModal" size="xl" :title="__('Add new manufacture')" centered>
-        <form method="POST" id="manufactureform">
-            @csrf
-            <input type="hidden" name="manufacture[id]" id="manufactureId">
+    <div x-data="crud(manufactureInCrudConfig)" @@manufacture:open-modal.document="openModal"
+        @@manufacture:set-data-list.document="setDataList">
+        <x-_modal size="xl" centered>
 
-            <div class="row">
-                <div class="col form-group">
-                    <label for="codeManufactureInput">{{ __('Code') }}</label>
-                    <input type="text" class="form-control" name="manufacture[code]" id="codeManufactureInput">
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
+                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+
+                <div class="row">
+                    <div class="col form-group" x-id="['text-input']">
+                        <label :for="$id('text-input')">{{ __('Code') }}</label>
+                        <input type="text" class="form-control" x-model="formData.code" :id="$id('text-input')">
+                    </div>
+
+                    <div class="col form-group" x-id="['input']">
+                        <label :for="$id('input')">{{ __('Date') }}</label>
+                        <input type="date" class="form-control" required :id="$id('input')"
+                            :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                            @@change="formData.at = $event.target.value">
+                    </div>
                 </div>
 
-                <div class="col form-group">
-                    <label for="atManufactureInput">{{ __('Date') }}</label>
-                    <input type="date" class="form-control" name="manufacture[at]" required id="atManufactureInput">
+                <div class="form-group" x-id="['textarea']">
+                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
+                        style="height:100%;"></textarea>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="noteManufactureInput">{{ __('Note') }}</label>
-                <textarea class="form-control" name="manufacture[note]" id="noteManufactureInput" rows="3" style="height:100%;"></textarea>
-            </div>
+                <!-- TABS LIST -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="material-out-tab" data-toggle="tab" data-target="#material-out"
+                            type="button" role="tab" aria-controls="material-out"
+                            aria-selected="true">{{ __('Material Out') }}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="product-in-tab" data-toggle="tab" data-target="#product-in"
+                            type="button" role="tab" aria-controls="product-in"
+                            aria-selected="false">{{ __('Product In') }}</button>
+                    </li>
+                </ul>
 
+                <!-- TAB CONTENT -->
+                <div class="tab-content">
 
-            <div class="row">
-                <div class="col">
-                    <h5 class="mb-3">{{ __('Materials') }}</h5>
+                    <!-- MATERIAL OUT TAB CONTENT -->
+                    <div class="tab-pane fade show active" id="material-out" role="tabpanel"
+                        aria-labelledby="material-out-tab">
+                        <div class="d-flex justify-content-center my-4">
+                            <a href="javascript:;" @@click="formData.material_out.details.push({})"
+                                class="badge badge-danger mr-3"><i class="fas fa-plus"></i>
+                                {{ __('Add material outs') }}</a>
+                        </div>
 
-                    <div class="px-1" style="overflow-x: auto">
-                        <div id="materialOutDetailsParent" style="width: 100%">
-                            <div class="row m-0">
-                                <label class="col-7">{{ __('Name') }}</label>
-                                <label class="col-4">{{ __('Qty') }}</label>
+                        <div class="px-0" style="overflow-x: auto">
+                            <div style="width: 100%">
+                                <div class="row mx-0 my-4">
+                                    <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
+                                </div>
+
+                                {{-- DETAILS LOOP --}}
+                                <template x-for="(detail, $i) in formData.material_out?.details">
+                                    <div class="form-group row mx-0 mb-4 align-items-center">
+                                        <div class="col-5 px-0">
+                                            <select class="form-control" x-init="initMaterialInDetailSelect2;
+                                            $($el).on('select2:select', (e) => {
+                                                detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
+                                                detail.material_in_detail_id = e.target.value;
+                                            })"
+                                                x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
+                                                required></select>
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
+                                            x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
+                                            x-text="priceText">
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0 input-group">
+                                            <input class="form-control" type="number" x-model="detail.qty" min="1"
+                                                required>
+
+                                            <div class="input-group-append">
+                                                <span class="input-group-text" x-data="{ unit: '' }"
+                                                    x-effect="unit = detail.material_in_detail?.material.unit"
+                                                    x-show="unit" x-text="unit"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                            x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
+                                            x-text="intToCurrency(subtotal_price)">
+                                        </div>
+
+                                        <div class="col-1 pl-4 pr-0">
+                                            <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                                @@click.prevent="formData.material_out.details.splice($i, 1)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                                {{-- END DETAILS LOOP --}}
+
+                                {{-- TOTAL --}}
+                                <div class="row mx-0 my-4">
+                                    <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0"
+                                        x-effect="$data.total_in_price = formData.material_out?.details?.reduce((a, b) => a + b.material_in_detail?.price * b.qty, 0)"
+                                        x-text="intToCurrency($data.total_in_price || 0)"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="">
-                        <a href="#" id="addMaterialOutDetailButton" class="btn btn-success btn-sm mr-2"><i
-                                class="fas fa-plus"></i> {{ __('More') }}</a>
-                        <a href="{{ route('materials.index') }}">{{ __('New material') }}?</a>
-                    </div>
-                </div>
+                    <!-- PRODUCT TAB CONTENT -->
+                    <div class="tab-pane fade" id="product-in" role="tabpanel" aria-labelledby="product-in-tab">
+                        <div class="d-flex justify-content-center my-4">
+                            <a href="javascript:;" @@click="formData.product_in.details.push({})"
+                                class="badge badge-success mr-3"><i class="fas fa-plus"></i>
+                                {{ __('Add product in') }}</a>
+                        </div>
 
-                <div class="col">
-                    <h5 class="mb-3">{{ __('Products') }}</h5>
+                        <div class="px-0" style="overflow-x: auto">
+                            <div style="width: 100%">
+                                <div class="row mx-0 my-4">
+                                    <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                                    <div class="font-weight-bold col-2 pl-4 pr-0">
+                                        {{ __('Cost') }}
 
-                    <div class="px-1" style="overflow-x: auto">
-                        <div id="productInDetailsParent" style="width: 100%">
-                            <div class="row m-0">
-                                <label class="col-7">{{ __('Name') }}</label>
-                                <label class="col-4">{{ __('Qty') }}</label>
+                                        <a x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Auto calculate from material outs') }}"
+                                            @@click="formData.product_in?.details.forEach(detail => detail.price = total_in_price / formData.product_in.details.length / (detail.qty || (detail.qty = 1)))"
+                                            class="text-warning">
+                                            <i class="fas fa-magic"></i>
+                                        </a>
+                                    </div>
+                                    <div class="font-weight-bold col-1 pl-4 pr-0">{{ __('Subtotal') }}</div>
+                                </div>
+
+                                {{-- DETAILS LOOP --}}
+                                <template x-for="(detail, $i) in formData.product_in?.details">
+                                    <div class="form-group row mx-0 mb-4 align-items-center">
+                                        <div class="col-5 px-0">
+                                            <select class="form-control" :disabled="detail.out_details?.length > 0"
+                                                :data-exclude-enabling="detail.out_details?.length > 0"
+                                                x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
+                                                    dropdownParent: $el.closest('.modal-body'),
+                                                    placeholder: '{{ __('Product') }}',
+                                                    data: products.map(product => ({
+                                                        id: product.id,
+                                                        text: null,
+                                                        product: product
+                                                    })),
+                                                    templateResult: productSelect2TemplateResultAndSelection,
+                                                    templateSelection: productSelect2TemplateResultAndSelection,
+                                                }).on('select2:select', (e) => {
+                                                    detail.product_id = e.target.value;
+                                                });"
+                                                required>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0 input-group">
+                                            <input class="form-control" type="number" x-model="detail.qty"
+                                                :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
+
+                                            <div class="input-group-append">
+                                                <span class="input-group-text" x-data="{ unit: '' }"
+                                                    x-effect="unit = products.find(product => detail.product_id == product.id)?.unit"
+                                                    x-show="unit" x-text="unit"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0">
+                                            <input x-model="detail.price" class="form-control" min="0"
+                                                type="number" step="any" required>
+                                        </div>
+
+                                        <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
+                                            x-effect="subtotal_price = detail.price * detail.qty"
+                                            x-text="intToCurrency(subtotal_price || 0)">
+                                        </div>
+
+                                        <div class="col-1 pl-4 pr-0">
+
+                                            <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
+                                                x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+
+                                            <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                                x-show="!(detail.out_details?.length > 0)"
+                                                :disabled="detail.out_details?.length > 0"
+                                                @@click.prevent="formData.product_in.details.splice($i, 1)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                {{-- TOTAL --}}
+                                <div class="row mx-0 my-4">
+                                    <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
+                                    <div class="col-2 pl-4 pr-0">
+                                        <div class="font-weight-bold"
+                                            x-effect="$data.total_out_price = formData.product_in?.details?.reduce((a, b) => a + b.qty * b.price, 0)"
+                                            x-text="intToCurrency(total_out_price || 0)"></div>
+                                        <div x-show="total_in_price && total_out_price && intToCurrency(total_in_price) != intToCurrency(total_out_price)"
+                                            x-transition class="text-danger">
+                                            {{ __('Total cost is not equal to total price') }}</div>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
-
-
-                    <div class="">
-                        <a href="#" id="addProductInsButton" class="btn btn-success btn-sm mr-2"><i
-                                class="fas fa-plus"></i> {{ __('More') }}</a>
-                        <a href="{{ route('products.index') }}">{{ __('New product') }}?</a>
-                    </div>
                 </div>
-
-            </div>
-
+            </form>
 
             @slot('footer')
                 <div>
-                    <button type="submit" form="manufactureform" class="btn btn-outline-success">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success"
+                        :disabled="intToCurrency($data.total_in_price || ($data.total_in_price = 0)) != intToCurrency(
+                            $data.total_out_price || ($data.total_out_price = 0))"
+                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                        {{ __('Save') }}
+                    </button>
+
+                    <button @@click="restore()" x-show="isDirty"
+                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
                 </div>
-                <form action="" method="post" id="deleteManufacture">
-                    @csrf
-                    @method('delete')
-                    <button type="submit" class="btn btn-icon btn-outline-danger">
+
+                <div>
+                    <x-_disabled-delete-button
+                        x-show="formData.product_in?.details?.find(detail => detail.out_details?.length > 0)"
+                        x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+
+                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                        @@click="openDeleteModal"
+                        x-show="formData.id && !(formData.product_in?.details?.find(detail => detail.out_details?.length > 0))">
                         <i class="fas fa-trash"></i>
                     </button>
-                </form>
-            @endslot
-        </form>
-    </x-_modal>
+                @endslot
+        </x-_modal>
 
-    {{-- <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="manufactureFormModalLabel"></h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="manufactureModalBody">
-
-
-                </div>
-                <div class="modal-footer d-flex justify-content-between">
-
-                </div>
-            </div>
-        </div>
-    </div> --}}
+        <x-_delete-modal x-on:submit.prevent="submitDelete" />
+    </div>
 @endpush
 
 @push('js')
     <script>
-        {
-            if (manufactureCrudDiv) {
-                // const manufactureFormModalLabel = $('#manufactureFormModalLabel')
+        const products = @json(App\Models\Product::all());
 
-                // $(function() {
-                //     $('#materialOutTypeSelect').select2({
-                //         tags: true,
-                //         dropdownParent: $('#manufactureModalBody')
-                //     })
-                // })
+        function productSelect2TemplateResultAndSelection(data) {
 
-                const renderTagMaterialOutButton = text =>
-                    `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-danger">${text}</a>`
+            if (!data.id) {
+                return data.text;
+            }
 
-                const renderTagProductInButton = text =>
-                    `<a href="#" onclick="datatableSearch('${text.split(' ')[0]}')" class="m-1 badge badge-success">${text}</a>`
+            const product = data.product;
 
-                const initMaterialSelects = $selectDom => $selectDom.select2({
-                    dropdownParent: $('#manufactureFormModal .modal-body'),
-                    placeholder: '{{ __('Material') }}',
+            const brandPrinted = product?.brand ?
+                '<small class=\'text-muted\'>(' +
+                product?.brand + ')</small>' : '';
 
-                    ajax: {
-                        url: '/api/select2/MaterialInDetail',
-                        dataType: 'json',
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        processResults: function(data) {
-                            const theResults = data.map(materialInDetail => {
+            const codePrinted = product?.code ?
+                '<small class=\'text-muted\'><b>' +
+                product?.code + '</b></small> - ' : '';
 
-                                return {
-                                    id: materialInDetail.id,
-                                    text: `${materialInDetail.material?.name} (${materialInDetail.stock?.qty}) ${moment(materialInDetail.material_in.at).format('DD-MM-YYYY')}`
-                                }
-                            })
+            return $(`
+				<div>
+					${codePrinted}
+					${product?.name}
+					${brandPrinted}
+				</div>
+			`);
+        }
 
-                            return {
-                                results: theResults
-                            };
-                        }
+        function initMaterialInDetailSelect2() {
+            $(this.$el).select2({
+                dropdownParent: $(this.$el).closest('.modal-body'),
+                placeholder: '{{ __('Material') }}',
+                ajax: {
+                    delay: 500,
+                    cache: true,
+                    url: '/api/select2/MaterialInDetail',
+                    dataType: 'json',
+                    beforeSend: function(request) {
+                        request.setRequestHeader(
+                            'Authorization',
+                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
+                        )
                     },
-                    minimumInputLength: 3
-                });
-
-                function addMaterialOutDetailRow(detail) {
-                    const nDetailInputSetMaterialOut = $('.materialOutDetailRowDiv').length
-                    const materialSelectParentDiv = document.createElement('div')
-                    materialSelectParentDiv.setAttribute('class', 'col-6 pl-0 pr-2')
-                    const $selectDomMaterialOut = $(`<select required placeholder="{{ __('Material name') }}"></select>`)
-                        .addClass('form-control select2 listSelect')
-                        .attr('name', `detailsMaterialOut[${nDetailInputSetMaterialOut}][material_in_detail_id]`)
-                    $(materialSelectParentDiv).append($selectDomMaterialOut)
-
-                    if (detail.material_in_detail_id) {
-                        $selectDomMaterialOut.append(
-                            `<option value="${detail.material_in_detail_id}" selected>${detail.material_in_detail?.material.name}</option>`
-                        );
-                    }
-
-                    initMaterialSelects($selectDomMaterialOut);
-                    $selectDomMaterialOut.val(detail.material_in_detail_id).change();
-
-                    const qtyInputParentDiv = document.createElement('div')
-                    qtyInputParentDiv.setAttribute('class', 'col-5 px-2')
-                    qtyInputParentDiv.innerHTML = `<input class="form-control" name="detailsMaterialOut[${nDetailInputSetMaterialOut}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-
-                    const detailRowDiv = document.createElement('div')
-                    detailRowDiv.setAttribute('class',
-                        'form-group row materialOutDetailRowDiv mx-0 align-items-center')
-                    $(detailRowDiv).append(materialSelectParentDiv)
-                    $(detailRowDiv).append(qtyInputParentDiv)
-                    // $(detailRowDiv).append(`<input type="hidden" name="" value="${detail.id}">`)
-
-                    materialOutDetailsParent.append(detailRowDiv);
-                    if (nDetailInputSetMaterialOut !== 0) {
-                        const removeRowButtonParentDiv = document.createElement('div')
-                        removeRowButtonParentDiv.setAttribute('class', 'col-1 pl-2 pr-0')
-                        $(removeRowButtonParentDiv).append($(
-                            '<button class="btn btn-outline-danger btn-icon" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>'
-                        ))
-
-                        $(detailRowDiv).append(removeRowButtonParentDiv)
-                    }
-                }
-
-
-                const setManufactureFormValue = manufacture => {
-                    codeManufactureInput.value = manufacture.code || null
-                    noteManufactureInput.value = manufacture.note || null
-
-                    atManufactureInput.value = moment(manufacture.at).format('YYYY-MM-DD')
-
-                    $('div .detailInputSetProductInDiv').remove()
-                    $('div .materialOutDetailRowDiv').remove()
-
-                    if (manufacture.material_out?.details) {
-                        manufacture.material_out.details.map(function(detail) {
-                            addMaterialOutDetailRow(detail)
-                        })
-                    } else {
-                        addMaterialOutDetailRow({})
-                    }
-
-                    $('div .addProductInDetailRow').remove()
-                    if (manufacture.product_in?.details) {
-                        manufacture.product_in.details?.map(function(detail) {
-                            addProductInDetailRow(detail)
-                        })
-                    } else {
-                        addProductInDetailRow({})
-                    }
-                }
-
-                function addProductInDetailRow(detail) {
-
-                    const nDetailInputSetProductIn = $('.detailInputSetProductInDiv').length
-
-                    const detailRowDiv = document.createElement('div')
-                    detailRowDiv.setAttribute('class', 'form-group row mx-0 align-items-center detailInputSetProductInDiv')
-                    productInDetailsParent.append(detailRowDiv);
-
-                    function getProductSelect() {
-                        const products = {{ Js::from(App\Models\Product::all()) }};
-
-                        const initProductsSelect = $selectDomProductIn => $selectDomProductIn.select2({
-                            dropdownParent: $('#manufactureFormModal .modal-body'),
-                            placeholder: '{{ __('Product') }}',
-                            data: [{
-                                id: null,
-                                text: null
-                            }].concat(products.map(product => {
-                                return {
-                                    id: product.id,
-                                    text: product.name
-                                }
-                            }))
+                    processResults: materialInDetail => {
+                        const data = materialInDetail.map(materialInDetail => {
+                            return {
+                                id: materialInDetail.id,
+                                text: null,
+                                materialInDetail: materialInDetail
+                            }
                         });
 
-                        const productSelectParentDiv = document.createElement('div')
-                        productSelectParentDiv.setAttribute('class', 'col-7 pl-0 pr-2')
-                        const $selectDomProductIn = $(`<select required placeholder="{{ __('Product name') }}"></select>`)
-                            .addClass('form-control productSelect')
-                            .attr('name', `detailsProductIn[${nDetailInputSetProductIn}][product_id]`)
-                        $(productSelectParentDiv).append($selectDomProductIn)
-                        initProductsSelect($selectDomProductIn);
-                        $selectDomProductIn.val(detail.product_id).change();
-
-                        return productSelectParentDiv
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
                     }
 
+                    const datePrinted = data.materialInDetail?.material_in.at ? moment(data.materialInDetail
+                        .material_in.at).format('DD-MM-YYYY') : null;
 
-                    $(detailRowDiv).append(getProductSelect())
-
-
-                    const qtyInputParentDiv = document.createElement('div')
-                    qtyInputParentDiv.setAttribute('class', 'col-4 px-2')
-                    $(qtyInputParentDiv).append(
-                        `<input class="form-control" name="detailsProductIn[${nDetailInputSetProductIn}][qty]" min="0" type="number" required placeholder="{{ __('Qty') }}" value="${detail.qty || ''}">`
-                    )
-                    
-                    const getRemoveRowButtonParentDiv = () => {
-                        const temp = document.createElement('div')
-                        temp.setAttribute('class', 'col-1 pl-2 pr-0')
-                        $(temp).append($(
-                            `<button class="btn btn-outline-danger btn-icon" tabindex="-1" onclick="this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>`
-                        ))
-
-                        return temp;
+                    return $(`
+                        <div style='line-height: 1em;'>
+                            <small>${datePrinted}</small>
+                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
+                            <small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
+                        </div>
+                    `);
+                },
+                templateSelection: function(data) {
+                    if (data.text === '{{ __('Material') }}') {
+                        return data.text;
                     }
 
+                    const materialInDetail = data.materialInDetail || data.element.materialInDetail;
 
-                    $(detailRowDiv).append(qtyInputParentDiv)
+                    const codePrinted = materialInDetail.material?.code ?
+                        '<small class=\'text-muted\'><b>' +
+                        materialInDetail.material?.code + '</b></small> - ' : '';
+                    const brandPrinted = materialInDetail.material?.code ?
+                        '<small class=\'text-muted\'>(' +
+                        materialInDetail.material?.brand + ')</small>' : '';
+                    const namePrinted = materialInDetail.material?.name;
+                    const atPrinted = materialInDetail.material_in?.at ? moment(materialInDetail.material_in
+                        ?.at).format('DD-MM-YYYY') : null;
 
-                    if (nDetailInputSetProductIn !== 0) {
-                        $(detailRowDiv).append(getRemoveRowButtonParentDiv())
-                    }
-                }
+                    return $(`
+                        <div>
+                            ${codePrinted}
+                            ${namePrinted}
+                            ${brandPrinted}
+                            <small class='text-muted ml-2'>
+                                ${atPrinted}
+                            </small>
+                        </div>
+                    `);
+                },
+                minimumInputLength: 3
+            });
+        }
 
-
-                $(document).on('click', '.addManufactureButton', function() {
-                    $('[name="_method"][value="put"]').remove()
-
-                    setManufactureFormValue({});
-                    deleteManufacture.style.display = "none";
-
-                    manufactureform.action = "{{ route('manufactures.store') }}";
-                });
-
-                $(document).on('click', '.editManufactureButton', function() {
-                    const manufactureId = $(this).data('manufacture-id');
-                    const manufacture = manufactureCrudDiv.manufactures.find(manufacture => manufacture.id ===
-                        manufactureId);
-
-                    deleteManufacture.style.display = "block";
-
-                    $('#manufactureform').append($('@method('put')'))
-
-                    setManufactureFormValue(manufacture);
-
-                    manufactureform.action = `{{ route('manufactures.update', '') }}/${manufacture.id}`;
-                    deleteManufacture.action = `{{ route('manufactures.destroy', '') }}/${manufacture.id}`;
-                })
-
-                $(document).on('click', '#addMaterialOutDetailButton', function() {
-                    addMaterialOutDetailRow({})
-                })
-
-                $(document).on('click', '#addProductInsButton', function() {
-                    addProductInDetailRow({})
-                })
-
-                // ################## DATATABLE SECTION
-
-                const datatableSearch = tag => manufactureCrudDiv.materialOutDatatable.DataTable().search(tag).draw()
-
-                manufactureCrudDiv.materialOutDatatable = $(materialOutDatatable).dataTable({
-                    processing: true,
-                    search: {
-                        return: true,
-                    },
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                    },
-                    serverSide: true,
-                    ajax: {
-                        url: "/api/datatable/Manufacture?with=productIn.details.product,materialOut.details.materialInDetail.material",
-                        dataSrc: json => {
-                            manufactureCrudDiv.manufactures = json.data;
-                            return json.data;
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader(
-                                "Authorization",
-                                'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                            )
-                        },
-                        cache: true
-                    },
-                    order: [1, 'desc'],
-                    columns: [{
-                        data: 'code',
-                        title: '{{ __('Code') }}'
-                    }, {
-                        data: 'at',
-                        title: '{{ __('At') }}',
-                        render: at => moment(at).format('DD-MM-YYYY')
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Material Out') }}',
-                        data: 'material_out.details',
-                        name: 'details',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagMaterialOutButton(
-                            `${detail.material_in_detail.material.name} (${detail.qty})`)).join('')
-                    }, {
-                        orderable: false,
-                        title: '{{ __('Product In') }}',
-                        data: 'product_in.details',
-                        name: 'details',
-                        width: '20%',
-                        render: details => details.map(detail => renderTagProductInButton(
-                            `${detail.product.name} (${detail.qty})`)).join('')
-                    }, {
-                        render: function(data, type, row) {
-                            const editButton = $(
-                                '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
-                            )
-                            editButton.attr('data-toggle', 'modal')
-                            editButton.attr('data-target', '#manufactureFormModal')
-                            editButton.addClass('editManufactureButton');
-                            editButton.attr('data-manufacture-id', row.id)
-                            return editButton.prop('outerHTML')
-                        },
-                        orderable: false
-                    }]
-                })
+        function materialInDetailSelect2Effect($el, material_in_detail_id, material_in_detail) {
+            if ($($el).find(`option[value="${material_in_detail_id}"]`).length) {
+                $($el).val(material_in_detail_id).trigger('change');
+            } else {
+                var newOption = new Option('', material_in_detail_id, true, true);
+                newOption.materialInDetail = material_in_detail;
+                $($el).append(newOption);
             }
         }
+
+        const manufactureInCrudConfig = {
+            blankData: {
+                'id': null,
+                'code': null,
+                'at': null,
+                'note': null,
+                'material_out': {
+                    'details': [{}]
+                },
+                'product_in': {
+                    'details': [{}]
+                }
+            },
+
+            refreshDatatableEventName: 'manufacture:datatable-draw',
+
+            routes: {
+                store: '{{ route('manufactures.store') }}',
+                update: '{{ route('manufactures.update', '') }}/',
+                destroy: '{{ route('manufactures.destroy', '') }}/',
+            },
+
+            getTitle(hasnotId) {
+                return !hasnotId ? `{{ __('Add New Manufacture') }}` : `{{ __('Edit Manufacture') }}: ` + this
+                    .formData.id_for_human;
+            },
+
+            getDeleteTitle() {
+                return `{{ __('Delete Manufacture') }}: ` + this.formData.id_for_human;
+            }
+        };
+
+        const manufactureInDatatableConfig = {
+            serverSide: true,
+            setDataListEventName: 'manufacture:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ $manufactureDatatableAjaxUrl }}',
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'at',
+                title: '{{ __('validation.attributes.at') }}',
+                render: at => moment(at).format('DD-MM-YYYY')
+            }, {
+                data: 'note',
+                title: '{{ __('validation.attributes.note') }}'
+            }, {
+                orderable: false,
+                title: '{{ __('Material') }}',
+                data: 'material_out.details',
+                name: 'material_out.details.material_in_detail.material.name',
+                render: details => details.map(detail => {
+                    const materialName = detail.material_in_detail?.material.name;
+                    const detailQty = detail.qty;
+
+                    const text = `${materialName} (${detailQty})`;
+                    return `<a href="javascript:;" class="m-1 badge badge-danger" @click="search('${materialName}')">${text}</a>`;
+                }).join('')
+            }, {
+                orderable: false,
+                title: '{{ __('products') }}',
+                data: 'product_in.details',
+                name: 'product_in.details.product.name',
+                render: details => details.map(detail => {
+                    const productName = detail.product?.name;
+                    const stockQty = detail.stock?.qty;
+                    const detailQty = detail.qty;
+
+                    const text = `${productName} (${stockQty}/${detailQty})`;
+                    return `<a href="javascript:;" class="m-1 badge badge-success" @click="search('${productName}')">${text}</a>`;
+                }).join('')
+            }, {
+                render: function(data, type, row) {
+                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('manufacture:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
+                },
+                orderable: false
+            }]
+        };
     </script>
 @endpush

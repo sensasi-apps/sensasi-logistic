@@ -190,9 +190,9 @@
 
             const product = data.product;
 
-            const brandPrinted = material?.brand ?
+            const brandPrinted = product?.brand ?
                 '<small class=\'text-muted\'>(' +
-                material?.brand + ')</small>' : '';
+                product?.brand + ')</small>' : '';
 
             const codePrinted = product?.code ?
                 '<small class=\'text-muted\'><b>' +
