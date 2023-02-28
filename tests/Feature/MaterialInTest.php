@@ -8,6 +8,7 @@ use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
 use App\Models\User;
 use Database\Seeders\MaterialsSeeder;
+use Helper;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,7 +43,7 @@ class MaterialInTest extends TestCase
     {
         $this->seed(MaterialsSeeder::class);
 
-        $user = User::factory()->create();
+        $user = Helper::createSuperman();
         $this->actingAs($user);
     }
 

@@ -12,24 +12,15 @@ use App\Models\ProductInDetail;
 use App\Models\ProductOut;
 use App\Models\ProductOutDetail;
 use App\Models\User;
+use Helper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
-            'name' => 'superman',
-            'email' => 'super@man.com',
-            'password' => bcrypt('superman')
-        ]);
-
-        $user = User::where('email', 'super@man.com')
-            ->first()
-            ->assignRole('Super Admin');
-
+        $user = Helper::createSuperman();
         Auth::login($user);
 
         User::factory(10)->create();
