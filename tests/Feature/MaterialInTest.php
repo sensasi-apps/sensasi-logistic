@@ -61,6 +61,17 @@ class MaterialInTest extends TestCase
         $this->assertDatabaseHas('material_in_details', $this->test_data['details'][2]);
     }
 
+    private function material_in_can_be_updated_assert()
+    {
+        $this->assertDatabaseCount('material_ins', 1);
+        $this->assertDatabaseHas('material_ins', ['code' => 'test2']);
+
+        $this->assertDatabaseCount('material_in_details', 3);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 1]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 4]);
+        $this->assertDatabaseHas('material_in_details', ['material_id' => 3]);
+    }
+
     public function test_material_in_can_be_updated()
     {
         // 0. initialize data
@@ -79,16 +90,9 @@ class MaterialInTest extends TestCase
 
         // test case 1 begin
         $response = $this->put("material-ins/1", $data1);
-
         $response->assertStatus(302);
-        $this->assertDatabaseCount('material_ins', 1);
-        $this->assertDatabaseHas('material_ins', ['code' => 'test2']);
 
-        $this->assertDatabaseCount('material_in_details', 3);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 1]);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 4]);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 3]);
-
+        $this->material_in_can_be_updated_assert();
 
         // case 2 data changed after used
         MaterialOut::factory()->create();
@@ -112,25 +116,18 @@ class MaterialInTest extends TestCase
         $data2['details'][0]['material_id'] = 5; // change material_id
         $data2['details'][1]['qty'] = 9; // change qty lest than used qty
 
-        // test case 2 begin
+        // test case 2 begin, should fail and rollback
         $response = $this->put("material-ins/1", $data2);
-
         $response->assertStatus(302);
-        $this->assertDatabaseCount('material_ins', 1);
-        $this->assertDatabaseHas('material_ins', ['code' => 'test3']);
 
-        $this->assertDatabaseCount('material_in_details', 4);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 1]);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 4]);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 3]);
-        $this->assertDatabaseHas('material_in_details', ['material_id' => 5]);
+        $this->material_in_can_be_updated_assert();
     }
 
     public function test_material_in_can_be_deleted()
     {
         $this->init();
 
-        $materialIns = MaterialIn::factory(2)->create();
+        MaterialIn::factory(2)->create();
         MaterialInDetail::insert([
             [
                 'material_in_id' => 1,
@@ -152,12 +149,13 @@ class MaterialInTest extends TestCase
             'qty' => 10
         ]);
 
-
-        $response1 = $this->delete('/material-ins/1');
-        $response1->assertStatus(302);
-
         $response2 = $this->delete('/material-ins/2');
         $response2->assertStatus(302);
+
+        // fail delete because material_in_id 1 is used
+        // note: fail response can't be run first
+        $response1 = $this->delete('/material-ins/1');
+        $response1->assertStatus(302);
 
         $this->assertDatabaseCount('material_ins', 1);
         $this->assertDatabaseHas('material_ins', ['id' => 1]);
