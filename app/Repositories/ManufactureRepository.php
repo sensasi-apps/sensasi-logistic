@@ -63,8 +63,8 @@ class ManufactureRepository extends BaseRepository
 		try {
 			DB::beginTransaction();
 
-			$materialOut = $this->materialOutRepository->store($validatedData['material_out'], $validatedData['material_out']['details']);
-			$productIn = $this->productInRepository->store($validatedData['product_in'], $validatedData['product_in']['details']);
+			$materialOut = $this->materialOutRepository->store($validatedData['material_out']);
+			$productIn = $this->productInRepository->store($validatedData['product_in']);
 
 			$validatedData['material_out_id'] = $materialOut->id;
 			$validatedData['product_in_id'] = $productIn->id;

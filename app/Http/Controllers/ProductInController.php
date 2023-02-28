@@ -16,8 +16,8 @@ class ProductInController extends Controller
 
     private function repoHandler(string $action, Request $request)
     {
-        $data = $request->only(['code', 'type', 'note', 'at']);
-        $productIn = $this->repo->$action($data, $request->details);
+        $data = $request->only(['code', 'type', 'note', 'at', 'details']);
+        $productIn = $this->repo->$action($data);
 
         $events = [
             'store' => 'added',

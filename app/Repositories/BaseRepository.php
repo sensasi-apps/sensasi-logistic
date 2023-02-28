@@ -31,4 +31,11 @@ class BaseRepository
 
 		return $this->modelClass::with($this->withs)->findOrFail($id);
 	}
+
+	protected function addDataIdToArray(array &$details): void
+	{
+		foreach ($details as &$detail) {
+			$detail["{$this->urlParamName}_id"] = $this->workingInstance->id;
+		}
+	}
 }

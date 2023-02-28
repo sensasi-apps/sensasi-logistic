@@ -4,69 +4,31 @@ namespace App\Repositories;
 
 use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
-use App\Repositories\Traits\MaterialInTrait;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class MaterialInRepository
+class MaterialInRepository extends BaseRepository
 {
-	use MaterialInTrait;
+	protected string $urlParamName = 'material_in';
+	protected string $modelClass = MaterialIn::class;
 
-	/**
-	 * Create a new repository instance.
-	 *
-	 * @return void
-	 */
-	public function __construct(
-		private MaterialIn $model
-	) {
-	}
+	protected array $withs = [
+		'details.material',
+		'details.outDetails',
+		'details.stock'
+	];
 
-	private function setWorkingInstance(): void
+	public function store(array $materialIn): MaterialIn
 	{
-		$this->workingInstance = $this->retrieveWorkingInstance();
-	}
-
-	private function retrieveWorkingInstance(): MaterialIn
-	{
-		if (Route::current() == null) {
-			return $this->model;
-		}
-
-		$materialInId = Route::current()->parameter('material_in');
-
-		if ($materialInId == null) {
-			return $this->model;
-		}
-
-		$with = [
-			'details.material',
-			'details.outDetails',
-			'details.stock'
-		];
-
-		return $this->model::with($with)->findOrFail($materialInId);
-	}
-
-	/**
-	 * Insert new MaterialIn and MaterialInDetails to database
-	 *
-	 * @param array $data input from request
-	 * @param array $detailsData input from request
-	 * @return MaterialIn
-	 */
-	public function store(array $data, array $detailsData): MaterialIn
-	{
-		$this->setWorkingInstance();
-
-		$validatedData = $this->validateData($data);
-		$validatedDetailsData = $this->validateDetailsData($detailsData);
+		$validatedData = $this->validateData($materialIn);
+		$validatedDetailsData = $this->validateDetailsData($materialIn['details']);
 
 		try {
 			DB::beginTransaction();
 
-			$this->workingInstance = $this->model::create($validatedData);
-			$this->addDataIdToDetails($validatedDetailsData);
+			$this->workingInstance = $this->modelClass::create($validatedData);
+			$this->addDataIdToArray($validatedDetailsData);
 
 			$this->workingInstance->details()->insert($validatedDetailsData);
 		} catch (\Throwable $th) {
@@ -76,28 +38,19 @@ class MaterialInRepository
 
 		DB::commit();
 
-		return $this->workingInstance->fresh();
+		return $this->workingInstance;
 	}
 
-	/**
-	 * Update exists MaterialIn and MaterialInDetails in database
-	 *
-	 * @param array $data input from request
-	 * @param array $detailsData input from request
-	 * @return MaterialIn
-	 **/
-	public function update(array $data, array $detailsData): MaterialIn
+	public function update(array $materialIn): MaterialIn
 	{
-		$this->setWorkingInstance();
-
-		$validatedData = $this->validateData($data);
-		$validatedDetails = $this->validateDetailsData($detailsData);
+		$validatedData = $this->validateData($materialIn);
+		$validatedDetails = $this->validateDetailsData($materialIn['details']);
 
 		[
 			'forInsert' => $forInsert,
 			'forUpdate' => $forUpdate,
 			'forDelete' => $forDelete
-		] = $this->separateDetailsData(collect($validatedDetails));
+		] = $this->separateDetailsData($validatedDetails);
 
 		$this->validateForDelete($forDelete->toArray());
 
@@ -107,11 +60,9 @@ class MaterialInRepository
 			// update material_in
 			$this->workingInstance->update($validatedData);
 
-			$forUpsert = $forInsert->merge($forUpdate)->toArray();
-
-			$this->addDataIdToDetails($forUpsert);
-
 			// update/insert data from user input
+			$forUpsert = $forInsert->merge($forUpdate)->toArray();
+			$this->addDataIdToArray($forUpsert);
 			MaterialInDetail::upsert(
 				$forUpsert,
 				['material_in_id', 'material_id'],
@@ -127,18 +78,11 @@ class MaterialInRepository
 			throw $th;
 		}
 
-		return $this->workingInstance->fresh();
+		return $this->workingInstance;
 	}
 
-	/**
-	 * Delete exists MaterialIn and MaterialInDetails in database
-	 *
-	 * @return MaterialIn
-	 **/
 	public function destroy(): MaterialIn
 	{
-		$this->setWorkingInstance();
-
 		$details = $this->workingInstance->details;
 		$this->validateForDelete($details->toArray());
 
@@ -155,5 +99,86 @@ class MaterialInRepository
 		}
 
 		return $this->workingInstance;
+	}
+
+	private function validateData(array $materialIn): array
+	{
+		return Validator::make($materialIn, [
+			'code' => "nullable|string|unique:material_ins,code,{$this->workingInstance->id}",
+			'type' => 'required|string',
+			'note' => 'nullable|string',
+			'at' => 'required|date'
+		])->validate();
+	}
+
+	private function validateDetailsData(array $materiialInDetails): array
+	{
+		$existsDetails = $this->workingInstance->details->keyBy('material_id');
+
+		return Validator::make($materiialInDetails, [
+			'*.material_id' => Rule::forEach(function ($value) use ($existsDetails) {
+
+				$rule = Rule::unique('material_in_details')->where(function ($query) use ($value) {
+					return $query->where([
+						'material_in_id' => $this->workingInstance->id,
+						'material_id' => $value
+					]);
+				});
+
+				if ($existsDetails->get($value)) {
+					$rule->ignore($existsDetails->get($value)->id);
+				}
+
+				return [
+					'required',
+					'distinct',
+					'exists:materials,id',
+					$rule
+				];
+			}),
+
+			'*.qty' => Rule::forEach(function ($value, $attr, $item) use ($existsDetails) {
+
+				$index = explode('.', $attr)[0];
+				$materialId = $item["{$index}.material_id"];
+				$materialInDetail = $existsDetails->get($materialId);
+
+				$min = $materialInDetail ? $materialInDetail->outDetails->sum('qty') : 0;
+
+				return [
+					'required',
+					'numeric',
+					"min:{$min}"
+				];
+			}),
+
+			'*.price' => 'required|numeric|min:0'
+		])->validate();
+	}
+
+	private function validateForDelete(array $materialInDetails): array
+	{
+		return Validator::make($materialInDetails, [
+			'*.id' => 'unique:material_out_details,material_in_detail_id'
+		])->validate();
+	}
+
+	private function separateDetailsData(array $materialInDetails): array
+	{
+		$existsMaterialInDetails = $this->workingInstance->details->keyBy('material_id');
+		$existsMaterialIds = $existsMaterialInDetails->pluck('material_id');
+
+		$materialInDetailsCollection = collect($materialInDetails)->keyBy('material_id');
+		$materialInDetailsMaterialIds = $materialInDetailsCollection->pluck('material_id');
+
+		$t1 = $materialInDetailsMaterialIds->diff($existsMaterialIds);
+		$t2 = $materialInDetailsMaterialIds->intersect($existsMaterialIds);
+		$t3 = $existsMaterialIds->diff($materialInDetailsMaterialIds);
+
+		return [
+			'forInsert' => $materialInDetailsCollection->whereIn('material_id', $t1->toArray()),
+			'forUpdate' => $materialInDetailsCollection->whereIn('material_id', $t2->toArray()),
+			'forDelete' => $existsMaterialInDetails->whereIn('material_id', $t3->toArray())
+		];
 	}
 }

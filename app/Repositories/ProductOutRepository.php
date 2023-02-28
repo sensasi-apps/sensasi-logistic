@@ -4,59 +4,35 @@ namespace App\Repositories;
 
 use App\Models\ProductOut;
 use App\Models\ProductOutDetail;
+use App\Models\Views\ProductInDetailsStockView;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
-use App\Repositories\Traits\ProductOutTrait;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class ProductOutRepository
+class ProductOutRepository extends BaseRepository
 {
-	use ProductOutTrait;
+	protected string $urlParamName = 'product_out';
+	protected string $modelClass = ProductOut::class;
 
-	public function __construct(
-		private ProductOut $model
-	) {
-	}
+	protected array $withs = [
+		'details.productInDetail' => [
+			'stock',
+			'product',
+			'productIn'
+		],
+	];
 
-	private function setWorkingInstance(): void
+
+	public function store(array $productOut): ProductOut
 	{
-		$this->workingInstance = $this->retrieveWorkingInstance();
-	}
-
-	private function retrieveWorkingInstance(): ProductOut
-	{
-		if (Route::current() == null) {
-			return $this->model;
-		}
-
-		$productOutId = Route::current()->parameter('product_out');
-
-		if ($productOutId == null) {
-			return $this->model;
-		}
-
-		$withs = [
-			'details.productInDetail' => [
-				'stock',
-				'product',
-				'productIn'
-			],
-		];
-
-		return $this->model::with($withs)->findOrFail($productOutId);
-	}
-
-	public function store(array $data, array $detailsData): ProductOut
-	{
-		$this->setWorkingInstance();
-
-		$validatedData = $this->validateData($data);
-		$validatedDetailsData = $this->validateDetailsData($detailsData);
+		$validatedData = $this->validateData($productOut);
+		$validatedDetailsData = $this->validateDetailsData($productOut['details']);
 
 		try {
 			DB::beginTransaction();
 
-			$this->workingInstance = $this->model::create($validatedData);
-			$this->addDataIdToDetails($validatedDetailsData);
+			$this->workingInstance = $this->workingInstance::create($validatedData);
+			$this->addDataIdToArray($validatedDetailsData);
 
 			$this->workingInstance->details()->insert($validatedDetailsData);
 			DB::commit();
@@ -65,28 +41,19 @@ class ProductOutRepository
 			throw $th;
 		}
 
-		return $this->workingInstance->fresh();
+		return $this->workingInstance;
 	}
 
-	/**
-	 * Update exists ProductOut and ProductOutDetails in database
-	 *
-	 * @param array $data input from request
-	 * @param array $detailsData input from request
-	 * @return ProductOut
-	 **/
-	public function update(array $data, array $detailsData): ProductOut
+	public function update(array $productOut): ProductOut
 	{
-		$this->setWorkingInstance();
-
-		$validatedData = $this->validateData($data);
-		$validatedDetails = $this->validateDetailsData($detailsData);
+		$validatedData = $this->validateData($productOut);
+		$validatedDetailsData = $this->validateDetailsData($productOut['details']);
 
 		[
 			'forInsert' => $forInsert,
 			'forUpdate' => $forUpdate,
 			'forDelete' => $forDelete
-		] = $this->separateDetailsData(collect($validatedDetails));
+		] = $this->separateDetailsData($validatedDetailsData);
 
 		try {
 			DB::beginTransaction();
@@ -94,11 +61,11 @@ class ProductOutRepository
 			$this->workingInstance->update($validatedData);
 
 			$forUpsert = $forInsert->merge($forUpdate)->toArray();
-			$this->addDataIdToDetails($forUpsert);
+			$this->addDataIdToArray($forUpsert);
 
 			ProductOutDetail::upsert(
 				$forUpsert,
-				['product_out_id', 'product_in_id'],
+				["{$this->urlParamName}_id", 'product_in_id'],
 				['qty']
 			);
 
@@ -115,8 +82,6 @@ class ProductOutRepository
 
 	public function destroy(): ProductOut
 	{
-		$this->setWorkingInstance();
-
 		try {
 			DB::beginTransaction();
 
@@ -130,5 +95,90 @@ class ProductOutRepository
 		}
 
 		return $this->workingInstance;
+	}
+
+	private function validateData(array $productOut): array
+	{
+		return Validator::make($productOut, [
+			'code' => "nullable|string|unique:product_outs,code,{$this->workingInstance->id}",
+			'type' => 'required|string',
+			'note' => 'nullable|string',
+			'at' => 'required|date'
+		])->validate();
+	}
+
+	private function validateDetailsData(array $detailsData): array
+	{
+		$existsDetails = $this->workingInstance->details->keyBy('product_in_detail_id');
+		$productInDetailsStock = ProductInDetailsStockView::whereIn('product_in_detail_id', array_column($detailsData, 'product_in_detail_id'))->get()->keyBy('product_in_detail_id');
+
+		return Validator::make($detailsData, [
+			'*.product_in_detail_id' => Rule::forEach(function ($value) use ($existsDetails) {
+
+				$rule = Rule::unique('product_out_details')->where(function ($query) use ($value) {
+					return $query->where([
+						"{$this->urlParamName}_id" => $this->workingInstance->id,
+						'product_in_detail_id' => $value
+					]);
+				});
+
+				if ($existsDetails->get($value)) {
+					$rule->ignore($existsDetails->get($value)->id);
+				}
+
+				return [
+					'required',
+					'distinct',
+					'exists:product_in_details,id',
+					$rule
+				];
+			}),
+
+			'*.price' => [
+				'required',
+				'numeric',
+				'min:0'
+			],
+
+			'*.qty' => Rule::forEach(function ($value, $attr, $item) use ($productInDetailsStock, $existsDetails) {
+
+				$index = explode('.', $attr)[0];
+				$productInDetailId = $item["{$index}.product_in_detail_id"];
+
+				$max = $productInDetailsStock->get($productInDetailId)->qty;
+
+				if ($existsDetails->get($productInDetailId)) {
+					$max += $existsDetails->get($productInDetailId)->qty;
+				}
+
+				return [
+					'required',
+					'numeric',
+					"max:{$max}",
+				];
+			}),
+		])->validate();
+	}
+
+	private function separateDetailsData(array $detailsData): array
+	{
+		$detailsDataCollection = collect($detailsData);
+		$detailsDataProductInIds = $detailsDataCollection->pluck('product_in_detail_id');
+
+		$existsProductOutDetails = $this->workingInstance->details;
+		$existsProductInIds = $existsProductOutDetails->pluck('product_in_detail_id');
+
+		// get product ids that not exists in old products
+		$t1 = $detailsDataProductInIds->diff($existsProductInIds);
+		// get product ids that exists in old products
+		$t2 = $detailsDataProductInIds->intersect($existsProductInIds);
+		// get product ids that not exists in new products
+		$t3 = $existsProductInIds->diff($detailsDataProductInIds);
+
+		return [
+			'forInsert' => $detailsDataCollection->whereIn('product_in_detail_id', $t1->toArray()),
+			'forUpdate' => $detailsDataCollection->whereIn('product_in_detail_id', $t2->toArray()),
+			'forDelete' => $existsProductOutDetails->whereIn('product_in_detail_id', $t3->toArray())
+		];
 	}
 }
