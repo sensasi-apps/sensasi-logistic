@@ -1,4 +1,3 @@
-@include('components.assets._select2')
 @include('components.assets._datepicker')
 
 <div id="productOutsCrudDiv">
