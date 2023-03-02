@@ -23,7 +23,7 @@
 
                 <div class="simple-footer">
                     <a href="{{ config('app.owner_url') }}" target="_blank">{{ config('app.owner') }}</a>
-                    <div class="bullet"></div> Copyright &copy; 2022
+                    <div class="bullet"></div> Copyright &copy; 2023
                 </div>
             </div>
         </div>
