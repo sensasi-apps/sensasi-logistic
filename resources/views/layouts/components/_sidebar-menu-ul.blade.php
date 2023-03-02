@@ -6,14 +6,18 @@
         </a>
     </li>
 
-    <li class="menu-header">Data</li>
+    @if (Auth::user()->hasRole('Warehouse|Sales|Manufacture|Super Admin'))
+        <li class="menu-header">Data</li>
+    @endif
 
-    <li @class(['active' => request()->is('materials*')])>
-        <a class="nav-link" href="{{ url('materials') }}">
-            <i class="fas fa-pallet"></i>
-            <span>{{ __('materials') }}</span>
-        </a>
-    </li>
+    @if (Auth::user()->hasRole('Warehouse|Super Admin'))
+        <li @class(['active' => request()->is('materials*')])>
+            <a class="nav-link" href="{{ url('materials') }}">
+                <i class="fas fa-pallet"></i>
+                <span>{{ __('materials') }}</span>
+            </a>
+        </li>
+    @endif
 
     @if (Auth::user()->hasRole('Manufacturer|Super Admin'))
         <li @class(['active' => request()->is('manufactures*')])>
@@ -24,38 +28,40 @@
         </li>
     @endif
 
-    <li @class(['active' => request()->is('manufactures*')])>
-        <a class="nav-link" href="{{ url('products') }}">
-            <i class="fas fa-box"></i>
-            <span>{{ __('products') }}</span>
-        </a>
-    </li>
+    @if (Auth::user()->hasRole('Warehouse|Sales|Super Admin'))
+        <li @class(['active' => request()->is('products*')])>
+            <a class="nav-link" href="{{ url('products') }}">
+                <i class="fas fa-box"></i>
+                <span>{{ __('products') }}</span>
+            </a>
+        </li>
+    @endif
 
 
+    @if (Auth::user()->hasRole('Stackholder|Super Admin'))
+        <li class="menu-header">{{ __('report') }}</li>
 
-    <li class="menu-header">{{ __('report') }}</li>
+        <li @class(['active' => request()->is('report/materials*')])>
+            <a class="nav-link" href="{{ url('report/materials') }}">
+                <i class="fas fa-file-alt"></i>
+                <span>{{ __('materials') }}</span>
+            </a>
+        </li>
 
-    <li @class(['active' => request()->is('report/manufactures*')])>
-        <a class="nav-link" href="{{ url('report/materials') }}">
-            <i class="fas fa-file-alt"></i>
-            <span>{{ __('materials') }}</span>
-        </a>
-    </li>
+        <li @class(['active' => request()->is('report/manufactures*')])>
+            <a class="nav-link" href="{{ url('report/manufactures') }}">
+                <i class="fas fa-file-alt"></i>
+                <span>{{ __('manufactures') }}</span>
+            </a>
+        </li>
 
-    <li @class(['active' => request()->is('report/manufactures*')])>
-        <a class="nav-link" href="{{ url('report/manufactures') }}">
-            <i class="fas fa-file-alt"></i>
-            <span>{{ __('manufactures') }}</span>
-        </a>
-    </li>
-
-    <li @class(['active' => request()->is('report/products*')])>
-        <a class="nav-link" href="{{ url('report/products') }}">
-            <i class="fas fa-file-alt"></i>
-            <span>{{ __('products') }}</span>
-        </a>
-    </li>
-
+        <li @class(['active' => request()->is('report/products*')])>
+            <a class="nav-link" href="{{ url('report/products') }}">
+                <i class="fas fa-file-alt"></i>
+                <span>{{ __('products') }}</span>
+            </a>
+        </li>
+    @endif
 
     @if (Auth::user()->hasRole('Super Admin'))
         <li class="menu-header">{{ __('system') }}</li>

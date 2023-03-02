@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use Helper;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,7 @@ class UserController extends Controller
     {
         $validationRules = [
             'name' => 'required|max:255',
-            'email' => "required|email:dns|unique:users,email,{$user->id}"
+            'email' => 'required|email:dns|unique:users,email,' . ($user ? $user->id : 'NULL'),
         ];
 
         if (!$user || $user->has_default_password || $request->password) {
@@ -48,12 +49,7 @@ class UserController extends Controller
         $validatedInput = $this->validateInput($request);
         $user = User::create($validatedInput)->assignRole($request->roles);
 
-        return redirect()->back()->with('notifications', [
-            [__('Password and password confirmation is not same'), 'danger']
-        ]);
-        return redirect()->back()->with('notifications', [
-            [__('User') . " <b>$user->name</b> " . __('has been added successfully'), 'success']
-        ]);
+        return Helper::getSuccessCrudResponse('created', __('users'), $user->name);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -62,9 +58,7 @@ class UserController extends Controller
 
         $user->syncRoles($request->roles)->update($validatedInput);
 
-        return redirect()->back()->with('notifications', [
-            [__('User') . " <b>$user->name</b> " . __('has been updated successfully'), 'success']
-        ]);
+        return Helper::getSuccessCrudResponse('updated', __('users'), $user->name);
     }
 
     public function selfUpdate(Request $request): RedirectResponse
@@ -74,17 +68,17 @@ class UserController extends Controller
 
         $user->update($validatedInput);
 
-        return redirect()->back()->with('notifications', [
-            [__('Your profile has been updated successfully'), 'success']
-        ]);
+        return Helper::getSuccessCrudResponse('updated', __('users'), $user->name);
     }
 
+    /**
+     * unused
+     *
+     **/
     public function destroy(User $user): RedirectResponse
     {
-        // $user->delete();
+        $user->delete();
 
-        return redirect()->back()->with('notifications', [
-            [__('User') . " <b>$user->name</b> " . __('has been deleted successfully'), 'warning']
-        ]);
+        return Helper::getSuccessCrudResponse('deleted', __('users'), $user->name);
     }
 }

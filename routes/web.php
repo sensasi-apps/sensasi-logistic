@@ -76,61 +76,75 @@ Route::middleware('guest')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', fn () => redirect()->route('dashboard'))->name('/');
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // all user
+    Route::get('/', fn () => redirect()->route('dashboard'))->name('/');
+    Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-    Route::controller(AppSystemController::class)->group(function () {
+
+    Route::middleware('role:Super Admin')->controller(AppSystemController::class)->group(function () {
         Route::prefix('system')->name('system.')->group(function () {
             Route::get('ip-addr', 'ipAddrIndex')->name('ip-addr');
 
             Route::resource('users', UserController::class)->except([
-                'create', 'show', 'edit'
+                'create', 'show', 'edit', 'destroy'
             ]);
         });
+    });
 
+    Route::middleware('role:Super Admin|Stackholder')->group(function () {
         Route::prefix('report')->name('report.')->group(function () {
             route::get('materials', MaterialReportController::class)->name('material.index');
             route::get('products', ProductReportController::class)->name('product.index');
             route::get('manufactures', ManufactureReportController::class)->name('manufacture.index');
         });
     });
-    Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
 
-    Route::get('materials', MaterialIndexController::class);
 
-    Route::resource('materials', MaterialController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
+    Route::middleware('role:Super Admin|Warehouse')->group(function () {
+        Route::get('materials', MaterialIndexController::class);
 
-    Route::resource('material-ins', MaterialInController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
+        Route::resource('materials', MaterialController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
 
-    Route::resource('material-outs', MaterialOutController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
+        Route::resource('material-ins', MaterialInController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
 
-    Route::get('products', ProductIndexController::class);
+        Route::resource('material-outs', MaterialOutController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
+    });
 
-    Route::resource('products', ProductController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
 
-    Route::resource('product-ins', ProductInController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
+    Route::middleware('role:Super Admin|Sales|Warehouse')->group(function () {
+        Route::get('products', ProductIndexController::class);
 
-    Route::resource('product-outs', ProductOutController::class)->only([
-        'store', 'update', 'destroy'
-    ]);
+        Route::resource('products', ProductController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
 
-    Route::resource('manufactures', ManufactureController::class)->except([
-        'create', 'show', 'edit'
-    ]);
+        Route::resource('product-ins', ProductInController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
 
-    if (App::environment('local')) {
+        Route::resource('product-outs', ProductOutController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
+    });
+
+
+    Route::middleware('role:Super Admin|Manufacture')->group(function () {
+        Route::resource('manufactures', ManufactureController::class)->except([
+            'create', 'show', 'edit'
+        ]);
+    });
+
+
+    Route::middleware('role:Super Admin')->group(function () {
         Route::get('basic-page-format', fn () => view('basic-page-format'));
-    }
+    });
 });
