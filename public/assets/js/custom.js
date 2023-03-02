@@ -135,15 +135,27 @@ function csrf_token() {
 	return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
 
-function tab_system_init(page) {
+function tab_system_init(page, defaultTab = 'list') {
 	window.onhashchange = function () {
-		const activeTab = location.hash.replace(/^#/, '');
-		$(`#pageTab a[href="#${activeTab || 'list'}"].nav-link`).tab('show')
+		const activeTab = location.hash?.replace(/^#/, '');
+		$(`.nav .nav-item a[href="#${activeTab || defaultTab}"][data-toggle="tab"].nav-link`).tab('show');
+
 	}
 
 	window.onhashchange()
 
-	$('#pageTab a.nav-link').on('click', function (e) {
-		window.history.pushState(null, null, `${page}${e.target.hash}`)
+	$('.nav .nav-item a[data-toggle="tab"].nav-link').on('click', function (e) {
+		window.history.pushState(null, null, `${page}${location.search}${e.target.hash || e.target.getAttribute('href')}`)
 	})
+}
+
+function findGetParameter(parameterName) {
+	var result = null,
+		tmp = [];
+	var items = location.search.substr(1).split("&");
+	for (var index = 0; index < items.length; index++) {
+		tmp = items[index].split("=");
+		if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+	}
+	return result;
 }

@@ -2,145 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\DB;
-
-use App\Models\ProductInDetail;
 use App\Models\ProductIn;
 use App\Models\ProductOut;
-use App\Models\ProductOutDetail;
+use Carbon\Carbon;
+use Illuminate\View\View;
+
 class ProductReportController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public function __invoke(): View
     {
-        $dateRange = explode('_', $request->daterange);
-        $productInDetailNota = productIn::with('details.product')
-        ->where('type', '!=', 'Manufacture')->get();
+        [$startDate, $endDate] = $this->getDateRange();
 
-        $productInDetailItem = productIn::select('products.name',
-            DB::raw('sum(product_in_details.qty) as qty'),
-            DB::raw("group_concat(DISTINCT products.unit) as unit"))
-        ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
-        ->join('products', 'products.id', 'product_in_details.product_id')
-        ->groupBy('products.name')
-        ->where('type', '!=', 'Manufacture')->get();
+        $productIns = ProductIn::with('details.product')
+            ->where('at', '>=', $startDate)
+            ->where('at', '<=', $endDate)
+            ->orderBy('at')
+            ->get();
 
-        $productOutDetailNota = productOut::with('details.productInDetail.product')
-        ->where('type', '!=', 'Manufacture')->get();
+        $productInDetailsGroupByProduct = $productIns->reduce(function ($carry, $item) {
+            return $carry->merge($item->details);
+        }, collect([]))
+            ->sortBy('product.name')
+            ->groupBy('product_id');
 
-        $productOutDetailItem = productOut::groupBy('products.name')->select('products.name',
-            DB::raw('sum(product_out_details.qty) as qty'),
-            DB::raw('sum(product_out_details.qty*product_out_details.price) as total'),
-            DB::raw("group_concat(DISTINCT products.unit) as unit"))
-        ->join('product_out_details', 'product_out_details.product_out_id', 'product_outs.id')
-        ->join('product_in_details', 'product_in_details.id', 'product_out_details.product_in_detail_id')
-        ->join('products', 'products.id', 'product_in_details.product_id')
-        ->where('type', '!=', 'Manufacture')->get();
-        
-        if ($request->daterange) {
+        $productOuts = ProductOut::with('details.productInDetail.product')
+            ->where('at', '>=', $startDate)
+            ->where('at', '<=', $endDate)
+            ->orderBy('at')
+            ->get();
 
-            $productInDetailNota = productIn::with('details.product')
-            ->where('product_ins.at', '>=', $dateRange[0])
-            ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('type', '!=', 'Manufacture')->get();
+        $productOutDetailsGroupByProduct = $productOuts->reduce(function ($carry, $item) {
+            return $carry->merge($item->details);
+        }, collect([]))
+            ->sortBy('productInDetail.product.name')
+            ->groupBy('productInDetail.product_id');
 
-            $productInDetailItem = productIn::groupBy('products.name')->select('products.name',
-                DB::raw('sum(product_in_details.qty) as qty'),
-                DB::raw("group_concat(DISTINCT products.unit) as unit"))
-            ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
-            ->join('products', 'products.id', 'product_in_details.product_id')
-            ->where('product_ins.at', '>=', $dateRange[0])
-            ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('type', '!=', 'Manufacture')->get();
 
-            $productOutDetailItem = productOut::groupBy('products.name')->select('products.name',
-                DB::raw('sum(product_out_details.qty) as qty'),
-                DB::raw('sum(product_out_details.qty*product_out_details.price) as total'),
-                DB::raw("group_concat(DISTINCT products.unit) as unit"))
-            ->join('product_out_details', 'product_out_details.product_out_id', 'product_outs.id')
-            ->join('product_in_details', 'product_in_details.id', 'product_out_details.product_in_detail_id')
-            ->join('products', 'products.id', 'product_in_details.product_id')
-            ->where('product_outs.at', '>=', $dateRange[0])
-            ->where('product_outs.at', '<=', $dateRange[1])
-            ->where('type', '!=', 'Manufacture')->get();
+        $reportPageId = 'product';
 
-            $productOutDetailNota = productOut::with('details.productInDetail.product')
-            ->where('product_outs.at', '>=', $dateRange[0])
-            ->where('product_outs.at', '<=', $dateRange[1])->get();
+        $title = __('report.name-report', ['name' => __($reportPageId)]);
+        $tabs = [
+            'in' => __('report.name-ins', ['name' => __($reportPageId)]),
+            'out' => __('report.name-outs', ['name' => __($reportPageId)]),
+        ];
+
+        $subtabs = [
+            'invoice' => __('by invoice'),
+            'item' => __('by item')
+        ];
+
+        return view('pages.report.page-template', compact(
+            'productIns',
+            'productInDetailsGroupByProduct',
+            'productOuts',
+            'productOutDetailsGroupByProduct',
+
+            'title',
+            'reportPageId',
+            'tabs',
+            'subtabs'
+        ));
+    }
+
+    private function getDateRange(): array
+    {
+        if (request()->daterange) {
+            $dateRange = explode('_', request()->daterange);
+
+            $startDate = $dateRange[0];
+            $endDate = $dateRange[1];
+        } else {
+            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
         }
 
-        return view('pages.report.product.index', compact('productInDetailNota', 'productInDetailItem','productOutDetailNota', 'productOutDetailItem'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return [$startDate, $endDate];
     }
 }

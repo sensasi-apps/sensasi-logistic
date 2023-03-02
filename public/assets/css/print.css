@@ -1,0 +1,19 @@
+@media print {
+	@page {
+		size: unset;
+	}
+
+	body {
+		all: unset !important;
+	}
+
+	body>*:not(.print-only) {
+		display: none !important;
+	}
+}
+
+@media not print {
+	.print-only {
+		display: none !important
+	}
+}

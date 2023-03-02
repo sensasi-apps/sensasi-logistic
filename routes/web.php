@@ -91,9 +91,9 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('report')->name('report.')->group(function () {
-            route::resource('materials', MaterialReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
-            route::resource('products', ProductReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
-            route::resource('manufactures', ManufactureReportController::class)->except(['create', 'show', 'edit', 'store', 'delete', 'update']);
+            route::get('materials', MaterialReportController::class)->name('material.index');
+            route::get('products', ProductReportController::class)->name('product.index');
+            route::get('manufactures', ManufactureReportController::class)->name('manufacture.index');
         });
     });
     Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');

@@ -2,142 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\DB;
-
-use App\Models\MaterialOut;
-use App\Models\ProductIn;
+use App\Models\Manufacture;
+use Carbon\Carbon;
+use Illuminate\View\View;
 
 class ManufactureReportController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public function __invoke(): View
     {
-        $dateRange = explode('_', $request->daterange);
-        $materialOutDetailNota = MaterialOut::with('details.materialInDetail.material')
-        ->where('type', '=', 'Manufacture')->get();
+        [$startDate, $endDate] = $this->getDateRange();
 
-        $materialOutDetailItem = MaterialOut::groupBy('materials.name')->select('materials.name', 
-            DB::raw('sum(material_out_details.qty) as qty'),
-            DB::raw("group_concat(DISTINCT materials.unit) as unit"))
-        ->join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
-        ->join('material_in_details', 'material_in_details.id', 'material_out_details.material_in_detail_id')
-        ->join('materials', 'materials.id', 'material_in_details.material_id')
-        ->where('type', '=', 'Manufacture')
-        ->get();
+        $manufactures = Manufacture::with('productIn.details.product', 'materialOut.details.materialInDetail.material')
+            ->where('at', '>=', $startDate)
+            ->where('at', '<=', $endDate)
+            ->orderBy('at')
+            ->get();
 
-        $productInDetailNota = productIn::with('details.product')
-        ->where('type', '=', 'Manufacture')->get();
+        $materialOutDetailsGroupByMaterial = $manufactures->reduce(function ($carry, $manufacture) {
+            return $carry->merge($manufacture->materialOut->details);
+        }, collect([]))
+            ->sortBy('materialInDetail.material.name')
+            ->groupBy('materialInDetail.material_id');
 
-        $productInDetailItem = productIn::select('products.name',
-            DB::raw('sum(product_in_details.qty) as qty'),
-            DB::raw("group_concat(DISTINCT products.unit) as unit"))
-        ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
-        ->join('products', 'products.id', 'product_in_details.product_id')
-        ->groupBy('products.name')
-        ->where('type', '=', 'Manufacture')->get();
+        $productInDetailsGroupByProduct = $manufactures->reduce(function ($carry, $manufacture) {
+            return $carry->merge($manufacture->productIn->details);
+        }, collect([]))
+            ->sortBy('product.name')
+            ->groupBy('product_id');
 
-        if ($request->daterange) {
-            $productInDetailNota = productIn::with('details.product')
-            ->where('product_ins.at', '>=', $dateRange[0])
-            ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('type', '=', 'Manufacture')->get();
+        $reportPageId = 'manufacture';
 
-            $productInDetailItem = productIn::groupBy('products.name')->select('products.name',
-                DB::raw('sum(product_in_details.qty) as qty'),
-                DB::raw("group_concat(DISTINCT products.unit) as unit"))
-            ->join('product_in_details', 'product_in_details.product_in_id', 'product_ins.id')
-            ->join('products', 'products.id', 'product_in_details.product_id')
-            ->where('product_ins.at', '>=', $dateRange[0])
-            ->where('product_ins.at', '<=', $dateRange[1])
-            ->where('type', '=', 'Manufacture')->get();
+        $title = __('report.name-report', ['name' => __('manufacture')]);
+        $key = '';
+        $tab = $title;
 
-            $materialOutDetailNota = MaterialOut::with('details.materialInDetail.material')
-            ->where('at', '>=', $dateRange[0])
-            ->where('at', '<=', $dateRange[1])
-            ->where('type', '=', 'Manufacture')->get();
+        $subtabs = [
+            'invoice' => __('by invoice'),
+            'material' => __('by item')
+        ];
 
-            $materialOutDetailItem = MaterialOut::groupBy('materials.name')->select('materials.name', 
-                DB::raw('sum(material_out_details.qty) as qty'),
-                DB::raw("group_concat(DISTINCT materials.unit) as unit"))
-            ->join('material_out_details', 'material_outs.id', 'material_out_details.material_out_id')
-            ->join('material_in_details', 'material_in_details.id', 'material_out_details.material_in_detail_id')
-            ->join('materials', 'materials.id', 'material_in_details.material_id')
-            ->where('material_outs.at', '>=', $dateRange[0])
-            ->where('material_outs.at', '<=', $dateRange[1])
-            ->where('material_outs.type', '=', 'Manufacture')->get();
+        return view('pages.report.manufacture', compact(
+            'manufactures',
+            'materialOutDetailsGroupByMaterial',
+            'productInDetailsGroupByProduct',
+
+            'reportPageId',
+            'title',
+            'key',
+            'tab',
+            'subtabs'
+        ));
+    }
+
+    private function getDateRange(): array
+    {
+        if (request()->daterange) {
+            $dateRange = explode('_', request()->daterange);
+
+            $startDate = $dateRange[0];
+            $endDate = $dateRange[1];
+        } else {
+            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
         }
-        return view('pages.report.manufacture.index', compact('productInDetailItem', 'productInDetailNota','materialOutDetailItem', 'materialOutDetailNota'));
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return [$startDate, $endDate];
     }
 }
