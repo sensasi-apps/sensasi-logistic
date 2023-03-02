@@ -86,7 +86,11 @@
   "product out": "produk keluar",
   "product in": "produk masuk",
   "manufacture": "manufaktur",
+  "manufactures": "manufaktur",
   "cost": "biaya",
   "value": "nilai",
-  "unit": "satuan"
+  "unit": "satuan",
+  "report": "laporan",
+  "users": "pengguna",
+  "dashboard": "dasbor"
 }
