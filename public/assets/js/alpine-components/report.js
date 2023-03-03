@@ -47,6 +47,22 @@ document.addEventListener('alpine:init', () => {
 			const wrapperDiv = document.createElement('div');
 			wrapperDiv.classList.add('print-only');
 
+			const logo = document.body.querySelector('.sidebar-brand a').cloneNode(true);
+			// logo.style.setProperty('color', '#000', 'important');
+			// logo.style.setProperty('font-weight', '700', 'important');
+			// logo.style.setProperty('text-decoration', 'none', 'important');
+			logo.style.color = '#000';
+			logo.style.fontWeight = '700';
+			logo.style.textDecoration = 'none';
+			logo.style.letterSpacing = '1.5px';
+			logo.style.textTransform = 'uppercase';
+
+			const logoWrapper = document.createElement('div');
+			logoWrapper.classList.add('text-right');
+			logoWrapper.appendChild(logo);
+
+			wrapperDiv.appendChild(logoWrapper);
+
 			const titleEl = document.createElement('h4');
 			titleEl.innerText = title;
 			titleEl.classList.add('mb-0');
