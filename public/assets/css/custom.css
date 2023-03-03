@@ -56,3 +56,7 @@ div.dataTables_processing.card {
 	box-shadow: 0 1px 30px rgb(0 0 0 / 20%);
 	border-radius: 10px;
 }
+
+.dataTable thead, .section-header, .section-title, .nav-link[data-toggle="tab"] {
+	text-transform: capitalize;
+}

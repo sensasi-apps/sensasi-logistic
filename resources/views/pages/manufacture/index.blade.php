@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', __('Manufacture'))
+@section('title', ucfirst(__('manufacture')))
 
 @section('main-content')
     <div class="section-body">

@@ -52,13 +52,20 @@
                 </div>
 
                 <div class="form-group" x-id="['input']">
-                    <label for="priceInput" :for="$id('input')">{{ __('validation.attributes.default_price') }}</label>
+                    <label for="priceInput" :for="$id('input')">
+                        {{ __('validation.attributes.default_price') }}
+
+                        <x-_icon-tooltip-span :title="__('used to estimate the value of the asset')" icon="fas fa-info-circle" />
+                    </label>
+
                     <input type="number" min="0" class="form-control" :id="$id('input')"
                         x-model="formData.default_price" required>
                 </div>
 
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.low_qty') }}</label>
+
+                    <x-_icon-tooltip-span :title="__('used for warnings')" icon="fas fa-info-circle" />
 
                     <div class="input-group">
                         <input type="number" min="0" class="form-control" :id="$id('input')"
@@ -71,6 +78,7 @@
 
                 <div class="form-group" x-id="['select']">
                     <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
+
                     <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
                         formData.tags = $($el).val();
                     })" :data-select2-opts="select2Opts"
@@ -149,12 +157,12 @@
             },
 
             getTitle(hasnotId) {
-                return !hasnotId ? `{{ __('Add New Product') }}` : `{{ __('Edit Product') }}: ` + this
+                return !hasnotId ? `{{ __('add new product') }}` : `{{ __('edit product') }}: ` + this
                     .formData.id_for_human;
             },
 
             getDeleteTitle() {
-                return `{{ __('Delete Product') }}: ` + this.formData.id_for_human;
+                return `{{ __('delete product') }}: ` + this.formData.id_for_human;
             }
         };
 

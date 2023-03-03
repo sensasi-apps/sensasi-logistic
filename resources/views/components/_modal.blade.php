@@ -5,7 +5,7 @@
     <div class="modal-dialog{{ $centered ?? false ? ' modal-dialog-centered' : null }}{{ $size ?? false ? " modal-$size" : null }}"
         role="document">
         <div class="modal-content">
-            <div class="modal-header bg-{{ $color ?? 'primary' }} text-white">
+            <div class="modal-header bg-{{ $color ?? 'primary' }} text-white text-capitalize">
                 <h5 class="modal-title" id="{{ $id }}-label">{{ $title ?? null }}</h5>
                 <button type="button" tabindex="-1" class="close text-white" onclick="$(this.closest('.modal')).modal('hide')" aria-label="Close">
                     <span aria-hidden="true">&times;</span>

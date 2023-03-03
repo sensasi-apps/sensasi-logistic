@@ -155,6 +155,9 @@ return [
 		'type' => 'Jenis',
 		'at' => 'Pada',
 		'low_qty' => 'Jumlah terendah',
+		'brand' => 'Merek',
+		'qty' => 'Jumlah',
+		'price' => 'Harga',
 
 		'email' => 'E-mail',
 		'password' => 'Kata sandi',

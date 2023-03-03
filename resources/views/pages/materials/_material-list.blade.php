@@ -141,12 +141,12 @@
             },
 
             getTitle(hasnotId) {
-                return !hasnotId ? `{{ __('Add New Material') }}` : `{{ __('Edit Material') }}: ` + this
+                return !hasnotId ? `{{ __('add new material') }}` : `{{ __('edit material') }}: ` + this
                     .formData.id_for_human;
             },
 
             getDeleteTitle() {
-                return `{{ __('Delete Material') }}: ` + this.formData.id_for_human;
+                return `{{ __('delete material') }}: ` + this.formData.id_for_human;
             }
         };
 
@@ -157,16 +157,16 @@
             order: [2, 'asc'],
             columns: [{
                 data: 'code',
-                title: '{{ __('Code') }}'
+                title: '{{ __('validation.attributes.code') }}'
             }, {
                 data: 'brand',
-                title: '{{ __('Brand') }}'
+                title: '{{ __('validation.attributes.brand') }}'
             }, {
                 data: 'name',
-                title: '{{ __('Name') }}'
+                title: '{{ __('validation.attributes.name') }}'
             }, {
                 data: 'qty',
-                title: '{{ __('Qty') }}',
+                title: '{{ __('validation.attributes.qty') }}',
                 orderable: false,
                 searchable: false,
                 render: (data, type, row) => `${data} ${row.unit}`
@@ -176,7 +176,7 @@
                 width: '15%',
                 orderable: false,
 
-                title: '{{ __('Tags') }}',
+                title: '{{ __('validation.attributes.tags') }}',
                 render: data => data?.map(tag =>
                     `<a href="javascript:;" class="m-1 badge badge-primary" @click="search('${tag}')">${tag}</a>`
                 ).join(''),

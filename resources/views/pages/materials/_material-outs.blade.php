@@ -35,12 +35,12 @@
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
-                        <label :for="$id('text-input')">{{ __('Code') }}</label>
+                        <label :for="$id('text-input')">{{ __('validation.attributes.code') }}</label>
                         <input type="text" class="form-control" x-model="formData.code" :id="$id('text-input')">
                     </div>
 
                     <div class="col form-group" x-id="['select']">
-                        <label :for="$id('select')">{{ __('Type') }}</label>
+                        <label :for="$id('select')">{{ __('validation.attributes.type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
                             x-effect="$($el).val(formData.type).change()"
                             @@readystatechange.document="$($el).select2({
@@ -57,30 +57,30 @@
                 </div>
 
                 <div class="form-group" x-id="['input']">
-                    <label :for="$id('input')">{{ __('Date') }}</label>
+                    <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                     <input type="date" class="form-control" required :id="$id('input')"
                         :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
                         @@change="formData.at = $event.target.value">
                 </div>
 
                 <div class="form-group" x-id="['textarea']">
-                    <label :for="$id('textarea')">{{ __('Note') }}</label>
+                    <label :for="$id('textarea')">{{ __('validation.attributes.note') }}</label>
                     <textarea x-model="formData.note" class="form-control" name="note" :id="$id('textarea')" rows="3"
                         style="height:100%;"></textarea>
                 </div>
 
                 <div class="d-flex justify-content-center my-2">
                     <a href="javascript:;" @@click="formData.details.push({})"
-                        class="badge badge-success mr-3"><i class="fas fa-plus"></i> {{ __('Add material') }}</a>
+                        class="badge badge-success text-capitalize"><i class="fas fa-plus mr-1"></i> {{ __('add material') }}</a>
                 </div>
 
                 <div class="px-0" style="overflow-x: auto" x-data="{ total_price: 0 }"
                     x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
                     <div style="width: 100%">
                         <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-5 pl-0 ">{{ __('Name') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Price') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Qty') }}</div>
+                            <div class="font-weight-bold col-5 pl-0 ">{{ __('validation.attributes.name') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.price') }}</div>
+                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.qty') }}</div>
                             <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
                         </div>
 
@@ -270,12 +270,12 @@
             },
 
             getTitle(hasnotId) {
-                return !hasnotId ? `{{ __('Add New Material Out') }}` : `{{ __('Edit Material Out') }}: ` + this
+                return !hasnotId ? `{{ __('add new material out') }}` : `{{ __('edit material out') }}: ` + this
                     .formData.id_for_human;
             },
 
             getDeleteTitle() {
-                return `{{ __('Delete Material Out') }}: ` + this.formData.id_for_human;
+                return `{{ __('delete material out') }}: ` + this.formData.id_for_human;
             }
         };
 
