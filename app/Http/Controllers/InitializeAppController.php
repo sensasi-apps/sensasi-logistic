@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Helper;
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -18,20 +19,11 @@ class InitializeAppController extends Controller
 
     public function check()
     {
-        // Is user with role super admin not exist
         if (!$this->isAdminExist()) {
             return redirect()->route('initialize-app.create-admin-user');
         }
 
-        // is user login
-        if (request()->user()) {
-            $apiToken = request()->user()->createToken('api-token')->plainTextToken;
-
-            return redirect('/')
-                ->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
-        }
-
-        return redirect('/');
+        return redirect(RouteServiceProvider::HOME);
     }
 
     public function index()
@@ -50,6 +42,10 @@ class InitializeAppController extends Controller
 
     public function storeAdminUser(Request $request)
     {
+        if ($this->isAdminExist()) {
+            abort('403');
+        }
+
         $validatedInput = $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|unique:users|email:dns',
@@ -70,12 +66,19 @@ class InitializeAppController extends Controller
 
         $request->session()->regenerate();
 
+        $apiToken = request()->user()->createToken('api-token')->plainTextToken;
+
         return redirect()
-            ->route('initialize-app.check');
+            ->route('initialize-app.check')
+            ->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
     }
 
     public function signUpWithGoogle()
     {
+        if ($this->isAdminExist()) {
+            abort('403');
+        }
+
         return Socialite::driver('google')
             ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
             ->redirect();
@@ -83,6 +86,10 @@ class InitializeAppController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
+        if ($this->isAdminExist()) {
+            abort('403');
+        }
+
         $googleUser = Socialite::driver('google')
             ->redirectUrl(route('initialize-app.create-admin-user.oauth.google.redirect'))
             ->stateless()
@@ -111,7 +118,10 @@ class InitializeAppController extends Controller
 
         Helper::logAuth('first registered and login via google');
 
+        $apiToken = request()->user()->createToken('api-token')->plainTextToken;
+
         return redirect()
-            ->route('initialize-app.check');
+            ->route('initialize-app.check')
+            ->withCookie(cookie('api-token', encrypt($apiToken), 10 * 365 * 24 * 60 * 60));
     }
 }
