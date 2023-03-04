@@ -113,7 +113,7 @@ class AuthController extends Controller
 
 		if ($user) {
 			Password::sendResetLink(['email' => $request->email]);
-			Helper::logAuth('request reset password');
+			Helper::logAuth('request reset password', $user->id);
 		}
 
 		return redirect()
@@ -151,13 +151,12 @@ class AuthController extends Controller
 		$status = Password::reset(
 			$request->only('email', 'password', 'password_confirmation', 'token'),
 			function ($user, $password) {
-				$user->forceFill([
-					'password' => bcrypt($password)
-				])->setRememberToken(Str::random(60));
 
-				$user->save();
+				DB::update('update users set password = ?, remember_token = ? where email = ?', [bcrypt($password), Str::random(60), $user->email]);
 
-				Helper::logAuth('password reseted');
+				Helper::logAuth('password resetted', $user->id);
+
+				DB::table('password_resets')->where('email', $user->email)->delete();
 
 				event(new PasswordReset($user));
 			}
