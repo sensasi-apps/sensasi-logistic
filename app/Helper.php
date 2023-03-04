@@ -7,9 +7,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Jenssegers\Agent\Agent;
 
-/**
- * undocumented class
- */
 class Helper
 {
 	public static function logAction(string $action, mixed $modelInstance): UserActivity
@@ -29,12 +26,12 @@ class Helper
 		]);
 	}
 
-	public static function logAuth(string $action): UserActivity
+	public static function logAuth(string $action, int $userId = null): UserActivity
 	{
 		$agent = new Agent();
 
 		return UserActivity::create([
-			'user_id' => auth()->id(),
+			'user_id' => $userId ?? auth()->id(),
 			'action' => $action,
 			'ip' => request()->ip(),
 			'browser' => $agent->browser() . ' ' . $agent->version($agent->browser()),
