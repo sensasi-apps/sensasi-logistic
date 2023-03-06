@@ -145,6 +145,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::middleware('role:Super Admin')->group(function () {
-        Route::get('basic-page-format', fn () => view('basic-page-format'));
+        Route::get('~basic-page-format', fn () => view('basic-page-format'));
+        Route::get('~phpinfo', fn () => phpinfo());
     });
 });
