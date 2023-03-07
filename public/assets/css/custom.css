@@ -57,6 +57,13 @@ div.dataTables_processing.card {
 	border-radius: 10px;
 }
 
-.dataTable thead, .section-header, .section-title, .nav-link[data-toggle="tab"] {
+.dataTable thead,
+.section-header,
+.section-title,
+.nav-link[data-toggle="tab"] {
 	text-transform: capitalize;
+}
+
+.hoverable:hover {
+	background-color: #EAEAEA;
 }
