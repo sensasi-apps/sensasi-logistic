@@ -27,7 +27,7 @@
 @push('modal')
     <div x-data="crud(manufactureInCrudConfig)" @@manufacture:open-modal.document="openModal"
         @@manufacture:set-data-list.document="setDataList">
-        <x-_modal size="xl" centered>
+        <x-_modal centered>
 
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
                 x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
@@ -72,27 +72,16 @@
                     <!-- MATERIAL OUT TAB CONTENT -->
                     <div class="tab-pane fade show active" id="material-out" role="tabpanel"
                         aria-labelledby="material-out-tab">
-                        <div class="d-flex justify-content-center my-4">
-                            <a href="javascript:;" @@click="formData.material_out.details.push({})"
-                                class="badge badge-danger text-capitalize"><i class="fas fa-plus mr-1"></i>
-                                {{ __('add material out') }}</a>
-                        </div>
 
-                        <div class="px-0" style="overflow-x: auto">
-                            <div style="width: 100%">
-                                <div class="row mx-0 my-4">
-                                    <div class="font-weight-bold col-5 pl-0 ">{{ __('validation.attributes.name') }}</div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.price') }}
-                                    </div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.qty') }}
-                                    </div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
-                                </div>
+                        <div x-data="{ total_price: 0 }"
+                            x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
 
-                                {{-- DETAILS LOOP --}}
-                                <template x-for="(detail, $i) in formData.material_out?.details">
-                                    <div class="form-group row mx-0 mb-4 align-items-center">
-                                        <div class="col-5 px-0">
+                            <div class="form-group">
+                                <label class="text-capitalize">{{ __('items') }}</label>
+
+                                <div class="list-group mb-4">
+                                    <template x-for="(detail, $i) in formData.material_out?.details">
+                                        <div class="list-group-item p-4">
                                             <select class="form-control" x-init="initMaterialInDetailSelect2;
                                             $($el).on('select2:select', (e) => {
                                                 detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
@@ -100,45 +89,70 @@
                                             })"
                                                 x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
                                                 required></select>
-                                        </div>
 
-                                        <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
-                                            x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
-                                            x-text="priceText">
-                                        </div>
+                                            <div class="row my-3">
+                                                <div class="col d-flex align-items-center">
+                                                    <label
+                                                        class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
 
-                                        <div class="col-2 pl-4 pr-0 input-group">
-                                            <input class="form-control" type="number" x-model="detail.qty" min="1"
-                                                required>
+                                                    <div x-data="{ priceText: null }"
+                                                        x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
+                                                        x-text="priceText">
+                                                    </div>
+                                                </div>
 
-                                            <div class="input-group-append">
-                                                <span class="input-group-text" x-data="{ unit: '' }"
-                                                    x-effect="unit = detail.material_in_detail?.material.unit"
-                                                    x-show="unit" x-text="unit"></span>
+                                                <div class="col d-flex align-items-center" x-id="['input']">
+                                                    <label :for="$id('input')"
+                                                        class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input :id="$id('input')" class="form-control form-control-sm"
+                                                            type="number" x-model="detail.qty" min="1" required>
+
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text h-auto" x-data="{ unit: '' }"
+                                                                x-effect="unit = detail.material_in_detail?.material.unit"
+                                                                x-show="unit" x-text="unit"></span>
+                                                        </div>
+
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-end">
+                                                <strong x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Subtotal') }}"
+                                                    x-data="{ subtotal_price: 0 }"
+                                                    x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
+                                                    x-text="intToCurrency(subtotal_price)">
+                                                </strong>
+
+                                                <button type="button" class="btn btn-icon btn-outline-danger"
+                                                    tabindex="-1"
+                                                    @@click.prevent="formData.material_out.details.splice($i, 1)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
+                                    </template>
+                                </div>
+                            </div>
 
-                                        <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
-                                            x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
-                                            x-text="intToCurrency(subtotal_price)">
-                                        </div>
-
-                                        <div class="col-1 pl-4 pr-0">
-                                            <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                                @@click.prevent="formData.material_out.details.splice($i, 1)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
+                            <div class="form-group d-flex justify-content-between">
+                                <div>
+                                    <label class="text-capitalize">{{ __('total') }}</label>
+                                    <div>
+                                        <strong
+                                            x-effect="$data.total_in_price = formData.material_out?.details?.reduce((a, b) => a + b.material_in_detail?.price * b.qty, 0)"
+                                            x-text="intToCurrency($data.total_in_price || 0)"></strong>
                                     </div>
-                                </template>
-                                {{-- END DETAILS LOOP --}}
+                                </div>
 
-                                {{-- TOTAL --}}
-                                <div class="row mx-0 my-4">
-                                    <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0"
-                                        x-effect="$data.total_in_price = formData.material_out?.details?.reduce((a, b) => a + b.material_in_detail?.price * b.qty, 0)"
-                                        x-text="intToCurrency($data.total_in_price || 0)"></div>
+                                <div>
+                                    <a href="javascript:;"
+                                        @@click="formData.material_out.details.push({})"
+                                        class="badge badge-danger text-capitalize"><i class="fas fa-plus mr-1"></i>
+                                        {{ __('add material out') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -146,75 +160,63 @@
 
                     <!-- PRODUCT TAB CONTENT -->
                     <div class="tab-pane fade" id="product-in" role="tabpanel" aria-labelledby="product-in-tab">
-                        <div class="d-flex justify-content-center my-4">
-                            <a href="javascript:;" @@click="formData.product_in.details.push({})"
-                                class="badge badge-success mr-3 text-capitalize"><i class="fas fa-plus mr-1"></i>
-                                {{ __('add product in') }}</a>
-                        </div>
+                        <div class="form-group">
+                            <label class="text-capitalize">{{ __('items') }}</label>
 
-                        <div class="px-0" style="overflow-x: auto">
-                            <div style="width: 100%">
-                                <div class="row mx-0 my-4 text-capitalize">
-                                    <div class="font-weight-bold col-5 pl-0 ">{{ __('validation.attributes.name') }}</div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.qty') }}
-                                    </div>
-                                    <div class="font-weight-bold col-2 pl-4 pr-0">
-                                        {{ __('cost') }}
-
-                                        <a x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Auto calculate from material outs') }}"
-                                            @@click="formData.product_in?.details.forEach(detail => detail.price = total_in_price / formData.product_in.details.length / (detail.qty || (detail.qty = 1)))"
-                                            class="text-warning">
-                                            <i class="fas fa-magic"></i>
-                                        </a>
-                                    </div>
-                                    <div class="font-weight-bold col-1 pl-4 pr-0">{{ __('Subtotal') }}</div>
-                                </div>
-
-                                {{-- DETAILS LOOP --}}
+                            <div class="list-group">
                                 <template x-for="(detail, $i) in formData.product_in?.details">
-                                    <div class="form-group row mx-0 mb-4 align-items-center">
-                                        <div class="col-5 px-0">
-                                            <select class="form-control" :disabled="detail.out_details?.length > 0"
-                                                :data-exclude-enabling="detail.out_details?.length > 0"
-                                                x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
-                                                    dropdownParent: $el.closest('.modal-body'),
-                                                    placeholder: '{{ __('Product') }}',
-                                                    data: products.map(product => ({
-                                                        id: product.id,
-                                                        text: null,
-                                                        product: product
-                                                    })),
-                                                    templateResult: productSelect2TemplateResultAndSelection,
-                                                    templateSelection: productSelect2TemplateResultAndSelection,
-                                                }).on('select2:select', (e) => {
-                                                    detail.product_id = e.target.value;
-                                                });"
-                                                required>
-                                            </select>
-                                        </div>
+                                    <div class="list-group-item p-4">
+                                        <select class="form-control" :disabled="detail.out_details?.length > 0"
+                                            :data-exclude-enabling="detail.out_details?.length > 0"
+                                            x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
+                                                dropdownParent: $el.closest('.modal-body'),
+                                                placeholder: '{{ __('Product') }}',
+                                                data: products.map(product => ({
+                                                    id: product.id,
+                                                    text: null,
+                                                    product: product
+                                                })),
+                                                templateResult: productSelect2TemplateResultAndSelection,
+                                                templateSelection: productSelect2TemplateResultAndSelection,
+                                            }).on('select2:select', (e) => {
+                                                detail.product_id = e.target.value;
+                                            });"
+                                            required>
+                                        </select>
 
-                                        <div class="col-2 pl-4 pr-0 input-group">
-                                            <input class="form-control" type="number" x-model="detail.qty"
-                                                :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
+                                        <div class="row my-3">
+                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                                <label :for="$id('text-input')"
+                                                    class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input :id="$id('text-input')" class="form-control form-control-sm"
+                                                        type="number" x-model="detail.qty"
+                                                        :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
 
-                                            <div class="input-group-append">
-                                                <span class="input-group-text" x-data="{ unit: '' }"
-                                                    x-effect="unit = products.find(product => detail.product_id == product.id)?.unit"
-                                                    x-show="unit" x-text="unit"></span>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text h-auto" x-data="{ unit: '' }"
+                                                            x-effect="unit = products.find(product => detail.product_id == product.id)?.unit"
+                                                            x-show="unit" x-text="unit"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                                <label :for="$id('text-input')"
+                                                    class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+
+                                                <input :id="$id('text-input')" x-model="detail.price"
+                                                    class="form-control form-control-sm" min="0" type="number"
+                                                    step="any" required>
                                             </div>
                                         </div>
 
-                                        <div class="col-2 pl-4 pr-0">
-                                            <input x-model="detail.price" class="form-control" min="0"
-                                                type="number" step="any" required>
-                                        </div>
-
-                                        <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
-                                            x-effect="subtotal_price = detail.price * detail.qty"
-                                            x-text="intToCurrency(subtotal_price || 0)">
-                                        </div>
-
-                                        <div class="col-1 pl-4 pr-0">
+                                        <div class="d-flex justify-content-between align-items-end">
+                                            <strong x-init="$($el).tooltip()" title="{{ __('subtotal') }}"
+                                                x-data="{ subtotal_price: 0 }"
+                                                x-effect="subtotal_price = detail.price * detail.qty"
+                                                x-text="intToCurrency(subtotal_price || 0)">
+                                            </strong>
 
                                             <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
                                                 x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
@@ -228,20 +230,36 @@
                                         </div>
                                     </div>
                                 </template>
+                            </div>
+                        </div>
 
-                                {{-- TOTAL --}}
-                                <div class="row mx-0 my-4">
-                                    <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                                    <div class="col-2 pl-4 pr-0">
-                                        <div class="font-weight-bold"
-                                            x-effect="$data.total_out_price = formData.product_in?.details?.reduce((a, b) => a + b.qty * b.price, 0)"
-                                            x-text="intToCurrency(total_out_price || 0)"></div>
-                                        <div x-show="total_in_price && total_out_price && intToCurrency(total_in_price) != intToCurrency(total_out_price)"
+                        <div class="form-group d-flex justify-content-between">
+                            <div>
+                                <label class="text-capitalize">{{ __('total') }}</label>
+                                <div>
+                                    <strong
+                                        x-effect="$data.total_out_price = formData.product_in?.details?.reduce((a, b) => a + b.qty * b.price, 0)"
+                                        x-text="intToCurrency(total_out_price || 0)"></strong>
+
+                                    <div>
+                                        <a x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Auto calculate from material outs') }}"
+                                            @@click="formData.product_in?.details.forEach(detail => detail.price = total_in_price / formData.product_in.details.length / (detail.qty || (detail.qty = 1)))"
+                                            class="text-warning">
+                                            <i class="fas fa-magic"></i>
+                                        </a>
+
+                                        <span
+                                            x-show="total_in_price && total_out_price && intToCurrency(total_in_price) != intToCurrency(total_out_price)"
                                             x-transition class="text-danger">
-                                            {{ __('Total cost is not equal to total price') }}</div>
+                                            {{ __('Total cost is not equal to total price') }}</span>
                                     </div>
-
                                 </div>
+                            </div>
+
+                            <div>
+                                <a href="javascript:;" @@click="formData.product_in.details.push({})"
+                                    class="badge badge-success mr-3 text-capitalize"><i class="fas fa-plus mr-1"></i>
+                                    {{ __('add product in') }}</a>
                             </div>
                         </div>
                     </div>

@@ -27,7 +27,7 @@
 @push('modal')
     <div x-data="crud(materialOutCrudConfig)" @@material-out:open-modal.document="openModal"
         @@material-out:set-data-list.document="setDataList">
-        <x-_modal size="xl" centered>
+        <x-_modal centered>
             <p x-show="formData.manufacture && formData.id" class="text-danger">
                 *{{ __('This data can be edit only from manufacture menu') }}</p>
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
@@ -69,25 +69,15 @@
                         style="height:100%;"></textarea>
                 </div>
 
-                <div class="d-flex justify-content-center my-2">
-                    <a href="javascript:;" @@click="formData.details.push({})"
-                        class="badge badge-success text-capitalize"><i class="fas fa-plus mr-1"></i> {{ __('add material') }}</a>
-                </div>
-
-                <div class="px-0" style="overflow-x: auto" x-data="{ total_price: 0 }"
+                <div x-data="{ total_price: 0 }"
                     x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
-                    <div style="width: 100%">
-                        <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-5 pl-0 ">{{ __('validation.attributes.name') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.price') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.qty') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('Subtotal') }}</div>
-                        </div>
 
-                        {{-- DETAILS LOOP --}}
-                        <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center">
-                                <div class="col-5 px-0">
+                    <div class="form-group">
+                        <label class="text-capitalize">{{ __('items') }}</label>
+
+                        <div class="list-group mb-4">
+                            <template x-for="(detail, $i) in formData.details">
+                                <div class="list-group-item p-4">
                                     <select class="form-control" x-init="initMaterialInDetailSelect2;
                                     $($el).on('select2:select', (e) => {
                                         detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
@@ -95,45 +85,65 @@
                                     })"
                                         x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
                                         required></select>
-                                </div>
 
-                                <div class="col-2 pl-4 pr-0" x-data="{ priceText: null }"
-                                    x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
-                                    x-text="priceText">
-                                </div>
+                                    <div class="row my-3">
+                                        <div class="col d-flex align-items-center">
+                                            <label class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                            <div x-data="{ priceText: null }"
+                                                x-effect="priceText = intToCurrency(parseInt(detail.material_in_detail?.price) || 0)"
+                                                x-text="priceText">
+                                            </div>
+                                        </div>
 
-                                <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty" min="1" required>
+                                        <div class="col d-flex align-items-center" x-id="['input']">
+                                            <label :for="$id('input')"
+                                                class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                            <div class="input-group input-group-sm">
+                                                <input :id="$id('input')" class="form-control form-control-sm"
+                                                    type="number" x-model="detail.qty" :min="1" required>
 
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" x-data="{ unit: '' }"
-                                            x-effect="unit = detail.material_in_detail?.material.unit" x-show="unit"
-                                            x-text="unit"></span>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text h-auto" x-data="{ unit: '' }"
+                                                        x-effect="unit = detail.material_in_detail?.material.unit"
+                                                        x-show="unit" x-text="unit"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <strong x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Subtotal') }}"
+                                            x-data="{ subtotal_price: 0 }"
+                                            x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
+                                            x-text="intToCurrency(subtotal_price || 0)">
+                                        </strong>
+
+                                        <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
+                                            @@click.prevent="removeDetail($i)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
+                            </template>
+                        </div>
+                    </div>
 
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
-                                    x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
-                                    x-text="intToCurrency(subtotal_price)">
-                                </div>
-
-                                <div class="col-1 pl-4 pr-0">
-                                    <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                                        @@click.prevent="removeDetail($i)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                    <div class="form-group d-flex justify-content-between">
+                        <div>
+                            <label class="text-capitalize">{{ __('total') }}</label>
+                            <div>
+                                <strong x-text="intToCurrency(total_price || 0)"></strong>
                             </div>
-                        </template>
-                        {{-- END DETAILS LOOP --}}
+                        </div>
 
-                        {{-- TOTAL --}}
-                        <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0" x-text="intToCurrency(total_price || 0)"></div>
+                        <div>
+                            <a href="javascript:;" @@click="formData.details.push({})"
+                                class="badge badge-success text-capitalize"><i class="fas fa-plus mr-1"></i>
+                                {{ __('add material') }}</a>
                         </div>
                     </div>
                 </div>
+
             </form>
 
             @slot('footer')

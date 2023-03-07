@@ -27,7 +27,7 @@
 @push('modal')
     <div x-data="crud(materialInCrudConfig)" @@material-in:open-modal.document="openModal"
         @@material-in:set-data-list.document="setDataList">
-        <x-_modal size="xl" centered>
+        <x-_modal centered>
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
 
                 <div class="row">
@@ -66,67 +66,59 @@
                         style="height:100%;"></textarea>
                 </div>
 
-                <div class="d-flex justify-content-center my-2">
-                    <a href="javascript:;" @@click="formData.details.push({})"
-                        class="badge badge-success text-capitalize"><i class="fas fa-plus mr-1"></i> {{ __('add material') }}</a>
+                <div class="form-group">
+                    <label class="text-capitalize">{{ __('items') }}</label>
 
-                </div>
-
-                <div class="px-0" style="overflow-x: auto">
-                    <div style="width: 100%">
-                        <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-5 pl-0 ">{{ __('validation.attributes.name') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.qty') }}</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0">{{ __('validation.attributes.price') }}</div>
-                            <div class="font-weight-bold col-1 pl-4 pr-0">{{ __('Subtotal') }}</div>
-                        </div>
-
-                        {{-- DETAILS LOOP --}}
+                    <div class="list-group">
                         <template x-for="(detail, $i) in formData.details">
-                            <div class="form-group row mx-0 mb-4 align-items-center">
+                            <div class="list-group-item p-4">
+                                <select class="form-control" :disabled="detail.out_details?.length > 0"
+                                    :data-exclude-enabling="detail.out_details?.length > 0"
+                                    x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
+                                        dropdownParent: $el.closest('.modal-body'),
+                                        placeholder: '{{ __('Material') }}',
+                                        data: materials.map(material => ({
+                                            id: material.id,
+                                            text: null,
+                                            material: material
+                                        })),
+                                        templateResult: materialSelect2TemplateResultAndSelection,
+                                        templateSelection: materialSelect2TemplateResultAndSelection,
+                                    }).on('select2:select', (e) => {
+                                        detail.material_id = e.target.value;
+                                    });" required>
+                                </select>
 
-                                <div class="col-5 px-0">
-                                    <select class="form-control" :disabled="detail.out_details?.length > 0"
-                                        :data-exclude-enabling="detail.out_details?.length > 0"
-                                        x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
-                                            dropdownParent: $el.closest('.modal-body'),
-                                            placeholder: '{{ __('Material') }}',
-                                            data: materials.map(material => ({
-                                                id: material.id,
-                                                text: null,
-                                                material: material
-                                            })),
-                                            templateResult: materialSelect2TemplateResultAndSelection,
-                                            templateSelection: materialSelect2TemplateResultAndSelection,
-                                        }).on('select2:select', (e) => {
-                                            detail.material_id = e.target.value;
-                                        });"
-                                        required>
-                                    </select>
-                                </div>
+                                <div class="row my-3">
+                                    <div class="col d-flex align-items-center" x-id="['text-input']">
+                                        <label :for="$id('text-input')"
+                                            class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                        <div class="input-group input-group-sm">
+                                            <input :id="$id('text-input')" class="form-control form-control-sm"
+                                                type="number" x-model="detail.qty"
+                                                :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
 
-                                <div class="col-2 pl-4 pr-0 input-group">
-                                    <input class="form-control" type="number" x-model="detail.qty"
-                                        :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text h-auto" x-data="{ unit: '' }"
+                                                    x-effect="unit = materials.find(material => detail.material_id == material.id)?.unit"
+                                                    x-show="unit" x-text="unit"></span>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" x-data="{ unit: '' }"
-                                            x-effect="unit = materials.find(material => detail.material_id == material.id)?.unit"
-                                            x-show="unit" x-text="unit"></span>
+                                    <div class="col d-flex align-items-center" x-id="['text-input']">
+                                        <label :for="$id('text-input')"
+                                            class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                        <input :id="$id('text-input')" x-model="detail.price"
+                                            class="form-control form-control-sm" min="0" type="number" required>
                                     </div>
                                 </div>
 
-                                <div class="col-2 pl-4 pr-0">
-                                    <input x-model="detail.price" class="form-control" min="0" type="number"
-                                        required>
-                                </div>
-
-                                <div class="col-2 pl-4 pr-0" x-data="{ subtotal_price: 0 }"
-                                    x-effect="subtotal_price = detail.price * detail.qty"
-                                    x-text="intToCurrency(subtotal_price || 0)">
-                                </div>
-
-                                <div class="col-1 pl-4 pr-0">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <strong x-init="$($el).tooltip()" title="{{ __('subtotal') }}" x-data="{ subtotal_price: 0 }"
+                                        x-effect="subtotal_price = detail.price * detail.qty"
+                                        x-text="intToCurrency(subtotal_price || 0)">
+                                    </strong>
 
                                     <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
                                         x-init="$($el).tooltip()" :title="__('cannot be deleted. Material(s) has been used')" />
@@ -140,14 +132,24 @@
                                 </div>
                             </div>
                         </template>
+                    </div>
+                </div>
 
-                        {{-- TOTAL --}}
-                        <div class="row mx-0 my-4">
-                            <div class="font-weight-bold col-9 px-0 text-right text-uppercase">Total</div>
-                            <div class="font-weight-bold col-2 pl-4 pr-0" x-data="{ total_price: 0 }"
+
+                <div class="form-group d-flex justify-content-between">
+                    <div>
+                        <label class="text-capitalize">{{ __('total') }}</label>
+                        <div>
+                            <strong x-data="{ total_price: 0 }"
                                 x-effect="total_price = formData.details?.reduce((a, b) => a + b.qty * b.price, 0)"
-                                x-text="intToCurrency(total_price || 0)"></div>
+                                x-text="intToCurrency(total_price || 0)"></strong>
                         </div>
+                    </div>
+
+                    <div>
+                        <a href="javascript:;" @@click="formData.details.push({})"
+                            class="badge badge-success text-capitalize"><i class="fas fa-plus mr-1"></i>
+                            {{ __('add material') }}</a>
                     </div>
                 </div>
             </form>

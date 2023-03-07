@@ -4,7 +4,7 @@
 
 @section('main-content')
     <div class="section-body">
-        <ul id="pageTab" class="nav nav-pills nav-fill" role="tablist">
+        <ul id="pageTab" class="nav nav-pills nav-fill text-capitalize flex-nowrap" role="tablist">
             <li class="nav-item">
                 <a class="nav-link py-1" id="list-tab" data-toggle="tab" href="#list" role="tab"
                     aria-controls="{{ __('list') }}" aria-selected="false"><i class="fas fa-list"></i>
