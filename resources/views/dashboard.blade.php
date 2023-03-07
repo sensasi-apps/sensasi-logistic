@@ -237,10 +237,7 @@
 
     <div class="row">
         <div class="col-md-6 col-sm-12">
-            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }"
-                @resize.window="
-            width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-            isOpen = width > 768;">
+            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }">
                 <div role="button" class="card-header hoverable" @@click="isOpen = !isOpen">
                     <h4>{{ __('Material List') }}</h4>
                 </div>
@@ -254,10 +251,7 @@
         </div>
 
         <div class="col-md-6 col-sm-12">
-            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }"
-                @resize.window="
-            width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-            isOpen = width > 768;">
+            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }">
                 <div role="button" class="card-header hoverable" @@click="isOpen = !isOpen">
                     <h4>{{ __('Product List') }}</h4>
                 </div>
