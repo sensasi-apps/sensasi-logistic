@@ -3,6 +3,7 @@
 @section('title', __('Dashboard'))
 
 @include('components.assets._datatable')
+@include('components.assets._alpinejs')
 
 {{-- TODO: implement alpinejs --}}
 
@@ -235,12 +236,15 @@
 
 
     <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">
+        <div class="col-md-6 col-sm-12">
+            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }"
+                @resize.window="
+            width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+            isOpen = width > 768;">
+                <div role="button" class="card-header hoverable" @@click="isOpen = !isOpen">
                     <h4>{{ __('Material List') }}</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body" x-show="isOpen" x-transition>
                     <div class="table-responsive">
                         <table class="table table-striped" id="materialDatatable" style="width:100%">
                         </table>
@@ -249,12 +253,15 @@
             </div>
         </div>
 
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">
+        <div class="col-md-6 col-sm-12">
+            <div class="card" x-data="{ isOpen: window.innerWidth > 768 }"
+                @resize.window="
+            width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+            isOpen = width > 768;">
+                <div role="button" class="card-header hoverable" @@click="isOpen = !isOpen">
                     <h4>{{ __('Product List') }}</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body" x-show="isOpen" x-transition>
                     <div class="table-responsive">
                         <table class="table table-striped" id="productDatatable" style="width:100%"></table>
                     </div>
