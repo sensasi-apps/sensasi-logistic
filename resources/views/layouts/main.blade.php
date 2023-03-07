@@ -58,7 +58,7 @@
         @endswitch
     </div>
 
-    <x-_modal id="profile" title="{{ __('Edit profile') }}">
+    <x-_modal id="profile" centered title="{{ __('Edit profile') }}">
         <form action="{{ route('user.update') }}" method="post" id="userProfileForm">
             @csrf
 
