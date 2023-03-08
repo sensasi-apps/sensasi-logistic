@@ -78,11 +78,34 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // all user
-    Route::get('/', fn () => redirect()->route('dashboard'))->name('/');
+    Route::get('/', function () {
+        $user = auth()->user();
+
+        if ($user->hasRole('Super Admin')) {
+            return redirect()->route('dashboard');
+        }
+
+        if ($user->hasRole('Stackholder')) {
+            return redirect()->route('dashboard');
+        }
+
+        if ($user->hasRole('Warehouse')) {
+            return redirect()->route('materials.index');
+        }
+
+        if ($user->hasRole('Sales')) {
+            return redirect()->route('products.index');
+        }
+
+        if ($user->hasRole('Manufacture')) {
+            return redirect()->route('manufactures.index');
+        }
+    })->name('/');
     Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
+
+    Route::middleware('role:Super Admin|Stackholder')->get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::middleware('role:Super Admin')->controller(AppSystemController::class)->group(function () {
         Route::prefix('system')->name('system.')->group(function () {
@@ -104,7 +127,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::middleware('role:Super Admin|Warehouse')->group(function () {
-        Route::get('materials', MaterialIndexController::class);
+        Route::get('materials', MaterialIndexController::class)->name('materials.index');
 
         Route::resource('materials', MaterialController::class)->only([
             'store', 'update', 'destroy'
@@ -121,7 +144,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::middleware('role:Super Admin|Sales|Warehouse')->group(function () {
-        Route::get('products', ProductIndexController::class);
+        Route::get('products', ProductIndexController::class)->name('products.index');
 
         Route::resource('products', ProductController::class)->only([
             'store', 'update', 'destroy'

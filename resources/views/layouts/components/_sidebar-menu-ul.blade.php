@@ -1,44 +1,47 @@
 <ul class="sidebar-menu text-capitalize">
-    <li @class(['active' => request()->is('dashboard*')])>
-        <a class="nav-link" href="{{ url('dashboard') }}">
-            <i class="fas fa-chart-line"></i>
-            <span>{{ __('dashboard') }}</span>
-        </a>
-    </li>
 
-    @if (Auth::user()->hasRole('Warehouse|Sales|Manufacture|Super Admin'))
+    @hasanyrole('Super Admin|Stackholder')
+        <li @class(['active' => request()->is('dashboard*')])>
+            <a class="nav-link" href="{{ url('dashboard') }}">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ __('dashboard') }}</span>
+            </a>
+        </li>
+    @endhasanyrole
+
+    @unlessrole('Stackholder')
         <li class="menu-header">Data</li>
-    @endif
+    @endunlessrole
 
-    @if (Auth::user()->hasRole('Warehouse|Super Admin'))
+    @hasanyrole('Warehouse|Super Admin')
         <li @class(['active' => request()->is('materials*')])>
             <a class="nav-link" href="{{ url('materials') }}">
                 <i class="fas fa-pallet"></i>
                 <span>{{ __('materials') }}</span>
             </a>
         </li>
-    @endif
+    @endhasanyrole
 
-    @if (Auth::user()->hasRole('Manufacturer|Super Admin'))
+    @hasanyrole('Manufacturer|Super Admin')
         <li @class(['active' => request()->is('manufactures*')])>
             <a class="nav-link" href="{{ url('manufactures') }}">
                 <i class="fas fa-boxes"></i>
                 <span>{{ __('manufactures') }}</span>
             </a>
         </li>
-    @endif
+    @endhasanyrole
 
-    @if (Auth::user()->hasRole('Warehouse|Sales|Super Admin'))
+    @hasanyrole('Warehouse|Sales|Super Admin')
         <li @class(['active' => request()->is('products*')])>
             <a class="nav-link" href="{{ url('products') }}">
                 <i class="fas fa-box"></i>
                 <span>{{ __('products') }}</span>
             </a>
         </li>
-    @endif
+    @endhasanyrole
 
 
-    @if (Auth::user()->hasRole('Stackholder|Super Admin'))
+    @hasanyrole('Stackholder|Super Admin')
         <li class="menu-header">{{ __('report') }}</li>
 
         <li @class(['active' => request()->is('report/materials*')])>
@@ -61,9 +64,9 @@
                 <span>{{ __('products') }}</span>
             </a>
         </li>
-    @endif
+    @endhasanyrole
 
-    @if (Auth::user()->hasRole('Super Admin'))
+    @hasanyrole('Super Admin')
         <li class="menu-header">{{ __('system') }}</li>
 
         <li @class(['active' => request()->is('report/users*')])>
@@ -79,5 +82,5 @@
                 <span>{{ __('IP Addresses') }}</span>
             </a>
         </li> --}}
-    @endif
+    @endhasanyrole
 </ul>
