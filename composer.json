@@ -1,13 +1,19 @@
 {
     "name": "sensasi-app/sensasi-logistic",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "description": "Is a web based management information system app for managing manufacture inventory.",
+    "keywords": [
+        "framework",
+        "logistic",
+        "mis",
+        "sensasi-delight"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "infureal/artisan-gui": "^2.0",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^9.48",
         "laravel/sanctum": "^2.11",
