@@ -38,6 +38,7 @@ class ManufactureFactory extends Factory
         return [
             'code' => $this->faker->unique()->numerify('MAN-#####'),
             'at' => $this->faker->dateTimeBetween('-3 months', '-1 week'),
+            'note' => $this->faker->sentence(10),
             'material_out_id' => $materialOutId,
             'product_in_id' => $productInId
         ];
