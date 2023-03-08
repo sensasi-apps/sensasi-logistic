@@ -2,10 +2,8 @@
 
 @section('title', __('Dashboard'))
 
-@include('components.assets._datatable')
 @include('components.assets._alpinejs')
-
-{{-- TODO: implement alpinejs --}}
+@include('components.alpine-data._datatable')
 
 @push('css-lib')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"
@@ -29,129 +27,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"
         integrity="sha512-CTiTx27lUxqoBGKfEHj2giGQTRdWgwJHNixfAOzPo5Hb86I03/YwYt+wpTM2TjFGespwSgQwUWKtLHPt2zTTDA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-@endpush
-
-@push('js')
-    <script>
-        let products;
-        let materials = [];
-        let productDatatable = document.getElementById('productDatatable');
-        let materialDatatable = document.getElementById('materialDatatable');
-
-        const productTagSearch = tag => productDatatable.search(tag).draw();
-        const materialTagSearch = tag => materialDatatable.search(tag).draw();
-
-        (function() {
-            $('.owl-carousel').owlCarousel({
-                // loop: true,
-                margin: 0,
-                // nav: true
-                responsive: {
-                    0: {
-                        items: 4
-                    },
-                    576: {
-                        items: 3
-                    },
-                    991: {
-                        items: 2
-                    }
-                }
-            })
-
-            materialDatatable = $(materialDatatable).DataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-
-
-                ajax: {
-                    url: '{{ route('api.datatable', ['model_name' => 'Material']) }}',
-                    dataSrc: json => {
-                        materials = json.data
-                        return json.data
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                        )
-                    },
-                    cache: true,
-                    accept: 'application/json'
-                },
-                order: [],
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('Code') }}'
-                }, {
-                    data: 'name',
-                    title: '{{ __('Name') }}'
-                }, {
-                    data: 'qty',
-                    title: '{{ __('Qty') }}',
-                    orderable: false,
-                    searchable: false,
-                    render: (data, type, row) => `${data} ${row.unit}`
-                }, {
-                    data: 'tags',
-                    name: 'tags_json',
-                    title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag =>
-                        `<a href="#/" class="m-1 badge badge-primary" onclick="materialTagSearch('${tag}')">${tag}</a>`
-                    ).join('') || null,
-                }]
-            });
-
-            productDatatable = $(productDatatable).DataTable({
-                processing: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/{{ app()->getLocale() }}.json'
-                },
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('api.datatable', ['model_name' => 'Product']) }}',
-                    dataSrc: json => {
-                        products = json.data;
-                        return json.data;
-                    },
-                    beforeSend: function(request) {
-                        request.setRequestHeader(
-                            "Authorization",
-                            'Bearer {{ decrypt(request()->cookie('api-token')) }}'
-                        )
-                    },
-                    cache: true
-                },
-                columns: [{
-                    data: 'code',
-                    title: '{{ __('validation.attributes.code') }}'
-                }, {
-                    data: 'name',
-                    title: '{{ __('validation.attributes.name') }}'
-                }, {
-                    data: 'qty',
-                    title: '{{ __('Qty') }}',
-                    orderable: false,
-                    searchable: false,
-                    render: (data, type, row) => `${data} ${row.unit}`
-                }, {
-                    data: 'default_price',
-                    title: '{{ __('validation.attributes.default_price') }}',
-                    render: data => data.toLocaleString()
-                }, {
-                    data: 'tags',
-                    name: 'tags_json',
-                    title: '{{ __('Tags') }}',
-                    render: data => data?.map(tag =>
-                        `<a href="#/" onclick="productTagSearch('${tag}')" class="m-1 badge badge-primary">${tag}</a>`
-                    ).join('') || null,
-                }]
-            });
-        })();
-    </script>
 @endpush
 
 @section('main-content')
@@ -234,7 +109,6 @@
         @endforeach
     </div>
 
-
     <div class="row">
         <div class="col-md-6 col-sm-12">
             <div class="card" x-data="{ isOpen: window.innerWidth > 768 }">
@@ -243,7 +117,7 @@
                 </div>
                 <div class="card-body" x-show="isOpen" x-transition>
                     <div class="table-responsive">
-                        <table class="table table-striped" id="materialDatatable" style="width:100%">
+                        <table x-data="dataTable(materialListDataTableConfig)" class="table table-striped" style="width:100%">
                         </table>
                     </div>
                 </div>
@@ -257,10 +131,98 @@
                 </div>
                 <div class="card-body" x-show="isOpen" x-transition>
                     <div class="table-responsive">
-                        <table class="table table-striped" id="productDatatable" style="width:100%"></table>
+                        <table x-data="dataTable(productListDataTableConfig)" class="table table-striped" style="width:100%">
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+
+@push('js')
+    <script>
+        const materialListDataTableConfig = {
+            setDataListEventName: 'material:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ route('api.datatable', ['model_name' => 'Material']) }}',
+            order: [2, 'asc'],
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'brand',
+                title: '{{ __('validation.attributes.brand') }}'
+            }, {
+                data: 'name',
+                title: '{{ __('validation.attributes.name') }}'
+            }, {
+                data: 'qty',
+                title: '{{ __('validation.attributes.qty') }}',
+                orderable: false,
+                searchable: false,
+                render: (data, type, row) => `${data} ${row.unit}`
+            }, {
+                data: 'tags',
+                name: 'tags_json',
+                width: '15%',
+                orderable: false,
+
+                title: '{{ __('validation.attributes.tags') }}',
+                render: data => data?.map(tag =>
+                    `<a href="javascript:;" class="m-1 badge badge-primary" @click="search('${tag}')">${tag}</a>`
+                ).join(''),
+            }]
+        };
+
+        const productListDataTableConfig = {
+            setDataListEventName: 'product:set-data-list',
+            token: '{{ decrypt(request()->cookie('api-token')) }}',
+            ajaxUrl: '{{ route('api.datatable', ['model_name' => 'Product']) }}',
+            order: [1, 'asc'],
+            columns: [{
+                data: 'code',
+                title: '{{ __('validation.attributes.code') }}'
+            }, {
+                data: 'name',
+                title: '{{ __('validation.attributes.name') }}'
+            }, {
+                data: 'qty',
+                title: '{{ __('validation.attributes.qty') }}',
+                orderable: false,
+                searchable: false,
+                render: (data, type, row) => `${data} ${row.unit}`
+            }, {
+                data: 'tags',
+                name: 'tags_json',
+                width: '15%',
+                orderable: false,
+
+                title: '{{ __('validation.attributes.tags') }}',
+                render: data => data?.map(tag =>
+                    `<a href="javascript:;" class="m-1 badge badge-primary" @click="search('${tag}')">${tag}</a>`
+                ).join(''),
+            }]
+        };
+
+        (function() {
+            $('.owl-carousel').owlCarousel({
+                // loop: true,
+                margin: 0,
+                // nav: true
+                responsive: {
+                    0: {
+                        items: 4
+                    },
+                    576: {
+                        items: 3
+                    },
+                    991: {
+                        items: 2
+                    }
+                }
+            })
+        })();
+    </script>
+@endpush
