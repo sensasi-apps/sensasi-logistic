@@ -81,14 +81,14 @@
 
     @hasanyrole('Super Admin')
         <li class="menu-header">Developer Only</li>
-        
-        {{-- <li>
-            <a class="nav-link" href="{{ url('_/terminal') }}" target="_BLANK">
+
+        <li>
+            <a class="nav-link" href="{{ url('_/laravel-shell') }}" target="_BLANK">
                 <i class="fas fa-terminal"></i>
-                <span>Terminal 1</span>
+                <span>Laravel Shell</span>
                 <i class="fas fa-external-link-alt"></i>
             </a>
-        </li> --}}
+        </li>
 
         <li>
             <a class="nav-link" href="{{ url('_/basic-page-format') }}" target="_BLANK">

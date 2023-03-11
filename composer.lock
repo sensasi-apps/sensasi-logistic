@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5187ab35898b9f8f2ab438fab7d398c",
+    "content-hash": "06ad8aa35b55fa383c046049ac836e48",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1241,6 +1241,58 @@
             "time": "2021-07-21T13:50:14+00:00"
         },
         {
+            "name": "jakyeru/laravel-shell",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/JakyeRU/laravel-shell.git",
+                "reference": "fef3b078cd3beb9b4428cbd3fda45f3fca04e20f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/JakyeRU/laravel-shell/zipball/fef3b078cd3beb9b4428cbd3fda45f3fca04e20f",
+                "reference": "fef3b078cd3beb9b4428cbd3fda45f3fca04e20f",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^9",
+                "livewire/livewire": "^2.11",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Jakyeru\\LaravelShell\\LaravelShellServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jakyeru\\LaravelShell\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jakye",
+                    "email": "jakye@jakye.me"
+                }
+            ],
+            "description": "Laravel-Shell adds a terminal interface to your web application, allowing you to run shell commands directly from your browser.",
+            "support": {
+                "issues": "https://github.com/JakyeRU/laravel-shell/issues",
+                "source": "https://github.com/JakyeRU/laravel-shell/tree/v1.1.1"
+            },
+            "time": "2023-02-09T13:55:58+00:00"
+        },
+        {
             "name": "jaybizzle/crawler-detect",
             "version": "v1.2.113",
             "source": {
@@ -2304,6 +2356,79 @@
                 "source": "https://github.com/thephpleague/oauth1-client/tree/v1.10.1"
             },
             "time": "2022-04-15T14:02:14+00:00"
+        },
+        {
+            "name": "livewire/livewire",
+            "version": "v2.12.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/livewire/livewire.git",
+                "reference": "019b1e69d8cd8c7e749eba7a38e4fa69ecbc8f74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/019b1e69d8cd8c7e749eba7a38e4fa69ecbc8f74",
+                "reference": "019b1e69d8cd8c7e749eba7a38e4fa69ecbc8f74",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/support": "^7.0|^8.0|^9.0|^10.0",
+                "illuminate/validation": "^7.0|^8.0|^9.0|^10.0",
+                "league/mime-type-detection": "^1.9",
+                "php": "^7.2.5|^8.0",
+                "symfony/http-kernel": "^5.0|^6.0"
+            },
+            "require-dev": {
+                "calebporzio/sushi": "^2.1",
+                "laravel/framework": "^7.0|^8.0|^9.0|^10.0",
+                "mockery/mockery": "^1.3.1",
+                "orchestra/testbench": "^5.0|^6.0|^7.0|^8.0",
+                "orchestra/testbench-dusk": "^5.2|^6.0|^7.0|^8.0",
+                "phpunit/phpunit": "^8.4|^9.0",
+                "psy/psysh": "@stable"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Livewire\\LivewireServiceProvider"
+                    ],
+                    "aliases": {
+                        "Livewire": "Livewire\\Livewire"
+                    }
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Livewire\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Caleb Porzio",
+                    "email": "calebporzio@gmail.com"
+                }
+            ],
+            "description": "A front-end framework for Laravel.",
+            "support": {
+                "issues": "https://github.com/livewire/livewire/issues",
+                "source": "https://github.com/livewire/livewire/tree/v2.12.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/livewire",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-03-03T20:12:38+00:00"
         },
         {
             "name": "mobiledetect/mobiledetectlib",
