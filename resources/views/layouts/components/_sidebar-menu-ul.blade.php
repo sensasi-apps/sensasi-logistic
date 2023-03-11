@@ -91,6 +91,14 @@
         </li>
 
         <li>
+            <a class="nav-link" href="{{ url('_/terminal') }}" target="_BLANK">
+                <i class="fas fa-terminal"></i>
+                <span>Terminal</span>
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        </li>
+
+        <li>
             <a class="nav-link" href="{{ url('_/basic-page-format') }}" target="_BLANK">
                 <i class="fas fa-border-all"></i>
                 <span>Basic page format</span>
@@ -105,11 +113,11 @@
             </a>
         </li>
 
-        {{-- <li class="{{ request()->is('system/ip-addr*') ? 'active' : '' }}">
+        <li class="{{ request()->is('system/ip-addr*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('system/ip-addr') }}">
                 <i class="fas fa-network-wired"></i>
                 <span>{{ __('IP Addresses') }}</span>
             </a>
-        </li> --}}
+        </li>
     @endhasanyrole
 </ul>

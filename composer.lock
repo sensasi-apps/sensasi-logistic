@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "06ad8aa35b55fa383c046049ac836e48",
+    "content-hash": "36af1da4febfa3ed594acdb43d0049ba",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -4189,6 +4189,81 @@
             "time": "2023-02-07T16:14:23+00:00"
         },
         {
+            "name": "recca0120/terminal",
+            "version": "v1.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/recca0120/laravel-terminal.git",
+                "reference": "902f92d214307ae42bfe503e1b9aa4a455c5b014"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/recca0120/laravel-terminal/zipball/902f92d214307ae42bfe503e1b9aa4a455c5b014",
+                "reference": "902f92d214307ae42bfe503e1b9aa4a455c5b014",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/config": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/console": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/database": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/events": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/filesystem": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/routing": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/view": "^5.1|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "php": ">=5.5.9",
+                "symfony/finder": "^2.7|^3.0|^4.0|^5.0|^6.0",
+                "webmozart/glob": "^4.1"
+            },
+            "require-dev": {
+                "mikey179/vfsstream": "^1.6",
+                "mockery/mockery": "^0.9.4|^1.0",
+                "nesbot/carbon": "^1.20|^2.0",
+                "phpunit/phpunit": "^4.8|^5.1|^6.1|^7.0|^8.0|^9.0|^10.0",
+                "roave/security-advisories": "dev-latest",
+                "vlucas/phpdotenv": "^4.0|^5.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Recca0120\\Terminal\\TerminalServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/polyfill.php"
+                ],
+                "psr-4": {
+                    "Recca0120\\Terminal\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "recca0120",
+                    "email": "recca0120@gmail.com"
+                }
+            ],
+            "description": "run laravel artisan command in web application",
+            "keywords": [
+                "artisan",
+                "console",
+                "laravel",
+                "terminal",
+                "web",
+                "web artisan"
+            ],
+            "support": {
+                "issues": "https://github.com/recca0120/laravel-terminal/issues",
+                "source": "https://github.com/recca0120/laravel-terminal/tree/v1.11.0"
+            },
+            "time": "2023-02-15T12:26:42+00:00"
+        },
+        {
             "name": "sentry/sdk",
             "version": "3.3.0",
             "source": {
@@ -7308,6 +7383,55 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "webmozart/glob",
+            "version": "4.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozarts/glob.git",
+                "reference": "3c17f7dec3d9d0e87b575026011f2e75a56ed655"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozarts/glob/zipball/3c17f7dec3d9d0e87b575026011f2e75a56ed655",
+                "reference": "3c17f7dec3d9d0e87b575026011f2e75a56ed655",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3 || ^8.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5",
+                "symfony/filesystem": "^5.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webmozart\\Glob\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bernhard Schussek",
+                    "email": "bschussek@gmail.com"
+                }
+            ],
+            "description": "A PHP implementation of Ant's glob.",
+            "support": {
+                "issues": "https://github.com/webmozarts/glob/issues",
+                "source": "https://github.com/webmozarts/glob/tree/4.6.0"
+            },
+            "time": "2022-05-24T19:45:58+00:00"
         },
         {
             "name": "yajra/laravel-datatables-oracle",
