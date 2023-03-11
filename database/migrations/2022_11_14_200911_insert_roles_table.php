@@ -15,11 +15,11 @@ class InsertRolesTable extends Migration
     public function up()
     {
         Role::create(['name' => 'Super Admin']);
-
-        $stackholderRole = Role::create(['name' => 'Stackholder']);
-        $manufactureRole = Role::create(['name' => 'Manufacture']);
-        $salesRole = Role::create(['name' => 'Sales']);
-        $warehouseRole = Role::create(['name' => 'Warehouse']);
+        Role::create(['name' => 'Admin']);
+        Role::create(['name' => 'Stackholder']);
+        Role::create(['name' => 'Manufacture']);
+        Role::create(['name' => 'Sales']);
+        Role::create(['name' => 'Warehouse']);
     }
 
     /**

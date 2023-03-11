@@ -1,4 +1,4 @@
-<ul class="sidebar-menu text-capitalize">
+<ul class="sidebar-menu text-capitalize pb-4">
 
     @hasanyrole('Super Admin|Stackholder')
         <li @class(['active' => request()->is('dashboard*')])>
@@ -9,7 +9,7 @@
         </li>
     @endhasanyrole
 
-    @unlessrole('Stackholder')
+    @hasanyrole('Super Admin|Warehouse|Manufacture|Sales')
         <li class="menu-header">Data</li>
     @endunlessrole
 
@@ -22,7 +22,7 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Manufacturer|Super Admin')
+    @hasanyrole('Manufacture|Super Admin')
         <li @class(['active' => request()->is('manufactures*')])>
             <a class="nav-link" href="{{ url('manufactures') }}">
                 <i class="fas fa-boxes"></i>
@@ -66,13 +66,42 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin')
+    @hasanyrole('Super Admin|Admin')
         <li class="menu-header">{{ __('system') }}</li>
+    @endhasanyrole
 
+    @hasanyrole('Super Admin|Admin')
         <li @class(['active' => request()->is('report/users*')])>
             <a class="nav-link" href="{{ url('system/users') }}">
                 <i class="fas fa-user-cog"></i>
                 <span>{{ __('users') }}</span>
+            </a>
+        </li>
+    @endhasanyrole
+
+    @hasanyrole('Super Admin')
+        <li class="menu-header">Developer Only</li>
+        
+        {{-- <li>
+            <a class="nav-link" href="{{ url('_/terminal') }}" target="_BLANK">
+                <i class="fas fa-terminal"></i>
+                <span>Terminal 1</span>
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        </li> --}}
+
+        <li>
+            <a class="nav-link" href="{{ url('_/basic-page-format') }}" target="_BLANK">
+                <i class="fas fa-border-all"></i>
+                <span>Basic page format</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="nav-link" href="{{ url('_/phpinfo') }}" target="_BLANK">
+                <i class="fab fa-php"></i>
+                <span>phpinfo</span>
+                <i class="fas fa-external-link-alt"></i>
             </a>
         </li>
 
