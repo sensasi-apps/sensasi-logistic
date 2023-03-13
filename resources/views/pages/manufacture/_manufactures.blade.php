@@ -121,7 +121,8 @@
                                                     <div class="input-group input-group-sm">
                                                         <input :id="$id('input')" class="form-control form-control-sm"
                                                             type="number" x-model="detail.qty" min="1"
-                                                            :max="formData.id ? undefined : detail.material_in_detail?.stock.qty"
+                                                            :max="formData.id ? undefined : detail.material_in_detail?.stock
+                                                                .qty"
                                                             required>
 
                                                         <div class="input-group-append">
@@ -481,7 +482,7 @@
                 orderable: false,
                 title: '{{ __('material') }}',
                 data: 'material_out.details',
-                name: 'material_out.details.material_in_detail.material.name',
+                name: 'materialOut.details.materialInDetail.material.name',
                 render: details => details.map(detail => {
                     const materialName = detail.material_in_detail?.material.name;
                     const detailQty = detail.qty;
@@ -493,7 +494,7 @@
                 orderable: false,
                 title: '{{ __('product') }}',
                 data: 'product_in.details',
-                name: 'product_in.details.product.name',
+                name: 'productIn.details.product.name',
                 render: details => details.map(detail => {
                     const productName = detail.product?.name;
                     const stockQty = detail.stock?.qty;
