@@ -39,17 +39,18 @@ class MaterialIndexController extends Controller
     private function getMaterialOutDatatableApiUrl(): string
     {
         // TODO: optimize columns to be selected
-        $materialInApiParamsJson = json_encode([
+        $materialOutApiParamsJson = json_encode([
             'withs' => [
                 'manufacture',
                 'details.materialInDetail' => [
                     'material',
-                    'materialIn'
+                    'materialIn',
+                    'stock'
                 ],
             ]
         ]);
 
-        return route('api.datatable', ['model_name' => 'MaterialOut', 'params_json' => urlencode($materialInApiParamsJson)]);
+        return route('api.datatable', ['model_name' => 'MaterialOut', 'params_json' => urlencode($materialOutApiParamsJson)]);
     }
 
     public function __invoke(): View

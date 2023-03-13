@@ -67,3 +67,13 @@ div.dataTables_processing.card {
 .hoverable:hover {
 	background-color: #EAEAEA;
 }
+
+.blinking {
+	animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+	50% {
+		opacity: 0.5;
+	}
+}

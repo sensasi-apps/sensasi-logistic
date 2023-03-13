@@ -42,16 +42,17 @@
                     <div class="col form-group" x-id="['select']">
                         <label :for="$id('select')">{{ __('validation.attributes.type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
-                            x-effect="$($el).val(formData.type).change()"
-                            x-on:readystatechange.document="$($el).select2({
-                                tags: true,
-                                dropdownParent: $el.closest('.modal-body'),
-                                data: {{ Js::from($productInTypes) }}.map(type => ({
-                                    id: type,
-                                    text: type
-                                }))
-                            }).on('select2:select', (e) => {
-                                formData.type = e.target.value;
+                            x-effect="$($el).val(formData.type).change()" x-init="$(document).ready(function() {
+                                $($el).select2({
+                                    tags: true,
+                                    dropdownParent: $el.closest('.modal-body'),
+                                    data: {{ Js::from($productInTypes) }}.map(type => ({
+                                        id: type,
+                                        text: type
+                                    }))
+                                }).on('select2:select', (e) => {
+                                    formData.type = e.target.value;
+                                })
                             })"></select>
                     </div>
                 </div>
@@ -88,7 +89,7 @@
                                         placeholder: '{{ __('Product') }}',
                                         data: products.map(product => ({
                                             id: product.id,
-                                            text: null,
+                                            text: product.id_for_human,
                                             product: product
                                         })),
                                         templateResult: productSelect2TemplateResultAndSelection,
@@ -228,7 +229,7 @@
                 'details': [{}]
             },
 
-            refreshDatatableEventName: 'product-in:datatable-draw',
+            dispatchEventsAfterSubmit: ['product-in:datatable-draw', 'product:datatable-reload'],
 
             routes: {
                 store: '{{ route('product-ins.store') }}',

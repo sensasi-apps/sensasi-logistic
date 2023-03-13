@@ -42,16 +42,17 @@
                     <div class="col form-group" x-id="['select']">
                         <label :for="$id('select')">{{ __('validation.attributes.type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
-                            x-effect="$($el).val(formData.type).change()"
-                            @@readystatechange.document="$($el).select2({
-                                tags: true,
-                                dropdownParent: $el.closest('.modal-body'),
-                                data: {{ Js::from($materialOutTypes) }}.map(type => ({
-                                    id: type,
-                                    text: type
-                                }))
-                            }).on('select2:select', (e) => {
-                                formData.type = e.target.value;
+                            x-effect="$($el).val(formData.type).change()" x-init="$(document).ready(function() {
+                                $($el).select2({
+                                    tags: true,
+                                    dropdownParent: $el.closest('.modal-body'),
+                                    data: {{ Js::from($materialOutTypes) }}.map(type => ({
+                                        id: type,
+                                        text: type
+                                    }))
+                                }).on('select2:select', (e) => {
+                                    formData.type = e.target.value;
+                                })
                             })"></select>
                     </div>
                 </div>
@@ -60,7 +61,21 @@
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                     <input type="date" class="form-control" required :id="$id('input')"
                         :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                        @@change="formData.at = $event.target.value">
+                        @@change="formData.at = $event.target.value"
+                        x-effect="formData.details;
+                            const detailDates = formData.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
+                            
+                            if (!detailDates || detailDates.length === 0) {
+                                return;
+                            }
+
+                            if (detailDates?.length === 1) {
+                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                return;
+                            }
+
+                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                        ">
                 </div>
 
                 <div class="form-group" x-id="['textarea']">
@@ -100,7 +115,10 @@
                                                 class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
                                             <div class="input-group input-group-sm">
                                                 <input :id="$id('input')" class="form-control form-control-sm"
-                                                    type="number" x-model="detail.qty" :min="1" required>
+                                                    type="number" x-model="detail.qty" :min="1"
+                                                    step="any"
+                                                    :max="formData.id ? undefined : detail.material_in_detail?.stock.qty"
+                                                    required>
 
                                                 <div class="input-group-append">
                                                     <span class="input-group-text h-auto" x-data="{ unit: '' }"
@@ -178,7 +196,7 @@
                 dropdownParent: $(this.$el).closest('.modal-body'),
                 placeholder: '{{ __('Material') }}',
                 ajax: {
-                    delay: 500,
+                    delay: 750,
                     cache: true,
                     url: '/api/select2/MaterialInDetail',
                     dataType: 'json',
@@ -188,11 +206,11 @@
                             'Bearer {{ decrypt(request()->cookie('api-token')) }}'
                         )
                     },
-                    processResults: materialInDetail => {
-                        const data = materialInDetail.map(materialInDetail => {
+                    processResults: materialInDetails => {
+                        const data = materialInDetails.map(materialInDetail => {
                             return {
                                 id: materialInDetail.id,
-                                text: null,
+                                text: '',
                                 materialInDetail: materialInDetail
                             }
                         });
@@ -271,7 +289,11 @@
                 'manufacture': {}
             },
 
-            refreshDatatableEventName: 'material-out:datatable-draw',
+            dispatchEventsAfterSubmit: [
+                'material-out:datatable-draw',
+                'material-in:datatable-draw',
+                'material:datatable-reload'
+            ],
 
             routes: {
                 store: '{{ route('material-outs.store') }}',

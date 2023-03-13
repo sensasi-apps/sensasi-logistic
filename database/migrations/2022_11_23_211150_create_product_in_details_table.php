@@ -27,7 +27,7 @@ class CreateProductInDetailsTable extends Migration
                 ->restrictOnDelete();
 
             $table->float('qty');
-            $table->decimal('price');
+            $table->float('price');
             $table->unique(['product_id', 'product_in_id']);
         });
 

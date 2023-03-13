@@ -53,7 +53,7 @@ class MaterialController extends Controller
                     ->where('brand', $brand);
             })->ignore($materialId)],
             'brand' => 'nullable',
-            'low_qty' => 'numeric',
+            'low_qty' => 'nullable|numeric',
             'unit' => 'required',
             'tags' => 'nullable|array'
         ]);

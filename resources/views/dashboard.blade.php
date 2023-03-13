@@ -55,7 +55,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-2">
                         <div class="card-stats">
-                            <div class="card-stats-title">
+                            <div class="card-stats-title text-capitalize">
                                 {{ __("{$key1} {$key2}") }}
                             </div>
                             <div class="card-stats-items owl-carousel">

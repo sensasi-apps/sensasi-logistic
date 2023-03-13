@@ -38,16 +38,17 @@
                     <div class="col form-group" x-id="['select']">
                         <label :for="$id('select')">{{ __('validation.attributes.type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
-                            x-effect="$($el).val(formData.type).change()"
-                            @@readystatechange.document="$($el).select2({
-                                tags: true,
-                                dropdownParent: $el.closest('.modal-body'),
-                                data: {{ Js::from($productOutTypes) }}.map(type => ({
-                                    id: type,
-                                    text: type
-                                }))
-                            }).on('select2:select', (e) => {
-                                formData.type = e.target.value;
+                            x-effect="$($el).val(formData.type).change()" x-init="$(document).ready(function() {
+                                $($el).select2({
+                                    tags: true,
+                                    dropdownParent: $el.closest('.modal-body'),
+                                    data: {{ Js::from($productOutTypes) }}.map(type => ({
+                                        id: type,
+                                        text: type
+                                    }))
+                                }).on('select2:select', (e) => {
+                                    formData.type = e.target.value;
+                                })
                             })"></select>
                     </div>
                 </div>
@@ -56,7 +57,21 @@
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                     <input type="date" class="form-control" required :id="$id('input')"
                         :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                        @@change="formData.at = $event.target.value">
+                        @@change="formData.at = $event.target.value"
+                        x-effect="formData.details;
+                            const detailDates = formData.details?.map(detail => detail.product_in_detail?.product_in?.at).filter(date => date);
+                            
+                            if (!detailDates || detailDates.length === 0) {
+                                return;
+                            }
+
+                            if (detailDates?.length === 1) {
+                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                return;
+                            }
+
+                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                        ">
                 </div>
 
                 <div class="form-group" x-id="['textarea']">
@@ -98,7 +113,9 @@
                                                 class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
                                             <div class="input-group input-group-sm">
                                                 <input :id="$id('input')" class="form-control form-control-sm"
-                                                    type="number" x-model="detail.qty" min="1" required>
+                                                    type="number" x-model="detail.qty" min="1" step="any"
+                                                    :max="formData.id ? undefined : detail.product_in_detail?.stock?.qty"
+                                                    required>
 
                                                 <div class="input-group-append">
                                                     <span class="input-group-text h-auto" x-data="{ unit: '' }"
@@ -150,8 +167,8 @@
                         {{ __('Save') }}
                     </button>
 
-                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
-                            class="fas fa-undo"></i></button>
+                    <button @@click="restore()" x-show="isDirty"
+                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
                 </div>
 
                 <div>
@@ -175,7 +192,7 @@
                 dropdownParent: $(this.$el).closest('.modal-body'),
                 placeholder: '{{ __('Product') }}',
                 ajax: {
-                    delay: 500,
+                    delay: 750,
                     cache: true,
                     url: '/api/select2/ProductInDetail',
                     dataType: 'json',
@@ -275,7 +292,11 @@
                 }]
             },
 
-            refreshDatatableEventName: 'product-out:datatable-draw',
+            dispatchEventsAfterSubmit: [
+                'product-out:datatable-draw',
+                'product-in:datatable-draw',
+                'product:datatable-reload'
+            ],
 
             routes: {
                 store: '{{ route('product-outs.store') }}',

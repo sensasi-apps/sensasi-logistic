@@ -76,6 +76,7 @@
   "product ins": "produk masuk",
   "material out": "bahan keluar",
   "product out": "produk keluar",
+  "product outs": "produk keluar",
   "product in": "produk masuk",
   "manufacture": "manufaktur",
   "manufactures": "manufaktur",
@@ -118,5 +119,7 @@
   "delete manufacture": "hapus manufaktur",
   "manufacture list": "daftar manufaktur",
   "items": "barang",
+  "low qty": "stok menipis",
+  "out of stock": "stok habis",
   "$": "Rp."
 }

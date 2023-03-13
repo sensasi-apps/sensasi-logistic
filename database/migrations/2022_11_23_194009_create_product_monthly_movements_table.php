@@ -25,8 +25,8 @@ class CreateProductMonthlyMovementsTable extends Migration
             $table->bigInteger('out')->default(0);
             $table->float('avg_in')->default(0);
             $table->float('avg_out')->default(0);
-            $table->decimal('avg_in_price')->default(0);
-            $table->decimal('avg_out_price')->default(0);
+            $table->float('avg_in_price')->default(0);
+            $table->float('avg_out_price')->default(0);
 
             $table->primary(['product_id', 'year', 'month']);
         });

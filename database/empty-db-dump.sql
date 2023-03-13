@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `material_in_details` (
   `material_in_id` bigint(20) unsigned NOT NULL,
   `material_id` bigint(20) unsigned NOT NULL,
   `qty` double(8,2) NOT NULL,
-  `price` decimal(8,2) NOT NULL,
+  `price` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `material_in_details_material_id_material_in_id_unique` (`material_id`,`material_in_id`),
   KEY `material_in_details_material_in_id_foreign` (`material_in_id`),
@@ -132,8 +132,8 @@ CREATE TABLE IF NOT EXISTS `material_monthly_movements` (
   `out` bigint(20) NOT NULL DEFAULT 0,
   `avg_in` double(8,2) NOT NULL DEFAULT 0.00,
   `avg_out` double(8,2) NOT NULL DEFAULT 0.00,
-  `avg_in_price` decimal(8,2) NOT NULL DEFAULT 0.00,
-  `avg_out_price` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `avg_in_price` double(8,2) NOT NULL DEFAULT 0.00,
+  `avg_out_price` double(8,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`material_id`,`year`,`month`),
   CONSTRAINT `material_monthly_movements_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -360,7 +360,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `brand` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `tags_json` varchar(255) DEFAULT NULL,
-  `default_price` decimal(8,2) NOT NULL,
+  `default_price` double(8,2) NOT NULL,
   `low_qty` int(11) DEFAULT NULL,
   `unit` varchar(10) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -393,7 +393,7 @@ CREATE TABLE IF NOT EXISTS `product_in_details` (
   `product_in_id` bigint(20) unsigned NOT NULL,
   `product_id` bigint(20) unsigned NOT NULL,
   `qty` double(8,2) NOT NULL,
-  `price` decimal(8,2) NOT NULL,
+  `price` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_in_details_product_id_product_in_id_unique` (`product_id`,`product_in_id`),
   KEY `product_in_details_product_in_id_foreign` (`product_in_id`),
@@ -437,8 +437,8 @@ CREATE TABLE IF NOT EXISTS `product_monthly_movements` (
   `out` bigint(20) NOT NULL DEFAULT 0,
   `avg_in` double(8,2) NOT NULL DEFAULT 0.00,
   `avg_out` double(8,2) NOT NULL DEFAULT 0.00,
-  `avg_in_price` decimal(8,2) NOT NULL DEFAULT 0.00,
-  `avg_out_price` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `avg_in_price` double(8,2) NOT NULL DEFAULT 0.00,
+  `avg_out_price` double(8,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`product_id`,`year`,`month`),
   CONSTRAINT `product_monthly_movements_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -525,7 +525,7 @@ CREATE TABLE IF NOT EXISTS `product_out_details` (
   `product_in_detail_id` bigint(20) unsigned NOT NULL,
   `product_out_id` bigint(20) unsigned NOT NULL,
   `qty` double(8,2) NOT NULL,
-  `price` decimal(8,2) NOT NULL,
+  `price` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_out_details_unique` (`product_in_detail_id`,`product_out_id`),
   KEY `product_out_details_product_out_id_foreign` (`product_out_id`),
@@ -570,15 +570,16 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `fa_icon` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table senlog_data.roles: ~5 rows (approximately)
+-- Dumping data for table senlog_data.roles: ~0 rows (approximately)
 INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`, `fa_icon`) VALUES
-	(1, 'Super Admin', 'web', '2023-03-05 10:54:56', '2023-03-05 10:54:56', NULL),
-	(2, 'Stackholder', 'web', '2023-03-05 10:54:56', '2023-03-05 10:54:56', NULL),
-	(3, 'Manufacture', 'web', '2023-03-05 10:54:56', '2023-03-05 10:54:56', NULL),
-	(4, 'Sales', 'web', '2023-03-05 10:54:56', '2023-03-05 10:54:56', NULL),
-	(5, 'Warehouse', 'web', '2023-03-05 10:54:56', '2023-03-05 10:54:56', NULL);
+	(1, 'Super Admin', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL),
+	(2, 'Admin', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL),
+	(3, 'Stackholder', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL),
+	(4, 'Manufacture', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL),
+	(5, 'Sales', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL),
+	(6, 'Warehouse', 'web', '2023-03-13 15:51:09', '2023-03-13 15:51:09', NULL);
 
 -- Dumping structure for table senlog_data.role_has_permissions
 CREATE TABLE IF NOT EXISTS `role_has_permissions` (
