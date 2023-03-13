@@ -27,7 +27,7 @@ class CreateMaterialInDetailsTable extends Migration
                 ->restrictOnDelete();
 
             $table->float('qty');
-            $table->decimal('price');
+            $table->float('price');
             $table->unique(['material_id', 'material_in_id']);
         });
 
