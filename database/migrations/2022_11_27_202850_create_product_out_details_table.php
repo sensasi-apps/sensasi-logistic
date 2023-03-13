@@ -31,7 +31,9 @@ class CreateProductOutDetailsTable extends Migration
             $table->unique(['product_in_detail_id', 'product_out_id'], 'product_out_details_unique');
         });
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE product_monthly_movements_upsert_out_procedure (
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_monthly_movements_upsert_out_procedure`');
+
+        DB::unprepared('CREATE PROCEDURE product_monthly_movements_upsert_out_procedure (
             IN productID int,
             IN yearAt int,
             IN monthAt int
@@ -59,7 +61,9 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE product_out_details__product_monthly_movements_procedure (
+        DB::unprepared('DROP PROCEDURE IF EXISTS `product_out_details__product_monthly_movements_procedure`');
+
+        DB::unprepared('CREATE PROCEDURE product_out_details__product_monthly_movements_procedure (
                 IN productOutId int,
                 IN productInDetailId int
             )
@@ -82,7 +86,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER product_outs_after_update_trigger
+        DB::unprepared('CREATE TRIGGER product_outs_after_update_trigger
             AFTER UPDATE
             ON product_outs
             FOR EACH ROW
@@ -118,7 +122,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_insert_trigger
+        DB::unprepared('CREATE TRIGGER product_out_details_after_insert_trigger
                 AFTER INSERT
                 ON product_out_details
                 FOR EACH ROW
@@ -127,7 +131,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_update_trigger
+        DB::unprepared('CREATE TRIGGER product_out_details_after_update_trigger
                 AFTER UPDATE
                 ON product_out_details
                 FOR EACH ROW
@@ -143,7 +147,7 @@ class CreateProductOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER product_out_details_after_delete_trigger
+        DB::unprepared('CREATE TRIGGER product_out_details_after_delete_trigger
                 AFTER DELETE
                 ON product_out_details
                 FOR EACH ROW

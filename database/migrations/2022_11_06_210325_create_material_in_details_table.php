@@ -31,7 +31,12 @@ class CreateMaterialInDetailsTable extends Migration
             $table->unique(['material_id', 'material_in_id']);
         });
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE
+        // DB::unprepared('DELIMITER //');
+
+        DB::unprepared('DROP PROCEDURE IF EXISTS `material_monthly_movements_upsert_in_procedure`');
+
+
+        DB::unprepared('CREATE PROCEDURE
             material_monthly_movements_upsert_in_procedure (
                 IN materialID int,
                 IN yearAt int,
@@ -59,7 +64,10 @@ class CreateMaterialInDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE material_in_details__material_monthly_movements_procedure (
+        DB::unprepared('DROP PROCEDURE IF EXISTS `material_in_details__material_monthly_movements_procedure`');
+
+
+        DB::unprepared('CREATE PROCEDURE material_in_details__material_monthly_movements_procedure (
                 IN materialInID int,
                 IN materialID int
             )
@@ -75,7 +83,7 @@ class CreateMaterialInDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_ins_after_update_trigger
+        DB::unprepared('CREATE TRIGGER material_ins_after_update_trigger
             AFTER UPDATE
             ON material_ins
             FOR EACH ROW
@@ -107,7 +115,7 @@ class CreateMaterialInDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_in_details_after_insert_trigger
+        DB::unprepared('CREATE TRIGGER material_in_details_after_insert_trigger
                 AFTER INSERT
                 ON material_in_details
                 FOR EACH ROW
@@ -116,7 +124,7 @@ class CreateMaterialInDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_in_details_after_update_trigger
+        DB::unprepared('CREATE TRIGGER material_in_details_after_update_trigger
                 AFTER UPDATE
                 ON material_in_details
                 FOR EACH ROW
@@ -132,7 +140,7 @@ class CreateMaterialInDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_in_details_after_delete_trigger
+        DB::unprepared('CREATE TRIGGER material_in_details_after_delete_trigger
                 AFTER DELETE
                 ON material_in_details
                 FOR EACH ROW

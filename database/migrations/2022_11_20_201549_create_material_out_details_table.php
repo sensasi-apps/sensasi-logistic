@@ -30,7 +30,9 @@ class CreateMaterialOutDetailsTable extends Migration
             $table->unique(['material_in_detail_id', 'material_out_id'], 'material_out_details_unique');
         });
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE
+        DB::unprepared('DROP PROCEDURE IF EXISTS `material_monthly_movements_upsert_out_procedure`');
+
+        DB::unprepared('CREATE PROCEDURE
             material_monthly_movements_upsert_out_procedure (
                 IN materialID int,
                 IN yearAt int,
@@ -59,7 +61,9 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE PROCEDURE material_out_details__material_monthly_movements_procedure (
+        DB::unprepared('DROP PROCEDURE IF EXISTS `material_out_details__material_monthly_movements_procedure`');
+
+        DB::unprepared('CREATE PROCEDURE material_out_details__material_monthly_movements_procedure (
                 IN materialOutId int,
                 IN materialInDetailId int
             )
@@ -82,7 +86,7 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_outs_after_update_trigger
+        DB::unprepared('CREATE TRIGGER material_outs_after_update_trigger
             AFTER UPDATE
             ON material_outs
             FOR EACH ROW
@@ -118,7 +122,7 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_insert_trigger
+        DB::unprepared('CREATE TRIGGER material_out_details_after_insert_trigger
                 AFTER INSERT
                 ON material_out_details
                 FOR EACH ROW
@@ -127,7 +131,7 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_update_trigger
+        DB::unprepared('CREATE TRIGGER material_out_details_after_update_trigger
                 AFTER UPDATE
                 ON material_out_details
                 FOR EACH ROW
@@ -143,7 +147,7 @@ class CreateMaterialOutDetailsTable extends Migration
             END;
         ');
 
-        DB::unprepared('CREATE OR REPLACE TRIGGER material_out_details_after_delete_trigger
+        DB::unprepared('CREATE TRIGGER material_out_details_after_delete_trigger
                 AFTER DELETE
                 ON material_out_details
                 FOR EACH ROW
