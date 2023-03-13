@@ -42,7 +42,21 @@
                         <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                         <input type="date" class="form-control" required :id="$id('input')"
                             :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                            @@change="formData.at = $event.target.value">
+                            @@change="formData.at = $event.target.value"
+                            x-effect="formData.material_out?.details;
+                            const detailDates = formData.material_out?.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
+                            
+                            if (!detailDates || detailDates.length === 0) {
+                                return;
+                            }
+
+                            if (detailDates?.length === 1) {
+                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                return;
+                            }
+
+                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                        ">
                     </div>
                 </div>
 
@@ -106,7 +120,9 @@
                                                         class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
                                                     <div class="input-group input-group-sm">
                                                         <input :id="$id('input')" class="form-control form-control-sm"
-                                                            type="number" x-model="detail.qty" min="1" required>
+                                                            type="number" x-model="detail.qty" min="1"
+                                                            :max="formData.id ? undefined : detail.material_in_detail?.stock.qty"
+                                                            required>
 
                                                         <div class="input-group-append">
                                                             <span class="input-group-text h-auto" x-data="{ unit: '' }"
@@ -173,7 +189,7 @@
                                                 placeholder: '{{ __('Product') }}',
                                                 data: products.map(product => ({
                                                     id: product.id,
-                                                    text: null,
+                                                    text: '',
                                                     product: product
                                                 })),
                                                 templateResult: productSelect2TemplateResultAndSelection,
@@ -330,7 +346,7 @@
                 dropdownParent: $(this.$el).closest('.modal-body'),
                 placeholder: '{{ __('Material') }}',
                 ajax: {
-                    delay: 500,
+                    delay: 750,
                     cache: true,
                     url: '/api/select2/MaterialInDetail',
                     dataType: 'json',
@@ -426,7 +442,9 @@
                 }
             },
 
-            refreshDatatableEventName: 'manufacture:datatable-draw',
+            dispatchEventsAfterSubmit: [
+                'manufacture:datatable-draw'
+            ],
 
             routes: {
                 store: '{{ route('manufactures.store') }}',

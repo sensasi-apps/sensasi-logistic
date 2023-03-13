@@ -39,16 +39,17 @@
                     <div class="col form-group" x-id="['select']">
                         <label :for="$id('select')">{{ __('validation.attributes.type') }}</label>
                         <select class="form-control" name="type" required :id="$id('select')" :value="formData.type"
-                            x-effect="$($el).val(formData.type).change()"
-                            x-on:readystatechange.document="$($el).select2({
-                                tags: true,
-                                dropdownParent: $el.closest('.modal-body'),
-                                data: {{ Js::from($materialInTypes) }}.map(type => ({
-                                    id: type,
-                                    text: type
-                                }))
-                            }).on('select2:select', (e) => {
-                                formData.type = e.target.value;
+                            x-effect="$($el).val(formData.type).change()" x-init="$(document).ready(function() {
+                                $($el).select2({
+                                    tags: true,
+                                    dropdownParent: $el.closest('.modal-body'),
+                                    data: {{ Js::from($materialInTypes) }}.map(type => ({
+                                        id: type,
+                                        text: type
+                                    }))
+                                }).on('select2:select', (e) => {
+                                    formData.type = e.target.value;
+                                })
                             })"></select>
                     </div>
                 </div>
@@ -79,7 +80,7 @@
                                         placeholder: '{{ __('Material') }}',
                                         data: materials.map(material => ({
                                             id: material.id,
-                                            text: null,
+                                            text: material.id_for_human,
                                             material: material
                                         })),
                                         templateResult: materialSelect2TemplateResultAndSelection,
@@ -95,7 +96,7 @@
                                             class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
                                         <div class="input-group input-group-sm">
                                             <input :id="$id('text-input')" class="form-control form-control-sm"
-                                                type="number" x-model="detail.qty"
+                                                type="number" x-model="detail.qty" step="any"
                                                 :min="detail.out_details?.reduce((a, b) => a + b.qty, 0)" required>
 
                                             <div class="input-group-append">
@@ -110,7 +111,8 @@
                                         <label :for="$id('text-input')"
                                             class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
                                         <input :id="$id('text-input')" x-model="detail.price"
-                                            class="form-control form-control-sm" min="0" type="number" required>
+                                            class="form-control form-control-sm" min="0" type="number"
+                                            step="any" required>
                                     </div>
                                 </div>
 
@@ -219,7 +221,10 @@
                 'details': [{}]
             },
 
-            refreshDatatableEventName: 'material-in:datatable-draw',
+            dispatchEventsAfterSubmit: [
+                'material-in:datatable-draw',
+                'material:datatable-reload'
+            ],
 
             routes: {
                 store: '{{ route('material-ins.store') }}',

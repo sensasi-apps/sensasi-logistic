@@ -44,7 +44,8 @@ class ProductIndexController extends Controller
             'withs' => [
                 'details.productInDetail' => [
                     'product',
-                    'productIn'
+                    'productIn',
+                    'stock'
                 ],
             ]
         ]);

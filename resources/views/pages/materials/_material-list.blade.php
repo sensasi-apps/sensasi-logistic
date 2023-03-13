@@ -37,7 +37,7 @@
 
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.brand') }}</label>
-                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.brand" required>
+                    <input type="text" class="form-control" :id="$id('input')" x-model="formData.brand">
                 </div>
 
                 <div class="form-group" x-id="['input']">
@@ -55,7 +55,7 @@
 
                     <div class="input-group">
                         <input type="number" min="0" class="form-control" :id="$id('input')"
-                            x-model="formData.low_qty" required>
+                            x-model="formData.low_qty">
                         <div class="input-group-append">
                             <span class="input-group-text" x-show="formData.unit" x-text="formData.unit"></span>
                         </div>
@@ -64,9 +64,15 @@
 
                 <div class="form-group" x-id="['select']">
                     <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
-                    <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
-                        formData.tags = $($el).val();
-                    })" :data-select2-opts="select2Opts"
+                    <select class="form-control" multiple x-init="$(document).ready(function() {
+                        $($el).select2({
+                            dropdownParent: $el.closest('.modal-body'),
+                            tags: true,
+                            tokenSeparators: [',', ' ']
+                        }).on('select2:select', () => {
+                            formData.tags = $($el).val();
+                        })
+                    })"
                         x-effect="addOptionIfNotExists($el, formData.tags); $($el).val(formData.tags).change()"
                         :id="$id('select')">
                     </select>
@@ -104,12 +110,6 @@
 @push('js')
     <script>
         // page scripts
-
-        const select2Opts = JSON.stringify({
-            tags: true,
-            tokenSeparators: [',', ' ']
-        });
-
         function addOptionIfNotExists($el, tags) {
             const selectOpts = $($el).find('option')
             const optValues = selectOpts.map((i, select) => select.innerText)
@@ -132,7 +132,9 @@
                 'tags': []
             },
 
-            refreshDatatableEventName: 'material:datatable-reload',
+            dispatchEventsAfterSubmit: [
+                'material:datatable-reload'
+            ],
 
             routes: {
                 store: '{{ route('materials.store') }}',
@@ -169,7 +171,14 @@
                 title: '{{ __('validation.attributes.qty') }}',
                 orderable: false,
                 searchable: false,
-                render: (data, type, row) => `${data} ${row.unit}`
+                render: function(data, type, row) {
+
+                    const isStockLow = row.low_qty && row.qty <= row.low_qty;
+
+                    return isStockLow ?
+                        `<b class="text-${row.qty === 0 ? 'danger' : 'warning'} blinking" x-init="$($el).tooltip()" title="${row.qty === 0 ? '{{ __('out of stock') }}' : '{{ __('low qty') }}'}">${data} ${row.unit}</b>` :
+                        `${data} ${row.unit}`;
+                }
             }, {
                 data: 'tags',
                 name: 'tags_json',

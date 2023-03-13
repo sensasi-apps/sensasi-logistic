@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Traits\CUDLogTrait;
 use App\Models\Views\ProductInDetailsStockView;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,13 +44,20 @@ class ProductInDetail extends Model
         return $this->hasOne(ProductInDetailsStockView::class);
     }
 
-    public static function search($q): Builder
+    public static function search($q): array
     {
         return self::with(['product', 'productIn', 'stock'])
             ->has('productIn')
             ->whereRelation('stock', 'qty', '>', 0)
-            ->whereRelation('product', 'name', 'LIKE', "%{$q}%")
-            ->orWhereRelation('productIn', 'at', 'LIKE', "%{$q}%")
-            ->orderBy('product_in_id')->limit(25);;
+            ->where(
+                fn ($query) => $query
+                    ->whereRelation('product', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('productIn', 'at', 'LIKE', "%{$q}%")
+            )
+            ->limit(25)
+            ->get()
+            ->sortBy('productIn.at')
+            ->values()
+            ->all();
     }
 }

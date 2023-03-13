@@ -156,8 +156,8 @@ document.addEventListener('alpine:init', () => {
 
 			// if success
 			if (response.status === 200) {
-				// refresh datatable
-				this.$dispatch(CONFIG.refreshDatatableEventName);
+				// refresh datatable & etd
+				CONFIG.dispatchEventsAfterSubmit.forEach(eventName => this.$dispatch(eventName));
 
 				// clear alert is any
 				this.htmlElements.modal.querySelectorAll('.alert').forEach(alert => {

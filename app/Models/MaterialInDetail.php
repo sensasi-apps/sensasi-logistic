@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
 use App\Models\Views\MaterialInDetailsStockView;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,7 +49,7 @@ class MaterialInDetail extends Model
         return $this->hasOne(MaterialInDetailsStockView::class);
     }
 
-    public static function search($q): Builder
+    public static function search($q): array
     {
         return self::with(['material', 'materialIn', 'stock'])
             ->has('materialIn')
@@ -59,6 +59,10 @@ class MaterialInDetail extends Model
                     ->whereRelation('material', 'name', 'LIKE', "%{$q}%")
                     ->orWhereRelation('materialIn', 'at', 'LIKE', "%{$q}%")
             )
-            ->orderBy('material_in_id')->limit(25);
+            ->limit(25)
+            ->get()
+            ->sortBy('materialIn.at')
+            ->values()
+            ->all();
     }
 }

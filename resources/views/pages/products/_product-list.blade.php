@@ -79,12 +79,17 @@
                 <div class="form-group" x-id="['select']">
                     <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
 
-                    <select class="form-control select2" multiple x-init="$($el).on('select2:select', () => {
-                        formData.tags = $($el).val();
-                    })" :data-select2-opts="select2Opts"
+                    <select class="form-control select2" multiple x-init="$(document).ready(function() {
+                        $($el).select2({
+                            tags: true,
+                            tokenSeparators: [',', ' '],
+                            dropdownParent: $el.closest('.modal-content')
+                        }).on('select2:select', () => {
+                            formData.tags = $($el).val();
+                        })
+                    })"
                         x-effect="addOptionIfNotExists($el, formData.tags); $($el).val(formData.tags).change()"
-                        :id="$id('select')">
-                    </select>
+                        :id="$id('select')"></select>
                 </div>
             </form>
 
@@ -119,12 +124,6 @@
 @push('js')
     <script>
         // page scripts
-
-        const select2Opts = JSON.stringify({
-            tags: true,
-            tokenSeparators: [',', ' ']
-        });
-
         function addOptionIfNotExists($el, tags) {
             const selectOpts = $($el).find('option')
             const optValues = selectOpts.map((i, select) => select.innerText)
@@ -148,7 +147,7 @@
                 'tags': []
             },
 
-            refreshDatatableEventName: 'product:datatable-reload',
+            dispatchEventsAfterSubmit: ['product:datatable-reload'],
 
             routes: {
                 store: '{{ route('products.store') }}',
@@ -175,6 +174,9 @@
                 data: 'code',
                 title: '{{ __('validation.attributes.code') }}'
             }, {
+                data: 'brand',
+                title: '{{ __('validation.attributes.brand') }}'
+            }, {
                 data: 'name',
                 title: '{{ __('validation.attributes.name') }}'
             }, {
@@ -182,7 +184,14 @@
                 title: '{{ __('validation.attributes.qty') }}',
                 orderable: false,
                 searchable: false,
-                render: (data, type, row) => `${data} ${row.unit}`
+                render: function(data, type, row) {
+
+                    const isStockLow = row.low_qty && row.qty <= row.low_qty;
+
+                    return isStockLow ?
+                        `<b class="text-${row.qty === 0 ? 'danger' : 'warning'} blinking" x-init="$($el).tooltip()" title="${row.qty === 0 ? '{{ __('out of stock') }}' : '{{ __('low qty') }}'}">${data} ${row.unit}</b>` :
+                        `${data} ${row.unit}`;
+                }
             }, {
                 data: 'tags',
                 name: 'tags_json',

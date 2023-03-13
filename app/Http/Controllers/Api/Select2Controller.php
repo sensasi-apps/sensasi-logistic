@@ -20,7 +20,7 @@ class Select2Controller extends Controller
 
             $term = trim($request->q);
 
-            $results = $modelClass::search($term)->get();
+            $results = $modelClass::search($term);
 
             return response()->json($results);
         }
