@@ -11,7 +11,7 @@ return [
     | will be enabled if APP_DEBUG is true.
     |
     */
-    'enabled' => env('APP_DEBUG', false),
+    'enabled' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -37,7 +37,7 @@ return [
     'route' => [
         'prefix' => '_/terminal',
         'as' => 'terminal.',
-        'middleware' => ['web'],
+        'middleware' => ['web', 'auth', 'role:Super Admin'],
     ],
 
     /*
