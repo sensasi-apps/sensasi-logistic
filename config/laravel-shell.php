@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'enabled' => env('APP_DEBUG', false),
+    'enabled' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -25,7 +25,7 @@ return [
 
     'route' => [
         'prefix' => '_/laravel-shell',
-        'middleware' => ['web'],
+        'middleware' => ['web', 'auth', 'role:Super Admin'],
     ],
 
     /*
