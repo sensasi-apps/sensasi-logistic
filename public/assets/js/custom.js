@@ -159,3 +159,53 @@ function findGetParameter(parameterName) {
 	}
 	return result;
 }
+
+function materialInDetailSelect2ResultTemplate(data) {
+	if (data.loading) {
+		return data.text;
+	}
+
+	const atPrinted = data.materialInDetail?.material_in.at ? `IN: ${moment(data.materialInDetail
+		.material_in.at).format('DD-MM-YYYY')}` : '';
+	const edPrinted = data.materialInDetail?.material_in.expired_at ? `ED: ${moment(data.materialInDetail
+		.material_in.expired_at).format('DD-MM-YYYY')}` : '';
+
+	return $(`
+		<div style='line-height: 1em'>
+			<small>${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}</small>
+			<p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
+			<small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
+		</div>
+	`)
+}
+
+function materialInDetailSelect2SelectionTemplate(data) {
+	if (!data.selected) {
+		return data.text;
+	}
+
+	const materialInDetail = data.materialInDetail || data.element.materialInDetail;
+
+	const codePrinted = materialInDetail.material?.code ?
+		'<small class=\'text-muted\'><b>' +
+		materialInDetail.material?.code + '</b></small> - ' : '';
+	const brandPrinted = materialInDetail.material?.code ?
+		'<small class=\'text-muted\'>(' +
+		materialInDetail.material?.brand + ')</small>' : '';
+	const namePrinted = materialInDetail.material?.name;
+	const atPrinted = materialInDetail.material_in?.at ? `IN: ${moment(materialInDetail.material_in
+		?.at).format('DD-MM-YYYY')}` : '';
+
+	const edPrinted = materialInDetail.material_in?.expired_at ? `ED: ${moment(materialInDetail.material_in?.expired_at).format('DD-MM-YYYY')}` : '';
+
+	return $(`
+		<div>
+			${codePrinted}
+			${namePrinted}
+			${brandPrinted}
+			<small class='text-muted ml-2'>
+				${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}
+			</small>
+		</div>
+	`);
+}

@@ -29,7 +29,24 @@ class ManufactureController extends Controller
             ]))
         ]);
 
-        return view('pages.manufacture.index', compact('manufactureDatatableAjaxUrl'));
+        $materialManufactureDatatableAjaxUrl = route('api.datatable', [
+            'model_name' => 'MaterialManufacture',
+            'params_json' => urlencode(json_encode([
+                'withs' => [
+                    'materialIn.details' => [
+                        'material',
+                        'stock'
+                    ],
+                    'materialOut.details.materialInDetail' => [
+                        'material',
+                        'materialIn',
+                        'stock'
+                    ],
+                ]
+            ]))
+        ]);
+
+        return view('pages.manufacture.index', compact('manufactureDatatableAjaxUrl', 'materialManufactureDatatableAjaxUrl'));
     }
 
     public function __construct(private ManufactureRepository $repo)

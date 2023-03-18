@@ -17,6 +17,7 @@ use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\ManufactureReportController;
 use App\Http\Controllers\MaterialIndexController;
+use App\Http\Controllers\MaterialManufactureController;
 use App\Http\Controllers\PhpInfoController;
 use App\Http\Controllers\ProductIndexController;
 use Illuminate\Support\Facades\Route;
@@ -132,11 +133,17 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::middleware('role:Super Admin|Manufacture')->group(function () {
-        Route::resource('manufactures', ManufactureController::class)->except([
-            'create', 'show', 'edit'
-        ]);
-    });
+    Route::resource('manufactures', ManufactureController::class)->except([
+        'create', 'show', 'edit'
+    ])->middleware('role:Super Admin|Manufacture');
+
+    Route::middleware('role:Super Admin|Manufacture')
+        ->prefix('manufactures')
+        ->as('manufactures.')->group(function () {
+            Route::resource('material', MaterialManufactureController::class)->only([
+                'store', 'update', 'destroy'
+            ]);
+        });
 
     Route::middleware('role:Super Admin')->prefix('_')->group(function () {
         Route::view('basic-page-format', 'basic-page-format');

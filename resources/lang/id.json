@@ -121,5 +121,7 @@
   "items": "barang",
   "low qty": "stok menipis",
   "out of stock": "stok habis",
+  "material manufacture list": "daftar manufaktur bahan",
+  "total cost is not equal to total price": "total biaya tidak sama dengan total harga",
   "$": "Rp."
 }
