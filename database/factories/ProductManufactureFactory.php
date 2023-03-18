@@ -6,7 +6,7 @@ use App\Models\MaterialOut;
 use App\Models\ProductIn;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ManufactureFactory extends Factory
+class ProductManufactureFactory extends Factory
 {
     private array $usedMaterialOutIds = [];
     private array $usedProductInIds = [];
