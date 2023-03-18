@@ -69,7 +69,7 @@
                 <!-- TABS LIST -->
                 <ul class="nav nav-tabs text-capitalize" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="material-out-tab" data-toggle="tab" data-target="#material-out"
+                        <button class="nav-link active" id="product-manufacture-material-out-tab" data-toggle="tab" data-target="#material-out"
                             type="button" role="tab" aria-controls="material-out"
                             aria-selected="true">{{ __('material out') }}</button>
                     </li>
@@ -85,7 +85,7 @@
 
                     <!-- MATERIAL OUT TAB CONTENT -->
                     <div class="tab-pane fade show active" id="material-out" role="tabpanel"
-                        aria-labelledby="material-out-tab">
+                        aria-labelledby="product-manufacture-material-out-tab">
 
                         <div x-data="{ total_price: 0 }"
                             x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
