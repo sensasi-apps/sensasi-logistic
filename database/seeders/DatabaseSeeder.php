@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Manufacture;
 use App\Models\MaterialIn;
 use App\Models\MaterialInDetail;
 use App\Models\MaterialManufacture;
@@ -10,6 +9,7 @@ use App\Models\MaterialOut;
 use App\Models\MaterialOutDetail;
 use App\Models\ProductIn;
 use App\Models\ProductInDetail;
+use App\Models\ProductManufacture;
 use App\Models\ProductOut;
 use App\Models\ProductOutDetail;
 use App\Models\User;
@@ -56,8 +56,8 @@ class DatabaseSeeder extends Seeder
         echo "ProductOutDetail Factory is working...\n";
         ProductOutDetail::factory(100)->create();
 
-        echo "Manufacture Factory is working...\n";
-        Manufacture::factory(10)->create();
+        echo "ProductManufacture Factory is working...\n";
+        ProductManufacture::factory(10)->create();
 
         echo "MaterialManufacture factory is working...\n";
         MaterialManufacture::factory(10)->create();

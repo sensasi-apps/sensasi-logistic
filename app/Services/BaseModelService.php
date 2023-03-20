@@ -4,11 +4,12 @@ namespace App\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+
 
 class BaseModelService
 {
 	protected string $modelClass;
-	protected string $urlParamName;
 	protected Model $workingInstance;
 	protected array $withs = [];
 
@@ -23,19 +24,12 @@ class BaseModelService
 			return new $this->modelClass;
 		}
 
-		$id = Route::current()->parameters[$this->urlParamName] ?? null;
+		$id = Route::current()->parameters[Str::snake(class_basename($this->modelClass))] ?? null;
 
 		if ($id === null) {
 			return new $this->modelClass;
 		}
 
 		return $this->modelClass::with($this->withs)->findOrFail($id);
-	}
-
-	protected function addDataIdToArray(array &$details): void
-	{
-		foreach ($details as &$detail) {
-			$detail["{$this->urlParamName}_id"] = $this->workingInstance->id;
-		}
 	}
 }

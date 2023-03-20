@@ -26,7 +26,7 @@
                 @include('pages.manufacture._materials-tab.index')
             </div>
             <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
-                @include('pages.manufacture._manufactures')
+                @include('pages.manufacture._products-tab.index')
             </div>
         </div>
     </div>

@@ -35,10 +35,10 @@ class ProductIn extends Model
 
     public function manufacture(): HasOne
     {
-        return $this->hasOne(Manufacture::class);
+        return $this->hasOne(ProductManufacture::class);
     }
 
-    public function getIdForHumanAttribute(): string
+    public function getIdForHumanAttribute(): string|null
     {
         return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }

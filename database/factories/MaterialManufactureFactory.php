@@ -17,7 +17,7 @@ class MaterialManufactureFactory extends Factory
     public function definition(): array
     {
         if (!$this->materialOutIds) {
-            $this->materialOutIds = MaterialOut::doesntHave('manufacture')->get()->pluck('id')->toArray();
+            $this->materialOutIds = MaterialOut::doesntHave('productManufacture')->doesntHave('materialManufacture')->get()->pluck('id')->toArray();
         }
 
         if (!$this->materialInIds) {

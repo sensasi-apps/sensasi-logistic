@@ -1,32 +1,9 @@
 @include('components.assets._select2')
 @include('components.alpine-data._crud')
-@include('components.alpine-data._datatable')
-
-@push('css')
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-@endpush
-
-<h2 class="section-title text-capitalize">
-    {{ __('manufacture list') }}
-    <button x-data type="button" @@click="$dispatch('manufacture:open-modal', null)"
-        class="ml-2 btn btn-primary">
-        <i class="fas fa-plus-circle"></i> {{ __('Add') }}
-    </button>
-</h2>
-
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table x-data="dataTable(manufactureInDatatableConfig)" @@manufacture:datatable-draw.document="draw"
-                class="table table-striped" style="width:100%">
-            </table>
-        </div>
-    </div>
-</div>
 
 @push('modal')
-    <div x-data="crud(manufactureInCrudConfig)" @@manufacture:open-modal.document="openModal"
-        @@manufacture:set-data-list.document="setDataList">
+    <div x-data="crud(manufactureInCrudConfig)" @@product-manufacture:open-modal.document="openModal"
+        @@product-manufacture:set-data-list.document="setDataList">
         <x-_modal centered>
 
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
@@ -40,8 +17,8 @@
 
                     <div class="col form-group" x-id="['input']">
                         <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
-                        <input type="date" class="form-control" required :id="$id('input')"
-                            :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        <input type="date" :max="moment().format('YYYY-MM-DD')" class="form-control" required
+                            :id="$id('input')" :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
                             @@change="formData.at = $event.target.value"
                             x-effect="formData.material_out?.details;
                             const detailDates = formData.material_out?.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
@@ -69,14 +46,14 @@
                 <!-- TABS LIST -->
                 <ul class="nav nav-tabs text-capitalize" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="material-out-tab" data-toggle="tab" data-target="#material-out"
-                            type="button" role="tab" aria-controls="material-out"
-                            aria-selected="true">{{ __('material out') }}</button>
+                        <button class="nav-link active" id="product-manufacture-material-out-tab" data-toggle="tab"
+                            data-target="#product-manufacture-material-out" type="button" role="tab"
+                            aria-controls="material-out" aria-selected="true">{{ __('material out') }}</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="product-in-tab" data-toggle="tab" data-target="#product-in"
-                            type="button" role="tab" aria-controls="product-in"
-                            aria-selected="false">{{ __('product in') }}</button>
+                        <button class="nav-link" id="product-manufacture-product-in-tab" data-toggle="tab"
+                            data-target="#product-manufacture-product-in" type="button" role="tab"
+                            aria-controls="product-in" aria-selected="false">{{ __('product in') }}</button>
                     </li>
                 </ul>
 
@@ -84,8 +61,8 @@
                 <div class="tab-content">
 
                     <!-- MATERIAL OUT TAB CONTENT -->
-                    <div class="tab-pane fade show active" id="material-out" role="tabpanel"
-                        aria-labelledby="material-out-tab">
+                    <div class="tab-pane fade show active" id="product-manufacture-material-out" role="tabpanel"
+                        aria-labelledby="product-manufacture-material-out-tab">
 
                         <div x-data="{ total_price: 0 }"
                             x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
@@ -106,8 +83,7 @@
 
                                             <div class="row my-3">
                                                 <div class="col d-flex align-items-center">
-                                                    <label
-                                                        class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                                    <label class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
 
                                                     <div x-data="{ priceText: null }"
                                                         x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
@@ -176,7 +152,8 @@
                     </div>
 
                     <!-- PRODUCT TAB CONTENT -->
-                    <div class="tab-pane fade" id="product-in" role="tabpanel" aria-labelledby="product-in-tab">
+                    <div class="tab-pane fade" id="product-manufacture-product-in" role="tabpanel"
+                        aria-labelledby="product-manufacture-product-in-tab">
                         <div class="form-group">
                             <label class="text-capitalize">{{ __('items') }}</label>
 
@@ -236,7 +213,7 @@
                                             </strong>
 
                                             <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
-                                                x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+                                                x-init="$($el).tooltip()" :title="__('cannot be deleted, product(s) has been used')" />
 
                                             <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
                                                 x-show="!(detail.out_details?.length > 0)"
@@ -299,7 +276,7 @@
                 <div>
                     <x-_disabled-delete-button
                         x-show="formData.product_in?.details?.find(detail => detail.out_details?.length > 0)"
-                        x-init="$($el).tooltip()" :title="__('cannot be deleted. Product(s) has been used')" />
+                        x-init="$($el).tooltip()" :title="__('cannot be deleted, product(s) has been used')" />
 
                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
                         @@click="openDeleteModal"
@@ -334,12 +311,12 @@
                 product?.code + '</b></small> - ' : '';
 
             return $(`
-				<div>
-					${codePrinted}
-					${product?.name}
-					${brandPrinted}
-				</div>
-			`);
+		<div>
+			${codePrinted}
+			${product?.name}
+			${brandPrinted}
+		</div>
+	`);
         }
 
         function initMaterialInDetailSelect2() {
@@ -361,7 +338,7 @@
                         const data = materialInDetail.map(materialInDetail => {
                             return {
                                 id: materialInDetail.id,
-                                text: null,
+                                text: '',
                                 materialInDetail: materialInDetail
                             }
                         });
@@ -371,50 +348,8 @@
                         };
                     }
                 },
-                templateResult: function(data) {
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    const datePrinted = data.materialInDetail?.material_in.at ? moment(data.materialInDetail
-                        .material_in.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div style='line-height: 1em;'>
-                            <small>${datePrinted}</small>
-                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
-                            <small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
-                        </div>
-                    `);
-                },
-                templateSelection: function(data) {
-                    if (data.text === '{{ __('Material') }}') {
-                        return data.text;
-                    }
-
-                    const materialInDetail = data.materialInDetail || data.element.materialInDetail;
-
-                    const codePrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'><b>' +
-                        materialInDetail.material?.code + '</b></small> - ' : '';
-                    const brandPrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'>(' +
-                        materialInDetail.material?.brand + ')</small>' : '';
-                    const namePrinted = materialInDetail.material?.name;
-                    const atPrinted = materialInDetail.material_in?.at ? moment(materialInDetail.material_in
-                        ?.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div>
-                            ${codePrinted}
-                            ${namePrinted}
-                            ${brandPrinted}
-                            <small class='text-muted ml-2'>
-                                ${atPrinted}
-                            </small>
-                        </div>
-                    `);
-                },
+                templateResult: materialInDetailSelect2ResultTemplate,
+                templateSelection: materialInDetailSelect2SelectionTemplate,
                 minimumInputLength: 3
             });
         }
@@ -444,13 +379,13 @@
             },
 
             dispatchEventsAfterSubmit: [
-                'manufacture:datatable-draw'
+                'product-manufacture:datatable-draw'
             ],
 
             routes: {
-                store: '{{ route('manufactures.store') }}',
-                update: '{{ route('manufactures.update', '') }}/',
-                destroy: '{{ route('manufactures.destroy', '') }}/',
+                store: '{{ route('product-manufactures.store') }}',
+                update: '{{ route('product-manufactures.update', '') }}/',
+                destroy: '{{ route('product-manufactures.destroy', '') }}/',
             },
 
             getTitle(hasnotId) {
@@ -461,54 +396,6 @@
             getDeleteTitle() {
                 return `{{ __('delete manufacture') }}: ` + this.formData.id_for_human;
             }
-        };
-
-        const manufactureInDatatableConfig = {
-            serverSide: true,
-            setDataListEventName: 'manufacture:set-data-list',
-            token: '{{ decrypt(request()->cookie('api-token')) }}',
-            ajaxUrl: '{{ $manufactureDatatableAjaxUrl }}',
-            columns: [{
-                data: 'code',
-                title: '{{ __('validation.attributes.code') }}'
-            }, {
-                data: 'at',
-                title: '{{ __('validation.attributes.at') }}',
-                render: at => moment(at).format('DD-MM-YYYY')
-            }, {
-                data: 'note',
-                title: '{{ __('validation.attributes.note') }}'
-            }, {
-                orderable: false,
-                title: '{{ __('material') }}',
-                data: 'material_out.details',
-                name: 'materialOut.details.materialInDetail.material.name',
-                render: details => details.map(detail => {
-                    const materialName = detail.material_in_detail?.material.name;
-                    const detailQty = detail.qty;
-
-                    const text = `${materialName} (${detailQty})`;
-                    return `<a href="javascript:;" class="m-1 badge badge-danger" @click="search('${materialName}')">${text}</a>`;
-                }).join('')
-            }, {
-                orderable: false,
-                title: '{{ __('product') }}',
-                data: 'product_in.details',
-                name: 'productIn.details.product.name',
-                render: details => details.map(detail => {
-                    const productName = detail.product?.name;
-                    const stockQty = detail.stock?.qty;
-                    const detailQty = detail.qty;
-
-                    const text = `${productName} (${stockQty}/${detailQty})`;
-                    return `<a href="javascript:;" class="m-1 badge badge-success" @click="search('${productName}')">${text}</a>`;
-                }).join('')
-            }, {
-                render: function(data, type, row) {
-                    return `<a class="btn-icon-custom" href="javascript:;" @click="$dispatch('manufacture:open-modal', ${row.id})"><i class="fas fa-cog"></i></a>`;
-                },
-                orderable: false
-            }]
         };
     </script>
 @endpush

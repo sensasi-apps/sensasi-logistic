@@ -122,6 +122,8 @@
   "low qty": "stok menipis",
   "out of stock": "stok habis",
   "material manufacture list": "daftar manufaktur bahan",
+  "product manufactures list": "daftar manufaktur produk",
   "total cost is not equal to total price": "total biaya tidak sama dengan total harga",
+  "cannot be deleted, product(s) has been used": "tidak dapat dihapus, produk telah digunakan",
   "$": "Rp."
 }

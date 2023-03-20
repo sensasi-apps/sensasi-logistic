@@ -9,8 +9,6 @@
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
                 x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
 
-                <input type="hidden" name="material_manufacture_id" x-model="formData.id">
-
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
                         <label :for="$id('text-input')">{{ __('validation.attributes.code') }}</label>
@@ -48,7 +46,7 @@
                 <!-- TABS LIST -->
                 <ul class="nav nav-tabs text-capitalize" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="material-out-tab" data-toggle="tab" data-target="#material-out"
+                        <button class="nav-link active" id="material-manufacture-material-out-tab" data-toggle="tab" data-target="#material-out"
                             type="button" role="tab" aria-controls="material-out"
                             aria-selected="true">{{ __('material outs') }}</button>
                     </li>
@@ -64,7 +62,7 @@
 
                     <!-- MATERIAL OUT TAB CONTENT -->
                     <div class="tab-pane fade show active" id="material-out" role="tabpanel"
-                        aria-labelledby="material-out-tab">
+                        aria-labelledby="material-manufacture-material-out-tab">
 
                         <div x-data="{ total_price: 0 }"
                             x-effect="total_price = 0; formData.details?.forEach(detail => total_price += (detail.qty * detail.material_in_detail?.price || 0));">
@@ -382,9 +380,9 @@
             ],
 
             routes: {
-                store: '{{ route('manufactures.material.store') }}',
-                update: '{{ route('manufactures.material.update', '') }}/',
-                destroy: '{{ route('manufactures.material.destroy', '') }}/',
+                store: '{{ route('material-manufactures.store') }}',
+                update: '{{ route('material-manufactures.update', '') }}/',
+                destroy: '{{ route('material-manufactures.destroy', '') }}/',
             },
 
             getTitle(hasnotId) {

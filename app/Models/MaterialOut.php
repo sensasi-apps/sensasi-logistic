@@ -27,12 +27,17 @@ class MaterialOut extends Model
         return $this->hasMany(MaterialOutDetail::class);
     }
 
-    public function manufacture(): HasOne
+    public function productManufacture(): HasOne
     {
-        return $this->hasOne(Manufacture::class);
+        return $this->hasOne(ProductManufacture::class);
     }
 
-    public function getIdForHumanAttribute(): string
+    public function materialManufacture(): HasOne
+    {
+        return $this->hasOne(MaterialManufacture::class);
+    }
+
+    public function getIdForHumanAttribute(): string|null
     {
         return $this->code ?? $this->at->format('d-m-Y') ?? null;
     }

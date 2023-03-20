@@ -180,7 +180,7 @@ function materialInDetailSelect2ResultTemplate(data) {
 }
 
 function materialInDetailSelect2SelectionTemplate(data) {
-	if (!data.selected) {
+	if (!data.id) {
 		return data.text;
 	}
 
