@@ -5,10 +5,8 @@ namespace App\Http\Requests;
 use App\Models\MaterialInDetail;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreOrUpdateMaterialManufactureRequest extends FormRequest
+class StoreOrUpdateProductManufactureRequest extends FormRequest
 {
-    protected $stopOnFirstFailure = true;
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -33,14 +31,15 @@ class StoreOrUpdateMaterialManufactureRequest extends FormRequest
             'material_out.details.*.qty' => 'required|numeric|min:0',
             'material_out.details.*.material_in_detail_id' => 'required|exists:material_in_details,id',
 
-            'material_in.details' => 'required|array',
-            'material_in.details.*.qty' => 'required|numeric|min:0',
-            'material_in.details.*.material_id' => 'required|exists:materials,id',
-            'material_in.details.*.price' => 'required|numeric|min:0',
+            'product_in.details' => 'required|array',
+            'product_in.details.*.qty' => 'required|numeric|min:0',
+            'product_in.details.*.product_id' => 'required|exists:products,id',
+            'product_in.details.*.price' => 'required|numeric|min:0',
 
-            'code' => "nullable|string|unique:material_manufactures,code,{$this->id}",
+            'code' => "nullable|string|unique:product_manufactures,code,{$this->id}",
             'note' => 'nullable|string',
             'at' => 'required|date|before:tomorrow|after_or_equal:' . $newestAt,
+
         ];
     }
 }

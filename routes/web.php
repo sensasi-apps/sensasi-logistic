@@ -11,7 +11,7 @@ use App\Http\Controllers\MaterialOutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductInController;
 use App\Http\Controllers\ProductOutController;
-use App\Http\Controllers\ManufactureController;
+use App\Http\Controllers\ManufactureIndexController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\ProductReportController;
@@ -20,8 +20,8 @@ use App\Http\Controllers\MaterialIndexController;
 use App\Http\Controllers\MaterialManufactureController;
 use App\Http\Controllers\PhpInfoController;
 use App\Http\Controllers\ProductIndexController;
+use App\Http\Controllers\ProductManufactureController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\App;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,17 +133,18 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::resource('manufactures', ManufactureController::class)->except([
-        'create', 'show', 'edit'
-    ])->middleware('role:Super Admin|Manufacture');
+    Route::middleware('role:Super Admin|Manufacture')->group(function () {
 
-    Route::middleware('role:Super Admin|Manufacture')
-        ->prefix('manufactures')
-        ->as('manufactures.')->group(function () {
-            Route::resource('material', MaterialManufactureController::class)->only([
-                'store', 'update', 'destroy'
-            ]);
-        });
+        Route::get('manufactures', ManufactureIndexController::class)->name('manufactures.index');
+
+        Route::resource('product-manufactures', ProductManufactureController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
+
+        Route::resource('material-manufactures', MaterialManufactureController::class)->only([
+            'store', 'update', 'destroy'
+        ]);
+    });
 
     Route::middleware('role:Super Admin')->prefix('_')->group(function () {
         Route::view('basic-page-format', 'basic-page-format');

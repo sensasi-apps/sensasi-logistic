@@ -81,10 +81,17 @@ class MaterialInRepository extends BaseRepository
 		return $this->workingInstance;
 	}
 
+	private function validateDeleteData(): array
+	{
+		return Validator::make($this->workingInstance->toArray(), [
+			'id' => "unique:material_manufactures,material_in_id,{$this->workingInstance->id},material_in_id",
+		])->validate();
+	}
+
 	public function destroy(): MaterialIn
 	{
-		$details = $this->workingInstance->details;
-		$this->validateForDelete($details->toArray());
+		$this->validateDeleteData();
+		$this->validateForDelete($this->workingInstance->details->toArray());
 
 		try {
 			DB::beginTransaction();

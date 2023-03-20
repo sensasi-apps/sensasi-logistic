@@ -9,8 +9,6 @@
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
                 x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
 
-                <input type="hidden" name="material_manufacture_id" x-model="formData.id">
-
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
                         <label :for="$id('text-input')">{{ __('validation.attributes.code') }}</label>
@@ -382,9 +380,9 @@
             ],
 
             routes: {
-                store: '{{ route('manufactures.material.store') }}',
-                update: '{{ route('manufactures.material.update', '') }}/',
-                destroy: '{{ route('manufactures.material.destroy', '') }}/',
+                store: '{{ route('material-manufactures.store') }}',
+                update: '{{ route('material-manufactures.update', '') }}/',
+                destroy: '{{ route('material-manufactures.destroy', '') }}/',
             },
 
             getTitle(hasnotId) {

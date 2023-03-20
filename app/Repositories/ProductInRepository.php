@@ -162,7 +162,7 @@ class ProductInRepository extends BaseRepository
 	private function validateDeleteData(): array
 	{
 		return Validator::make($this->workingInstance->toArray(), [
-			'id' => "unique:manufactures,product_in_id,{$this->workingInstance->id},product_in_id",
+			'id' => "unique:product_manufactures,product_in_id,{$this->workingInstance->id},product_in_id",
 		])->validate();
 	}
 

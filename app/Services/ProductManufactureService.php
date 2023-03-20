@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\MaterialManufacture;
-use App\Repositories\MaterialInRepository;
+use App\Models\ProductManufacture;
 use App\Repositories\MaterialOutRepository;
+use App\Repositories\ProductInRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MaterialManufactureService extends BaseModelService
+class ProductManufactureService extends BaseModelService
 {
-	protected string $modelClass = MaterialManufacture::class;
+	protected string $modelClass = ProductManufacture::class;
 
 	protected array $withs = [
 		'materialOut',
-		'materialIn'
+		'productIn'
 	];
 
-	public function __construct(private MaterialOutRepository $materialOutRepository, private MaterialInRepository $materialInRepository)
+	public function __construct(private MaterialOutRepository $materialOutRepository, private ProductInRepository $productInRepository)
 	{
 		parent::__construct();
 
@@ -25,8 +25,8 @@ class MaterialManufactureService extends BaseModelService
 			$this->materialOutRepository = new MaterialOutRepository($this->workingInstance->materialOut);
 		}
 
-		if ($this->workingInstance->materialIn) {
-			$this->materialInRepository = new MaterialInRepository($this->workingInstance->materialIn);
+		if ($this->workingInstance->productIn) {
+			$this->productInRepository = new ProductInRepository($this->workingInstance->productIn);
 		}
 	}
 
@@ -42,7 +42,7 @@ class MaterialManufactureService extends BaseModelService
 		}
 	}
 
-	public function store(Request $request): MaterialManufacture
+	public function store(Request $request): ProductManufacture
 	{
 		$data = $request->all();
 		$this->preprocessData($data);
@@ -51,14 +51,14 @@ class MaterialManufactureService extends BaseModelService
 			DB::beginTransaction();
 
 			$materialOut = $this->materialOutRepository->store($data['material_out']);
-			$materialIn = $this->materialInRepository->store($data['material_in']);
+			$productIn = $this->productInRepository->store($data['product_in']);
 
 			$data = [
 				'code' => $data['code'],
 				'note' => $data['note'],
 				'at' => $data['at'],
 				'material_out_id' => $materialOut->id,
-				'material_in_id' => $materialIn->id
+				'product_in_id' => $productIn->id
 			];
 
 			$createdInstance = $this->workingInstance::create($data);
@@ -69,12 +69,10 @@ class MaterialManufactureService extends BaseModelService
 			throw $th;
 		}
 
-		$createdInstance->load($this->withs);
-
 		return $createdInstance;
 	}
 
-	public function update(Request $request): MaterialManufacture
+	public function update(Request $request): ProductManufacture
 	{
 		$data = $request->all();
 		$this->preprocessData($data);
@@ -83,7 +81,7 @@ class MaterialManufactureService extends BaseModelService
 			DB::beginTransaction();
 
 			$this->materialOutRepository->update($data['material_out'], $data['material_out']['details']);
-			$this->materialInRepository->update($data['material_in'], $data['material_in']['details']);
+			$this->productInRepository->update($data['product_in'], $data['product_in']['details']);
 			$this->workingInstance->update($data);
 
 			DB::commit();
@@ -95,20 +93,21 @@ class MaterialManufactureService extends BaseModelService
 		return $this->workingInstance->fresh();
 	}
 
-	public function destroy(): MaterialManufacture
+	public function destroy(): ProductManufacture
 	{
 		try {
 			DB::beginTransaction();
 
 			$this->workingInstance->delete();
 			$this->materialOutRepository->destroy();
-			$this->materialInRepository->destroy();
+			$this->productInRepository->destroy();
 
 			DB::commit();
 		} catch (\Throwable $th) {
 			DB::rollBack();
 			throw $th;
 		}
+
 
 		return $this->workingInstance;
 	}

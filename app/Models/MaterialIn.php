@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MaterialIn extends Model
 {
@@ -29,6 +30,11 @@ class MaterialIn extends Model
     public function outDetails(): HasManyThrough
     {
         return $this->hasManyThrough(MaterialOutDetail::class, MaterialInDetail::class)->has('materialOut');
+    }
+
+    public function manufacture(): HasOne
+    {
+        return $this->hasOne(MaterialManufacture::class);
     }
 
     public function getIdForHumanAttribute(): string|null

@@ -159,7 +159,7 @@ class MaterialOutRepository extends BaseRepository
 	private function validateDeleteData(): array
 	{
 		return Validator::make($this->workingInstance->toArray(), [
-			'id' => "unique:manufactures,material_out_id,{$this->workingInstance->id},material_out_id"
+			'id' => "unique:product_manufactures,material_out_id,{$this->workingInstance->id},material_out_id|unique:material_manufactures,material_out_id,{$this->workingInstance->id},material_out_id"
 		])->validate();
 	}
 
