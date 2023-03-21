@@ -279,6 +279,7 @@
                         x-show="formData.id && !(formData.material_in?.details?.find(detail => detail.out_details?.length > 0))">
                         <i class="fas fa-trash"></i>
                     </button>
+                </div>
                 @endslot
         </x-_modal>
 
