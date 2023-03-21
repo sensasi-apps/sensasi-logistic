@@ -97,8 +97,7 @@
                                                     <div class="input-group input-group-sm">
                                                         <input :id="$id('input')" class="form-control form-control-sm"
                                                             type="number" x-model="detail.qty" min="1"
-                                                            :max="formData.id ? undefined : detail.material_in_detail?.stock
-                                                                .qty"
+                                                            :max="formData.id ? undefined : detail.material_in_detail?.stock?.qty"
                                                             required>
 
                                                         <div class="input-group-append">
