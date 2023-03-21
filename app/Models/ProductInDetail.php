@@ -17,6 +17,12 @@ class ProductInDetail extends Model
     use HasFactory, CUDLogTrait;
 
     protected $guarded = ['id'];
+
+    protected $dates = [
+        'expired_at',
+        'manufactured_at'
+    ];
+
     public $timestamps = false;
 
     public function product(): BelongsTo

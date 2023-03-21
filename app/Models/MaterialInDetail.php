@@ -17,6 +17,11 @@ class MaterialInDetail extends Model
 
     protected $guarded = ['id'];
 
+    protected $dates = [
+        'expired_at',
+        'manufactured_at'
+    ];
+
     public $timestamps = false;
 
     public function material(): BelongsTo
