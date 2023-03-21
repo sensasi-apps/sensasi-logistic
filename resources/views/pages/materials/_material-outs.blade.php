@@ -28,10 +28,11 @@
     <div x-data="crud(materialOutCrudConfig)" @@material-out:open-modal.document="openModal"
         @@material-out:set-data-list.document="setDataList">
         <x-_modal centered>
-            <p x-show="formData.manufacture && formData.id" class="text-danger">
-                *{{ __('This data can be edit only from manufacture menu') }}</p>
+            <p x-show="(formData.product_manufacture || formData.material_manufacture) && formData.id" class="text-danger">
+                *{{ ucfirst(__('this data can be edit only from manufacture menu')) }}</p>
+
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
-                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+                x-effect="formData.id; $nextTick(() => (formData.product_manufacture?.id || formData.material_manufacture?.id) && formData.id ? $el.disableAll() : $el.enableAll())">
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
@@ -166,7 +167,7 @@
 
             @slot('footer')
                 <div>
-                    <button class="btn btn-success" :disabled="formData.manufacture && formData.id"
+                    <button class="btn btn-success" :disabled="(formData.product_manufacture || formData.material_manufacture) && formData.id"
                         :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
@@ -176,7 +177,7 @@
                 </div>
 
                 <div>
-                    <button x-show="!formData.manufacture && formData.id" class="btn btn-icon btn-outline-danger"
+                    <button x-show="!(formData.product_manufacture || formData.material_manufacture) && formData.id" class="btn btn-icon btn-outline-danger"
                         tabindex="-1" @@click="openDeleteModal">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -285,8 +286,7 @@
                 'type': null,
                 'at': null,
                 'note': null,
-                'details': [{}],
-                'manufacture': {}
+                'details': [{}]
             },
 
             dispatchEventsAfterSubmit: [

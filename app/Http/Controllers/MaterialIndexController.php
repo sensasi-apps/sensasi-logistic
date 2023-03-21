@@ -22,6 +22,7 @@ class MaterialIndexController extends Controller
     {
         $materialInApiParamsJson = json_encode([
             'withs' => [
+                'manufacture',
                 'details' => [
                     'material',
                     'outDetails',
@@ -41,7 +42,8 @@ class MaterialIndexController extends Controller
         // TODO: optimize columns to be selected
         $materialOutApiParamsJson = json_encode([
             'withs' => [
-                'manufacture',
+                'productManufacture',
+                'materialManufacture',
                 'details.materialInDetail' => [
                     'material',
                     'materialIn',

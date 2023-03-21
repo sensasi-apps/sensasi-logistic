@@ -29,7 +29,8 @@
         @@product-in:set-data-list.document="setDataList">
         <x-_modal centered>
             <p x-show="formData.manufacture" class="text-danger">
-                *{{ __('This data can be edit only from manufacture menu') }}</p>
+                *{{ ucfirst(__('this data can be edit only from manufacture menu')) }}</p>
+
             <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
                 x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
 
