@@ -42,7 +42,7 @@ class ProductManufactureService extends BaseModelService
 		}
 
 		foreach ($data['product_in']['details'] as &$product_in_detail) {
-			$product_in_detail['manufactured_at'] = date('Y-m-d');
+			$product_in_detail['manufactured_at'] = date('Y-m-d', strtotime($data['at']));
 		}
 	}
 

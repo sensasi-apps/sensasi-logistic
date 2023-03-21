@@ -28,8 +28,8 @@ class CreateMaterialInDetailsTable extends Migration
 
             $table->float('qty');
             $table->float('price');
-            $table->date('expired_at')->nullable();
-            $table->date('manufactured_at')->nullable();
+            $table->dateTime('expired_at')->nullable();
+            $table->dateTime('manufactured_at')->nullable();
             $table->unique(['material_id', 'material_in_id']);
         });
 

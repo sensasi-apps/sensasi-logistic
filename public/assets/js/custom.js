@@ -209,3 +209,52 @@ function materialInDetailSelect2SelectionTemplate(data) {
 		</div>
 	`);
 }
+
+function materialSelect2TemplateResultAndSelection(data) {
+	if (!data.id) {
+		return data.text;
+	}
+
+	const material = data.material;
+
+	const codePrinted = material?.code ?
+		'<small class=\'text-muted\'><b>' +
+		material?.code + '</b></small> - ' : '';
+	const brandPrinted = material?.brand ?
+		'<small class=\'text-muted\'>(' +
+		material?.brand + ')</small>' : '';
+	const namePrinted = material?.name;
+
+	return $(`
+		<div>
+			${codePrinted}
+			${namePrinted}
+			${brandPrinted}
+		</div>
+	`);
+}
+
+function productSelect2TemplateResultAndSelection(data) {
+
+	if (!data.id) {
+		return data.text;
+	}
+
+	const product = data.product;
+
+	const brandPrinted = product?.brand ?
+		'<small class=\'text-muted\'>(' +
+		product?.brand + ')</small>' : '';
+
+	const codePrinted = product?.code ?
+		'<small class=\'text-muted\'><b>' +
+		product?.code + '</b></small> - ' : '';
+
+	return $(`
+		<div>
+			${codePrinted}
+			${product?.name}
+			${brandPrinted}
+		</div>
+	`);
+}

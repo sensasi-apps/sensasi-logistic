@@ -158,6 +158,12 @@ return [
 		'brand' => 'Merek',
 		'qty' => 'Jumlah',
 		'price' => 'Harga',
+		'manufactured_at' => 'dibuat pada',
+		'expired_at' => 'kadaluarsa pada',
+		'material' => 'bahan',
+		'material in' => 'bahan masuk',
+		'product' => 'produk',
+		'product in' => 'produk masuk',
 
 		'email' => 'E-mail',
 		'password' => 'Kata sandi',

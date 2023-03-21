@@ -62,7 +62,7 @@
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                     <input type="date" class="form-control" required :id="$id('input')"
-                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD')"
                         @@change="formData.at = $event.target.value">
                 </div>
 
@@ -78,27 +78,34 @@
                     <div class="list-group">
                         <template x-for="(detail, $i) in formData.details">
                             <div class="list-group-item p-4">
-                                <select class="form-control" :disabled="detail.out_details?.length > 0"
-                                    :data-exclude-enabling="detail.out_details?.length > 0"
-                                    x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
-                                        dropdownParent: $el.closest('.modal-body'),
-                                        placeholder: '{{ __('Material') }}',
-                                        data: materials.map(material => ({
-                                            id: material.id,
-                                            text: material.id_for_human,
-                                            material: material
-                                        })),
-                                        templateResult: materialSelect2TemplateResultAndSelection,
-                                        templateSelection: materialSelect2TemplateResultAndSelection,
-                                    }).on('select2:select', (e) => {
-                                        detail.material_id = e.target.value;
-                                    });" required>
-                                </select>
+                                <div class="form-group mb-3" x-id="['select-input']">
+                                    <label :for="$id('select-input')"
+                                        class="text-capitalize">{{ __('validation.attributes.material') }}</label>
+                                    <select :id="$id('select-input')" class="form-control"
+                                        :disabled="detail.out_details?.length > 0"
+                                        :data-exclude-enabling="detail.out_details?.length > 0"
+                                        x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
+                                            dropdownParent: $el.closest('.modal-body'),
+                                            placeholder: '{{ __('Material') }}',
+                                            data: materials.map(material => ({
+                                                id: material.id,
+                                                text: material.id_for_human,
+                                                material: material
+                                            })),
+                                            templateResult: materialSelect2TemplateResultAndSelection,
+                                            templateSelection: materialSelect2TemplateResultAndSelection,
+                                        }).on('select2:select', (e) => {
+                                            detail.material_id = e.target.value;
+                                        });"
+                                        required>
+                                    </select>
+                                </div>
 
-                                <div class="row my-3">
-                                    <div class="col d-flex align-items-center" x-id="['text-input']">
+
+                                <div class="row">
+                                    <div class="col form-group mb-3" x-id="['text-input']">
                                         <label :for="$id('text-input')"
-                                            class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                            class="text-capitalize">{{ __('validation.attributes.qty') }}</label>
                                         <div class="input-group input-group-sm">
                                             <input :id="$id('text-input')" class="form-control form-control-sm"
                                                 type="number" x-model="detail.qty" step="any"
@@ -112,12 +119,35 @@
                                         </div>
                                     </div>
 
-                                    <div class="col d-flex align-items-center" x-id="['text-input']">
+                                    <div class="col form-group mb-3" x-id="['text-input']">
                                         <label :for="$id('text-input')"
-                                            class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                            class="text-capitalize">{{ __('validation.attributes.price') }}</label>
                                         <input :id="$id('text-input')" x-model="detail.price"
                                             class="form-control form-control-sm" min="0" type="number"
                                             step="any" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col form-group" x-id="['date-input']">
+                                        <label :for="$id('date-input')"
+                                            class="text-capitalize">{{ __('validation.attributes.manufactured_at') }}</label>
+                                        <input :id="$id('date-input')" class="form-control form-control-sm"
+                                            :max="moment(formData.at).format('YYYY-MM-DD')"
+                                            :value="detail.manufactured_at ? moment(detail.manufactured_at).format(
+                                                'YYYY-MM-DD') : ''"
+                                            @@change="detail.manufactured_at = $event.target.value"
+                                            type="date">
+                                    </div>
+
+                                    <div class="col form-group" x-id="['date-input']">
+                                        <label :for="$id('date-input')"
+                                            class="text-capitalize">{{ __('validation.attributes.expired_at') }}</label>
+                                        <input :id="$id('date-input')" class="form-control form-control-sm"
+                                            :min="moment(formData.at).format('YYYY-MM-DD')"
+                                            :value="detail.expired_at ? moment(detail.expired_at).format('YYYY-MM-DD') : ''"
+                                            @@change="detail.expired_at = $event.target.value"
+                                            type="date">
                                     </div>
                                 </div>
 
@@ -192,30 +222,6 @@
         // page scripts
 
         const materials = @json(App\Models\Material::all());
-
-        function materialSelect2TemplateResultAndSelection(data) {
-            if (!data.id) {
-                return data.text;
-            }
-
-            const material = data.material;
-
-            const codePrinted = material?.code ?
-                '<small class=\'text-muted\'><b>' +
-                material?.code + '</b></small> - ' : '';
-            const brandPrinted = material?.brand ?
-                '<small class=\'text-muted\'>(' +
-                material?.brand + ')</small>' : '';
-            const namePrinted = material?.name;
-
-            return $(`
-                <div>
-                    ${codePrinted}
-                    ${namePrinted}
-                    ${brandPrinted}
-                </div>
-            `);
-        }
 
         const materialInCrudConfig = {
             blankData: {

@@ -42,7 +42,7 @@ class MaterialManufactureService extends BaseModelService
 		}
 
 		foreach ($data['material_in']['details'] as &$material_in_detail) {
-			$material_in_detail['manufactured_at'] = $data['at'];
+			$material_in_detail['manufactured_at'] = date('Y-m-d', strtotime($data['at']));
 		}
 	}
 

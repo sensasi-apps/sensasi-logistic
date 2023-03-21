@@ -61,7 +61,7 @@
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                     <input type="date" class="form-control" required :id="$id('input')"
-                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
+                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD')"
                         @@change="formData.at = $event.target.value"
                         x-effect="formData.details;
                             const detailDates = formData.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
