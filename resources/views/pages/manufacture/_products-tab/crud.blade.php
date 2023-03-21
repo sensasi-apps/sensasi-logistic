@@ -2,7 +2,7 @@
 @include('components.alpine-data._crud')
 
 @push('modal')
-    <div x-data="crud(manufactureInCrudConfig)" @@product-manufacture:open-modal.document="openModal"
+    <div x-data="crud(productManufactureCrudConfig)" @@product-manufacture:open-modal.document="openModal"
         @@product-manufacture:set-data-list.document="setDataList">
         <x-_modal centered>
 
@@ -279,11 +279,12 @@
                         x-init="$($el).tooltip()" :title="__('cannot be deleted, product(s) has been used')" />
 
                     <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
-                        @@click="openDeleteModal"
+                        @@click.prevent="openDeleteModal"
                         x-show="formData.id && !(formData.product_in?.details?.find(detail => detail.out_details?.length > 0))">
                         <i class="fas fa-trash"></i>
                     </button>
-                @endslot
+                </div>
+            @endslot
         </x-_modal>
 
         <x-_delete-modal x-on:submit.prevent="submitDelete" />
@@ -364,7 +365,7 @@
             }
         }
 
-        const manufactureInCrudConfig = {
+        const productManufactureCrudConfig = {
             blankData: {
                 'id': null,
                 'code': null,

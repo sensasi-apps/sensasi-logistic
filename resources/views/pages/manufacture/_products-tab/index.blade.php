@@ -11,7 +11,7 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table x-data="dataTable(manufactureInDatatableConfig)" @@product-manufacture:datatable-draw.document="draw"
+            <table x-data="dataTable(productManufactureDatatableConfig)" @@product-manufacture:datatable-draw.document="draw"
                 class="table table-striped" style="width:100%">
             </table>
         </div>
@@ -22,7 +22,7 @@
 
 @push('js')
     <script>
-        const manufactureInDatatableConfig = {
+        const productManufactureDatatableConfig = {
             serverSide: true,
             setDataListEventName: 'product-manufacture:set-data-list',
             token: '{{ decrypt(request()->cookie('api-token')) }}',
