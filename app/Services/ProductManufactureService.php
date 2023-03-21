@@ -40,6 +40,10 @@ class ProductManufactureService extends BaseModelService
 			$data['material_out'][$key] = $data[$key];
 			$data['product_in'][$key] = $data[$key];
 		}
+
+		foreach ($data['product_in']['details'] as &$product_in_detail) {
+			$product_in_detail['manufactured_at'] = date('Y-m-d');
+		}
 	}
 
 	public function store(Request $request): ProductManufacture

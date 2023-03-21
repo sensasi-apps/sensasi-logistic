@@ -68,7 +68,7 @@ class ProductInRepository extends BaseRepository
 			ProductInDetail::upsert(
 				$forUpsert,
 				['product_in_id', 'product_id'],
-				['qty', 'price']
+				['qty', 'price', 'expired_at', 'manufactured_at']
 			);
 
 			// delete record that not exists in $detailsData
@@ -155,7 +155,9 @@ class ProductInRepository extends BaseRepository
 				];
 			}),
 
-			'*.price' => 'required|numeric|min:0'
+			'*.price' => 'required|numeric|min:0',
+			'*.expired_at' => 'nullable|date',
+			'*.manufactured_at' => 'nullable|date'
 		])->validate();
 	}
 

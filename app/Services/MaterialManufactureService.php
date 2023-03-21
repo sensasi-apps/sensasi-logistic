@@ -34,11 +34,15 @@ class MaterialManufactureService extends BaseModelService
 	{
 		$data['type'] = ucfirst(__('manufacture'));
 		$data['material_out']['type'] = $data['type'];
-		$data['product_in']['type'] = $data['type'];
+		$data['material_in']['type'] = $data['type'];
 
 		foreach (['at', 'code', 'note'] as $key) {
 			$data['material_out'][$key] = $data[$key];
-			$data['product_in'][$key] = $data[$key];
+			$data['material_in'][$key] = $data[$key];
+		}
+
+		foreach ($data['material_in']['details'] as &$material_in_detail) {
+			$material_in_detail['manufactured_at'] = $data['at'];
 		}
 	}
 

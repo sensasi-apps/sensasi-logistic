@@ -66,7 +66,7 @@ class MaterialInRepository extends BaseRepository
 			MaterialInDetail::upsert(
 				$forUpsert,
 				['material_in_id', 'material_id'],
-				['qty', 'price']
+				['qty', 'price', 'manufactured_at', 'expired_at']
 			);
 
 			// delete record that not exists in $detailsData
@@ -159,7 +159,9 @@ class MaterialInRepository extends BaseRepository
 				];
 			}),
 
-			'*.price' => 'required|numeric|min:0'
+			'*.price' => 'required|numeric|min:0',
+			'*.expired_at' => 'nullable|date',
+			'*.manufactured_at' => 'nullable|date'
 		])->validate();
 	}
 
