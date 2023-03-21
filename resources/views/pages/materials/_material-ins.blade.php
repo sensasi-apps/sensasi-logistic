@@ -28,7 +28,12 @@
     <div x-data="crud(materialInCrudConfig)" @@material-in:open-modal.document="openModal"
         @@material-in:set-data-list.document="setDataList">
         <x-_modal centered>
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
+            <p x-show="formData.manufacture" class="text-danger">
+                *{{ ucfirst(__('this data can be edit only from manufacture menu')) }}</p>
+
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
+                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
@@ -158,12 +163,13 @@
 
             @slot('footer')
                 <div>
-                    <button class="btn btn-success" :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
+                    <button class="btn btn-success" :disabled="!!(formData.manufacture)"
+                        :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
 
-                    <button @@click="restore()" x-show="isDirty" class="btn btn-icon btn-outline-warning"><i
-                            class="fas fa-undo"></i></button>
+                    <button @@click="restore()" x-show="isDirty"
+                        class="btn btn-icon btn-outline-warning"><i class="fas fa-undo"></i></button>
                 </div>
 
                 <div>

@@ -125,5 +125,6 @@
   "product manufactures list": "daftar manufaktur produk",
   "total cost is not equal to total price": "total biaya tidak sama dengan total harga",
   "cannot be deleted, product(s) has been used": "tidak dapat dihapus, produk telah digunakan",
+  "this data can be edit only from manufacture menu": "data ini hanya dapat diubah dari menu manufaktur",
   "$": "Rp."
 }
