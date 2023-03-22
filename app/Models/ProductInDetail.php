@@ -56,11 +56,13 @@ class ProductInDetail extends Model
             ->where(
                 fn ($query) => $query
                     ->whereRelation('product', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('product', 'code', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('product', 'brand', 'LIKE', "%{$q}%")
                     ->orWhereRelation('productIn', 'at', 'LIKE', "%{$q}%")
             )
             ->limit(25)
             ->get()
-            ->sortBy('productIn.at')
+            ->sortBy(['expired_at', 'productIn.at'])
             ->values()
             ->all();
     }

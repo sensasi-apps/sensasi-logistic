@@ -102,7 +102,7 @@
 
                                             <input :id="$id('input')" x-model="detail.price"
                                                 class="form-control form-control-sm"
-                                                x-effect="detail.price = detail.price ? detail.price : detail.product_in_detail.product.default_price"
+                                                x-effect="detail.price = detail.price ? detail.price : detail.product_in_detail?.product.default_price"
                                                 min="0" type="number" required>
                                         </div>
 
@@ -151,7 +151,7 @@
                         </div>
 
                         <div>
-                            <a href="javascript:;" @@click="formData.details.push({...defaultDetail})"
+                            <a href="javascript:;" @@click="formData.details.push({})"
                                 class="badge badge-success text-capitalize"><i class="fas fa-plus mr-2"></i>
                                 {{ __('add product') }}</a>
                         </div>
@@ -204,7 +204,7 @@
                         const data = productInDetail.map(productInDetail => {
                             return {
                                 id: productInDetail.id,
-                                text: null,
+                                text: productInDetail.id_for_human,
                                 productInDetail: productInDetail
                             }
                         });
@@ -214,50 +214,8 @@
                         };
                     }
                 },
-                templateResult: function(data) {
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    const datePrinted = data.productInDetail.product_in.at ? moment(data.productInDetail
-                        .product_in.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div style='line-height: 1em;'>
-                            <small>${datePrinted}</small>
-                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.productInDetail.product.id_for_human}<b></p>
-                            <small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.product.default_price)}</small>
-                        </div>
-                    `);
-                },
-                templateSelection: function(data) {
-                    if (data.text === '{{ __('Product') }}') {
-                        return data.text;
-                    }
-
-                    const productInDetail = data.productInDetail || data.element.productInDetail;
-
-                    const codePrinted = productInDetail.product?.code ?
-                        '<small class=\'text-muted\'><b>' +
-                        productInDetail.product?.code + '</b></small> - ' : '';
-                    const brandPrinted = productInDetail.product?.code ?
-                        '<small class=\'text-muted\'>(' +
-                        productInDetail.product?.brand + ')</small>' : '';
-                    const namePrinted = productInDetail.product?.name;
-                    const atPrinted = productInDetail.product_in?.at ? moment(productInDetail.product_in
-                        ?.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div>
-                            ${codePrinted}
-                            ${namePrinted}
-                            ${brandPrinted}
-                            <small class='text-muted ml-2'>
-                                ${atPrinted}
-                            </small>
-                        </div>
-                    `);
-                },
+                templateResult: productInDetailSelect2ResultTemplate,
+                templateSelection: productInDetailSelect2SelectionTemplate,
                 minimumInputLength: 3
             });
         }
@@ -272,12 +230,6 @@
             }
         }
 
-        const defaultDetail = {
-            product_in_detail: {
-                product: {}
-            }
-        }
-
         const productOutCrudConfig = {
             blankData: {
                 'id': null,
@@ -285,9 +237,7 @@
                 'type': null,
                 'at': null,
                 'note': null,
-                'details': [{
-                    ...defaultDetail
-                }]
+                'details': [{}]
             },
 
             dispatchEventsAfterSubmit: [

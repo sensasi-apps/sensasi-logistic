@@ -62,11 +62,13 @@ class MaterialInDetail extends Model
             ->where(
                 fn ($query) => $query
                     ->whereRelation('material', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('material', 'brand', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('material', 'code', 'LIKE', "%{$q}%")
                     ->orWhereRelation('materialIn', 'at', 'LIKE', "%{$q}%")
             )
             ->limit(25)
             ->get()
-            ->sortBy('materialIn.at')
+            ->sortBy(['expired_at', 'materialIn.at'])
             ->values()
             ->all();
     }

@@ -220,50 +220,8 @@
                         };
                     }
                 },
-                templateResult: function(data) {
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    const datePrinted = data.materialInDetail?.material_in.at ? moment(data.materialInDetail
-                        .material_in.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div style='line-height: 1em;'>
-                            <small>${datePrinted}</small>
-                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
-                            <small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
-                        </div>
-                    `);
-                },
-                templateSelection: function(data) {
-                    if (data.text === '{{ __('Material') }}') {
-                        return data.text;
-                    }
-
-                    const materialInDetail = data.materialInDetail || data.element.materialInDetail;
-
-                    const codePrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'><b>' +
-                        materialInDetail.material?.code + '</b></small> - ' : '';
-                    const brandPrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'>(' +
-                        materialInDetail.material?.brand + ')</small>' : '';
-                    const namePrinted = materialInDetail.material?.name;
-                    const atPrinted = materialInDetail.material_in?.at ? moment(materialInDetail.material_in
-                        ?.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div>
-                            ${codePrinted}
-                            ${namePrinted}
-                            ${brandPrinted}
-                            <small class='text-muted ml-2'>
-                                ${atPrinted}
-                            </small>
-                        </div>
-                    `);
-                },
+                templateResult: materialInDetailSelect2ResultTemplate,
+                templateSelection: materialInDetailSelect2SelectionTemplate,
                 minimumInputLength: 3
             });
         }
