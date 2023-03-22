@@ -24,13 +24,13 @@
 
         <div class="tab-content">
             <div class="tab-pane fade" id="out" role="tabpanel" aria-labelledby="out-tab">
-                {{-- @include('pages.materials._material-outs') --}}
+                @include('pages.materials._material-outs')
             </div>
             <div class="tab-pane fade" id="in" role="tabpanel" aria-labelledby="in-tab">
                 @include('pages.materials._material-ins')
             </div>
             <div class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
-                {{-- @include('pages.materials._material-list') --}}
+                @include('pages.materials._material-list')
             </div>
         </div>
     </div>
