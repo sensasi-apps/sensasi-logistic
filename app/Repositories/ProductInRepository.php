@@ -156,8 +156,10 @@ class ProductInRepository extends BaseRepository
 			}),
 
 			'*.price' => 'required|numeric|min:0',
-			'*.expired_at' => 'nullable|date',
-			'*.manufactured_at' => 'nullable|date'
+			// TODO: implement check if expired_at is after at main: after_or_equal:{$productIn['at']}
+			'*.expired_at' => "nullable|date",
+			// TODO: implement check if manufactured_at is before at main: before_or_equal:{$productIn['at']}
+			'*.manufactured_at' => "nullable|date"
 		])->validate();
 	}
 
