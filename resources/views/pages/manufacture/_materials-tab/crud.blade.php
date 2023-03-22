@@ -6,8 +6,7 @@
         @@material-manufacture:set-data-list.document="setDataList">
         <x-_modal centered>
 
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
-                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
@@ -18,9 +17,7 @@
                     <div class="col form-group" x-id="['input']">
                         <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
                         <input type="date" :max="moment().format('YYYY-MM-DD')" class="form-control" required
-                            :id="$id('input')"
-                            :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD')"
-                            @@change="formData.at = $event.target.value"
+                            :id="$id('input')" x-model="formData.at"
                             x-effect="formData.material_out?.details;
                             const detailDates = formData.material_out?.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
                             
@@ -29,11 +26,11 @@
                             }
 
                             if (detailDates?.length === 1) {
-                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                $el.min = detailDates[0];
                                 return;
                             }
 
-                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                            $el.min = detailDates.reduce((a,b) => a > b ? a : b);
                         ">
                     </div>
                 </div>
@@ -211,23 +208,16 @@
                                             <div class="col form-group" x-id="['date-input']">
                                                 <label :for="$id('date-input')"
                                                     class="text-capitalize">{{ __('validation.attributes.manufactured_at') }}</label>
-                                                <input :id="$id('date-input')" class="form-control form-control-sm"
-                                                    :max="formData.at"
-                                                    :value="formData.at ? moment(formData.at).format(
-                                                        'YYYY-MM-DD') : ''"
-                                                    readonly>
+                                                <input type="date" :id="$id('date-input')"
+                                                    class="form-control form-control-sm" :max="formData.at"
+                                                    :value="detail.manufactured_at = formData.at" readonly>
                                             </div>
 
                                             <div class="col form-group" x-id="['date-input']">
                                                 <label :for="$id('date-input')"
                                                     class="text-capitalize">{{ __('validation.attributes.expired_at') }}</label>
                                                 <input :id="$id('date-input')" class="form-control form-control-sm"
-                                                    :min="moment(formData.at).format(
-                                                        'YYYY-MM-DD')"
-                                                    :value="detail.expired_at ? moment(detail.expired_at).format(
-                                                        'YYYY-MM-DD') : ''"
-                                                    @@change="detail.expired_at = $event.target.value"
-                                                    type="date">
+                                                    :min="formData.at" x-model="detail.expired_at" type="date">
                                             </div>
                                         </div>
 
