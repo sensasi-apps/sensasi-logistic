@@ -6,8 +6,7 @@
         @@material-manufacture:set-data-list.document="setDataList">
         <x-_modal centered>
 
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
-                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
 
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
@@ -17,9 +16,7 @@
 
                     <div class="col form-group" x-id="['input']">
                         <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
-                        <input type="date" :max="moment().format('YYYY-MM-DD')" class="form-control" required
-                            :id="$id('input')" :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                            @@change="formData.at = $event.target.value"
+                        <input type="date" class="form-control" required :id="$id('input')" x-model="formData.at"
                             x-effect="formData.material_out?.details;
                             const detailDates = formData.material_out?.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
                             
@@ -28,11 +25,11 @@
                             }
 
                             if (detailDates?.length === 1) {
-                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                $el.min = detailDates[0];
                                 return;
                             }
 
-                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                            $el.min = detailDates.reduce((a,b) => a > b ? a : b);
                         ">
                     </div>
                 </div>
@@ -46,8 +43,8 @@
                 <!-- TABS LIST -->
                 <ul class="nav nav-tabs text-capitalize" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="material-manufacture-material-out-tab" data-toggle="tab" data-target="#material-out"
-                            type="button" role="tab" aria-controls="material-out"
+                        <button class="nav-link active" id="material-manufacture-material-out-tab" data-toggle="tab"
+                            data-target="#material-out" type="button" role="tab" aria-controls="material-out"
                             aria-selected="true">{{ __('material outs') }}</button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -98,7 +95,7 @@
                                                         <input :id="$id('input')" class="form-control form-control-sm"
                                                             type="number" x-model="detail.qty" min="1"
                                                             :max="formData.id ? undefined : detail.material_in_detail?.stock
-                                                                .qty"
+                                                                ?.qty"
                                                             required>
 
                                                         <div class="input-group-append">
@@ -148,7 +145,7 @@
                         </div>
                     </div>
 
-                    <!-- PRODUCT TAB CONTENT -->
+                    <!-- MATERIAL IN TAB CONTENT -->
                     <div class="tab-pane fade" id="material-in" role="tabpanel" aria-labelledby="material-in-tab">
                         <div class="form-group">
                             <label class="text-capitalize">{{ __('items') }}</label>
@@ -156,28 +153,33 @@
                             <div class="list-group">
                                 <template x-for="(detail, $i) in formData.material_in?.details">
                                     <div class="list-group-item p-4">
-                                        <select class="form-control" :disabled="detail.out_details?.length > 0"
-                                            :data-exclude-enabling="detail.out_details?.length > 0"
-                                            x-effect="$($el).val(detail.material_id).change();" x-init="$($el).select2({
-                                                dropdownParent: $el.closest('.modal-body'),
-                                                placeholder: '{{ __('Material') }}',
-                                                data: materials.map(material => ({
-                                                    id: material.id,
-                                                    text: '',
-                                                    material: material
-                                                })),
-                                                templateResult: materialSelect2TemplateResultAndSelection,
-                                                templateSelection: materialSelect2TemplateResultAndSelection,
-                                            }).on('select2:select', (e) => {
-                                                detail.material_id = e.target.value;
-                                            });"
-                                            required>
-                                        </select>
+                                        <div class="form-group mb-3" x-id="['select-input']">
+                                            <label :for="$id('select-input')"
+                                                class="text-capitalize">{{ __('validation.attributes.product') }}</label>
+                                            <select :id="$id('select-input')" class="form-control"
+                                                :disabled="detail.out_details?.length > 0"
+                                                :data-exclude-enabling="detail.out_details?.length > 0"
+                                                x-effect="$($el).val(detail.material_id).change();"
+                                                x-init="$($el).select2({
+                                                    dropdownParent: $el.closest('.modal-body'),
+                                                    placeholder: '{{ __('Material') }}',
+                                                    data: materials.map(material => ({
+                                                        id: material.id,
+                                                        text: '',
+                                                        material: material
+                                                    })),
+                                                    templateResult: materialSelect2TemplateResultAndSelection,
+                                                    templateSelection: materialSelect2TemplateResultAndSelection,
+                                                }).on('select2:select', (e) => {
+                                                    detail.material_id = e.target.value;
+                                                });" required>
+                                            </select>
+                                        </div>
 
-                                        <div class="row my-3">
-                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                        <div class="row">
+                                            <div class="col form-group mb-3" x-id="['text-input']">
                                                 <label :for="$id('text-input')"
-                                                    class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                                    class="text-capitalize">{{ __('validation.attributes.qty') }}</label>
                                                 <div class="input-group input-group-sm">
                                                     <input :id="$id('text-input')" class="form-control form-control-sm"
                                                         type="number" x-model="detail.qty"
@@ -191,13 +193,30 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                            <div class="col form-group mb-3" x-id="['text-input']">
                                                 <label :for="$id('text-input')"
-                                                    class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                                    class="text-capitalize">{{ __('validation.attributes.price') }}</label>
 
                                                 <input :id="$id('text-input')" x-model="detail.price"
                                                     class="form-control form-control-sm" min="0" type="number"
                                                     step="any" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col form-group" x-id="['date-input']">
+                                                <label :for="$id('date-input')"
+                                                    class="text-capitalize">{{ __('validation.attributes.manufactured_at') }}</label>
+                                                <input type="date" :id="$id('date-input')"
+                                                    class="form-control form-control-sm" :max="formData.at"
+                                                    :value="detail.manufactured_at = formData.at" readonly>
+                                            </div>
+
+                                            <div class="col form-group" x-id="['date-input']">
+                                                <label :for="$id('date-input')"
+                                                    class="text-capitalize">{{ __('validation.attributes.expired_at') }}</label>
+                                                <input :id="$id('date-input')" class="form-control form-control-sm"
+                                                    :min="formData.at" x-model="detail.expired_at" type="date">
                                             </div>
                                         </div>
 
@@ -280,7 +299,7 @@
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-                @endslot
+            @endslot
         </x-_modal>
 
         <x-_delete-modal x-on:submit.prevent="submitDelete" />
@@ -291,31 +310,6 @@
 @push('js')
     <script>
         const materials = @json(App\Models\Material::all());
-
-        function materialSelect2TemplateResultAndSelection(data) {
-
-            if (!data.id) {
-                return data.text;
-            }
-
-            const material = data.material;
-
-            const brandPrinted = material?.brand ?
-                '<small class=\'text-muted\'>(' +
-                material?.brand + ')</small>' : '';
-
-            const codePrinted = material?.code ?
-                '<small class=\'text-muted\'><b>' +
-                material?.code + '</b></small> - ' : '';
-
-            return $(`
-		<div>
-			${codePrinted}
-			${material?.name}
-			${brandPrinted}
-		</div>
-	`);
-        }
 
         function initMaterialInDetailSelect2() {
             $(this.$el).select2({

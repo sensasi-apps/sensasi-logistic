@@ -209,3 +209,103 @@ function materialInDetailSelect2SelectionTemplate(data) {
 		</div>
 	`);
 }
+
+function materialSelect2TemplateResultAndSelection(data) {
+	if (!data.id) {
+		return data.text;
+	}
+
+	const material = data.material;
+
+	const codePrinted = material?.code ?
+		'<small class=\'text-muted\'><b>' +
+		material?.code + '</b></small> - ' : '';
+	const brandPrinted = material?.brand ?
+		'<small class=\'text-muted\'>(' +
+		material?.brand + ')</small>' : '';
+	const namePrinted = material?.name;
+
+	return $(`
+		<div>
+			${codePrinted}
+			${namePrinted}
+			${brandPrinted}
+		</div>
+	`);
+}
+
+function productInDetailSelect2ResultTemplate(data) {
+	if (data.loading) {
+		return data.text;
+	}
+
+	const atPrinted = data.productInDetail?.product_in.at ? `IN: ${moment(data.productInDetail
+		.product_in.at).format('DD-MM-YYYY')}` : '';
+	const edPrinted = data.productInDetail?.product_in.expired_at ? `ED: ${moment(data.productInDetail
+		.product_in.expired_at).format('DD-MM-YYYY')}` : '';
+
+	return $(`
+		<div style='line-height: 1em'>
+			<small>${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}</small>
+			<p class='my-0' stlye='font-size: 1.1em'><b>${data.productInDetail.product.id_for_human}<b></p>
+			<small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.price)}</small>
+		</div>
+	`)
+}
+
+function productInDetailSelect2SelectionTemplate(data) {
+
+	if (!data.id) {
+		return data.text;
+	}
+
+	const productInDetail = data.productInDetail || data.element.productInDetail;
+
+	const codePrinted = productInDetail.product?.code ?
+		'<small class=\'text-muted\'><b>' +
+		productInDetail.product?.code + '</b></small> - ' : '';
+	const brandPrinted = productInDetail.product?.code ?
+		'<small class=\'text-muted\'>(' +
+		productInDetail.product?.brand + ')</small>' : '';
+	const namePrinted = productInDetail.product?.name;
+	const atPrinted = productInDetail.product_in?.at ? `IN: ${moment(productInDetail.product_in
+		?.at).format('DD-MM-YYYY')}` : '';
+
+	const edPrinted = productInDetail.product_in?.expired_at ? `ED: ${moment(productInDetail.product_in?.expired_at).format('DD-MM-YYYY')}` : '';
+
+	return $(`
+		<div>
+			${codePrinted}
+			${namePrinted}
+			${brandPrinted}
+			<small class='text-muted ml-2'>
+				${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}
+			</small>
+		</div>
+	`);
+}
+
+function productSelect2TemplateResultAndSelection(data) {
+
+	if (!data.id) {
+		return data.text;
+	}
+
+	const product = data.product;
+
+	const brandPrinted = product?.brand ?
+		'<small class=\'text-muted\'>(' +
+		product?.brand + ')</small>' : '';
+
+	const codePrinted = product?.code ?
+		'<small class=\'text-muted\'><b>' +
+		product?.code + '</b></small> - ' : '';
+
+	return $(`
+		<div>
+			${codePrinted}
+			${product?.name}
+			${brandPrinted}
+		</div>
+	`);
+}

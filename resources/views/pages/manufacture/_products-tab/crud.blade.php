@@ -6,9 +6,7 @@
         @@product-manufacture:set-data-list.document="setDataList">
         <x-_modal centered>
 
-            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}"
-                x-effect="formData.id; $nextTick(() => formData.manufacture?.id && formData.id ? $el.disableAll() : $el.enableAll())">
-
+            <form method="POST" @@submit.prevent="submitForm" id="{{ uniqid() }}">
                 <div class="row">
                     <div class="col form-group" x-id="['text-input']">
                         <label :for="$id('text-input')">{{ __('validation.attributes.code') }}</label>
@@ -17,9 +15,7 @@
 
                     <div class="col form-group" x-id="['input']">
                         <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
-                        <input type="date" :max="moment().format('YYYY-MM-DD')" class="form-control" required
-                            :id="$id('input')" :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                            @@change="formData.at = $event.target.value"
+                        <input type="date" class="form-control" required :id="$id('input')" x-model="formData.at"
                             x-effect="formData.material_out?.details;
                             const detailDates = formData.material_out?.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
                             
@@ -28,11 +24,11 @@
                             }
 
                             if (detailDates?.length === 1) {
-                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                $el.min = detailDates[0];
                                 return;
                             }
 
-                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                            $el.min = detailDates.reduce((a,b) => a > b ? a : b);
                         ">
                     </div>
                 </div>
@@ -73,17 +69,25 @@
                                 <div class="list-group mb-4">
                                     <template x-for="(detail, $i) in formData.material_out?.details">
                                         <div class="list-group-item p-4">
-                                            <select class="form-control" x-init="initMaterialInDetailSelect2;
-                                            $($el).on('select2:select', (e) => {
-                                                detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
-                                                detail.material_in_detail_id = e.target.value;
-                                            })"
-                                                x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
-                                                required></select>
 
-                                            <div class="row my-3">
-                                                <div class="col d-flex align-items-center">
-                                                    <label class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                            <div class="form-group mb-3" x-id="['select-input']">
+                                                <label :for="$id('select-input')"
+                                                    class="text-capitalize">{{ __('validation.attributes.material') }}</label>
+                                                <select :id="$id('select-input')" class="form-control"
+                                                    x-init="initMaterialInDetailSelect2;
+                                                    $($el).on('select2:select', (e) => {
+                                                        detail.material_in_detail = $(e.target).select2('data')[0].materialInDetail;
+                                                        detail.material_in_detail_id = e.target.value;
+                                                    })"
+                                                    x-effect="materialInDetailSelect2Effect($el, detail.material_in_detail_id, detail.material_in_detail)"
+                                                    required></select>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col form-group mb-3">
+                                                    <label
+                                                        class="text-capitalize">{{ __('validation.attributes.price') }}</label>
 
                                                     <div x-data="{ priceText: null }"
                                                         x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
@@ -91,14 +95,14 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="col d-flex align-items-center" x-id="['input']">
+                                                <div class="col form-group mb-3" x-id="['input']">
                                                     <label :for="$id('input')"
-                                                        class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                                        class="text-capitalize">{{ __('validation.attributes.qty') }}</label>
                                                     <div class="input-group input-group-sm">
                                                         <input :id="$id('input')" class="form-control form-control-sm"
                                                             type="number" x-model="detail.qty" min="1"
                                                             :max="formData.id ? undefined : detail.material_in_detail?.stock
-                                                                .qty"
+                                                                ?.qty"
                                                             required>
 
                                                         <div class="input-group-append">
@@ -106,9 +110,6 @@
                                                                 x-effect="unit = detail.material_in_detail?.material.unit"
                                                                 x-show="unit" x-text="unit"></span>
                                                         </div>
-
-
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -160,28 +161,33 @@
                             <div class="list-group">
                                 <template x-for="(detail, $i) in formData.product_in?.details">
                                     <div class="list-group-item p-4">
-                                        <select class="form-control" :disabled="detail.out_details?.length > 0"
-                                            :data-exclude-enabling="detail.out_details?.length > 0"
-                                            x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
-                                                dropdownParent: $el.closest('.modal-body'),
-                                                placeholder: '{{ __('Product') }}',
-                                                data: products.map(product => ({
-                                                    id: product.id,
-                                                    text: '',
-                                                    product: product
-                                                })),
-                                                templateResult: productSelect2TemplateResultAndSelection,
-                                                templateSelection: productSelect2TemplateResultAndSelection,
-                                            }).on('select2:select', (e) => {
-                                                detail.product_id = e.target.value;
-                                            });"
-                                            required>
-                                        </select>
+                                        <div class="form-group mb-3" x-id="['select-input']">
+                                            <label :for="$id('select-input')"
+                                                class="text-capitalize">{{ __('validation.attributes.product') }}</label>
+                                            <select :id="$id('select-input')" class="form-control"
+                                                :disabled="detail.out_details?.length > 0"
+                                                :data-exclude-enabling="detail.out_details?.length > 0"
+                                                x-effect="$($el).val(detail.product_id).change();" x-init="$($el).select2({
+                                                    dropdownParent: $el.closest('.modal-body'),
+                                                    placeholder: '{{ __('Product') }}',
+                                                    data: products.map(product => ({
+                                                        id: product.id,
+                                                        text: '',
+                                                        product: product
+                                                    })),
+                                                    templateResult: productSelect2TemplateResultAndSelection,
+                                                    templateSelection: productSelect2TemplateResultAndSelection,
+                                                }).on('select2:select', (e) => {
+                                                    detail.product_id = e.target.value;
+                                                });"
+                                                required>
+                                            </select>
+                                        </div>
 
-                                        <div class="row my-3">
-                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                        <div class="row">
+                                            <div class="col form-group mb-3" x-id="['text-input']">
                                                 <label :for="$id('text-input')"
-                                                    class="mb-0 mr-2">{{ __('validation.attributes.qty') }}</label>
+                                                    class="text-capitalize">{{ __('validation.attributes.qty') }}</label>
                                                 <div class="input-group input-group-sm">
                                                     <input :id="$id('text-input')" class="form-control form-control-sm"
                                                         type="number" x-model="detail.qty"
@@ -195,13 +201,30 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col d-flex align-items-center" x-id="['text-input']">
+                                            <div class="col form-group mb-3" x-id="['text-input']">
                                                 <label :for="$id('text-input')"
-                                                    class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
+                                                    class="text-capitalize">{{ __('validation.attributes.price') }}</label>
 
                                                 <input :id="$id('text-input')" x-model="detail.price"
                                                     class="form-control form-control-sm" min="0" type="number"
                                                     step="any" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col form-group" x-id="['date-input']">
+                                                <label :for="$id('date-input')"
+                                                    class="text-capitalize">{{ __('validation.attributes.manufactured_at') }}</label>
+                                                <input type="date" :id="$id('date-input')"
+                                                    class="form-control form-control-sm" :max="formData.at"
+                                                    :value="detail.manufactured_at = formData.at" readonly>
+                                            </div>
+
+                                            <div class="col form-group" x-id="['date-input']">
+                                                <label :for="$id('date-input')"
+                                                    class="text-capitalize">{{ __('validation.attributes.expired_at') }}</label>
+                                                <input :id="$id('date-input')" class="form-control form-control-sm"
+                                                    :min="formData.at" x-model="detail.expired_at" type="date">
                                             </div>
                                         </div>
 
@@ -294,31 +317,6 @@
 @push('js')
     <script>
         const products = @json(App\Models\Product::all());
-
-        function productSelect2TemplateResultAndSelection(data) {
-
-            if (!data.id) {
-                return data.text;
-            }
-
-            const product = data.product;
-
-            const brandPrinted = product?.brand ?
-                '<small class=\'text-muted\'>(' +
-                product?.brand + ')</small>' : '';
-
-            const codePrinted = product?.code ?
-                '<small class=\'text-muted\'><b>' +
-                product?.code + '</b></small> - ' : '';
-
-            return $(`
-		<div>
-			${codePrinted}
-			${product?.name}
-			${brandPrinted}
-		</div>
-	`);
-        }
 
         function initMaterialInDetailSelect2() {
             $(this.$el).select2({

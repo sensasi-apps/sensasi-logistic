@@ -4,8 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
 use App\Models\Views\ProductInDetailsStockView;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +15,12 @@ class ProductInDetail extends Model
     use HasFactory, CUDLogTrait;
 
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'expired_at' => 'date:Y-m-d',
+        'manufactured_at' => 'date:Y-m-d'
+    ];
+
     public $timestamps = false;
 
     public function product(): BelongsTo
@@ -52,11 +56,13 @@ class ProductInDetail extends Model
             ->where(
                 fn ($query) => $query
                     ->whereRelation('product', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('product', 'code', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('product', 'brand', 'LIKE', "%{$q}%")
                     ->orWhereRelation('productIn', 'at', 'LIKE', "%{$q}%")
             )
             ->limit(25)
             ->get()
-            ->sortBy('productIn.at')
+            ->sortBy(['expired_at', 'productIn.at'])
             ->values()
             ->all();
     }

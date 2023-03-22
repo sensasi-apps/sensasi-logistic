@@ -60,9 +60,7 @@
 
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
-                    <input type="date" class="form-control" required :id="$id('input')"
-                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : ''"
-                        @@change="formData.at = $event.target.value"
+                    <input type="date" class="form-control" required :id="$id('input')" x-model="formData.at"
                         x-effect="formData.details;
                             const detailDates = formData.details?.map(detail => detail.material_in_detail?.material_in.at).filter(date => date);
                             
@@ -71,11 +69,11 @@
                             }
 
                             if (detailDates?.length === 1) {
-                                $el.min = detailDates[0] ? moment(detailDates[0]).format('YYYY-MM-DD') : null;
+                                $el.min = detailDates[0];
                                 return;
                             }
 
-                            $el.min = moment(detailDates.reduce((a,b) => a > b ? a : b).substr(0, 10)).format('YYYY-MM-DD');
+                            $el.min = detailDates.reduce((a,b) => a > b ? a : b);
                         ">
                 </div>
 
@@ -167,7 +165,8 @@
 
             @slot('footer')
                 <div>
-                    <button class="btn btn-success" :disabled="(formData.product_manufacture || formData.material_manufacture) && formData.id"
+                    <button class="btn btn-success"
+                        :disabled="(formData.product_manufacture || formData.material_manufacture) && formData.id"
                         :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}
                     </button>
@@ -177,8 +176,8 @@
                 </div>
 
                 <div>
-                    <button x-show="!(formData.product_manufacture || formData.material_manufacture) && formData.id" class="btn btn-icon btn-outline-danger"
-                        tabindex="-1" @@click="openDeleteModal">
+                    <button x-show="!(formData.product_manufacture || formData.material_manufacture) && formData.id"
+                        class="btn btn-icon btn-outline-danger" tabindex="-1" @@click="openDeleteModal">
                         <i class="fas fa-trash"></i>
                     </button>
 
@@ -221,50 +220,8 @@
                         };
                     }
                 },
-                templateResult: function(data) {
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    const datePrinted = data.materialInDetail?.material_in.at ? moment(data.materialInDetail
-                        .material_in.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div style='line-height: 1em;'>
-                            <small>${datePrinted}</small>
-                            <p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
-                            <small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
-                        </div>
-                    `);
-                },
-                templateSelection: function(data) {
-                    if (data.text === '{{ __('Material') }}') {
-                        return data.text;
-                    }
-
-                    const materialInDetail = data.materialInDetail || data.element.materialInDetail;
-
-                    const codePrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'><b>' +
-                        materialInDetail.material?.code + '</b></small> - ' : '';
-                    const brandPrinted = materialInDetail.material?.code ?
-                        '<small class=\'text-muted\'>(' +
-                        materialInDetail.material?.brand + ')</small>' : '';
-                    const namePrinted = materialInDetail.material?.name;
-                    const atPrinted = materialInDetail.material_in?.at ? moment(materialInDetail.material_in
-                        ?.at).format('DD-MM-YYYY') : null;
-
-                    return $(`
-                        <div>
-                            ${codePrinted}
-                            ${namePrinted}
-                            ${brandPrinted}
-                            <small class='text-muted ml-2'>
-                                ${atPrinted}
-                            </small>
-                        </div>
-                    `);
-                },
+                templateResult: materialInDetailSelect2ResultTemplate,
+                templateSelection: materialInDetailSelect2SelectionTemplate,
                 minimumInputLength: 3
             });
         }

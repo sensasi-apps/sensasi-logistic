@@ -33,10 +33,8 @@ class ProductManufactureService extends BaseModelService
 	private function preprocessData(array &$data)
 	{
 		$data['type'] = ucfirst(__('manufacture'));
-		$data['material_out']['type'] = $data['type'];
-		$data['product_in']['type'] = $data['type'];
 
-		foreach (['at', 'code', 'note'] as $key) {
+		foreach (['at', 'code', 'note', 'type'] as $key) {
 			$data['material_out'][$key] = $data[$key];
 			$data['product_in'][$key] = $data[$key];
 		}

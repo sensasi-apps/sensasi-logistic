@@ -13,8 +13,8 @@ class MaterialManufacture extends Model
 
     protected $guarded = ['id'];
 
-    protected $dates = [
-        'at'
+    protected $casts = [
+        'at' => 'date:Y-m-d',
     ];
 
     protected $appends = [

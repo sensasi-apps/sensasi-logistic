@@ -17,6 +17,11 @@ class MaterialInDetail extends Model
 
     protected $guarded = ['id'];
 
+    protected $dates = [
+        'expired_at',
+        'manufactured_at'
+    ];
+
     public $timestamps = false;
 
     public function material(): BelongsTo
@@ -57,11 +62,13 @@ class MaterialInDetail extends Model
             ->where(
                 fn ($query) => $query
                     ->whereRelation('material', 'name', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('material', 'brand', 'LIKE', "%{$q}%")
+                    ->orWhereRelation('material', 'code', 'LIKE', "%{$q}%")
                     ->orWhereRelation('materialIn', 'at', 'LIKE', "%{$q}%")
             )
             ->limit(25)
             ->get()
-            ->sortBy('materialIn.at')
+            ->sortBy(['expired_at', 'materialIn.at'])
             ->values()
             ->all();
     }

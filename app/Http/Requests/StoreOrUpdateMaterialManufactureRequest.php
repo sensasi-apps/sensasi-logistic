@@ -29,6 +29,10 @@ class StoreOrUpdateMaterialManufactureRequest extends FormRequest
         $newestAt = $existsMaterialInDetails->max('materialIn.at');
 
         return [
+            'code' => "nullable|string|unique:material_manufactures,code,{$this->id}",
+            'note' => 'nullable|string',
+            'at' => 'required|date|before:tomorrow|after_or_equal:' . $newestAt,
+
             'material_out.details' => 'required|array',
             'material_out.details.*.qty' => 'required|numeric|min:0',
             'material_out.details.*.material_in_detail_id' => 'required|exists:material_in_details,id',
@@ -37,10 +41,8 @@ class StoreOrUpdateMaterialManufactureRequest extends FormRequest
             'material_in.details.*.qty' => 'required|numeric|min:0',
             'material_in.details.*.material_id' => 'required|exists:materials,id',
             'material_in.details.*.price' => 'required|numeric|min:0',
-
-            'code' => "nullable|string|unique:material_manufactures,code,{$this->id}",
-            'note' => 'nullable|string',
-            'at' => 'required|date|before:tomorrow|after_or_equal:' . $newestAt,
+            'matereal_in.details.*.expired_at' => "nullable|date|after_or_equal:{$this->at}",
+            'material_in.details.*.manufactured_at' => "nullable|date|before_or_equal:{$this->at}"
         ];
     }
 }

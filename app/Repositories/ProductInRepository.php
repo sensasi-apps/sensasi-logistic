@@ -68,7 +68,7 @@ class ProductInRepository extends BaseRepository
 			ProductInDetail::upsert(
 				$forUpsert,
 				['product_in_id', 'product_id'],
-				['qty', 'price']
+				['qty', 'price', 'expired_at', 'manufactured_at']
 			);
 
 			// delete record that not exists in $detailsData
@@ -155,7 +155,11 @@ class ProductInRepository extends BaseRepository
 				];
 			}),
 
-			'*.price' => 'required|numeric|min:0'
+			'*.price' => 'required|numeric|min:0',
+			// TODO: implement check if expired_at is after at main: after_or_equal:{$productIn['at']}
+			'*.expired_at' => "nullable|date",
+			// TODO: implement check if manufactured_at is before at main: before_or_equal:{$productIn['at']}
+			'*.manufactured_at' => "nullable|date"
 		])->validate();
 	}
 
