@@ -3,7 +3,7 @@
 <div x-data="reportComponent">
     <h2 class="section-title">
         {{ $tab }}
-        &mdash; {{ request()->get('label') ?? __('this month') }}
+        &mdash; {{ __(request()->get('label')) ?? __('this month') }}
         <a href="javascript:;" class="btn btn-primary daterange-btn icon-left btn-icon ml-2" x-init="daterangepicker">
             <i class="fas fa-calendar"></i> {{ __('Choose Date') }}
         </a>
@@ -31,7 +31,7 @@
                         <button type="button"
                             @@click="printTable(
                                 '{{ __('report.name-report', ['name' => $tab]) }}',
-                                '{{ request()->get('label') ?? __('this month') }} - {{ $subtab }}'
+                                '{{ __(request()->get('label')) ?? __('this month') }} - {{ $subtab }}'
                                 )"
                             class="btn btn-primary mb-3 icon-left btn-icon text-capitalize">
                             <i class="fas fa-print"></i> {{ __('print') }}

@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Manufacture;
+use App\Models\MaterialManufacture;
+use App\Models\ProductManufacture;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
@@ -12,45 +13,50 @@ class ManufactureReportController extends Controller
     {
         [$startDate, $endDate] = $this->getDateRange();
 
-        $manufactures = Manufacture::with('productIn.details.product', 'materialOut.details.materialInDetail.material')
+        $materialManufactures = MaterialManufacture::with('materialIn.details.material', 'materialOut.details.materialInDetail.material')
             ->where('at', '>=', $startDate)
             ->where('at', '<=', $endDate)
             ->orderBy('at')
             ->get();
 
-        $materialOutDetailsGroupByMaterial = $manufactures->reduce(function ($carry, $manufacture) {
+        $productManufactures = ProductManufacture::with('productIn.details.product', 'materialOut.details.materialInDetail.material')
+            ->where('at', '>=', $startDate)
+            ->where('at', '<=', $endDate)
+            ->orderBy('at')
+            ->get();
+
+        $productManufactureMaterialOutDetailsGroupByMaterial = $productManufactures->reduce(function ($carry, $manufacture) {
             return $carry->merge($manufacture->materialOut->details);
         }, collect([]))
             ->sortBy('materialInDetail.material.name')
             ->groupBy('materialInDetail.material_id');
 
-        $productInDetailsGroupByProduct = $manufactures->reduce(function ($carry, $manufacture) {
+        $materialManufactureMaterialOutDetailsGroupByMaterial = $materialManufactures->reduce(function ($carry, $manufacture) {
+            return $carry->merge($manufacture->materialOut->details);
+        }, collect([]))
+            ->sortBy('materialInDetail.material.name')
+            ->groupBy('materialInDetail.material_id');
+
+        $productInDetailsGroupByProduct = $productManufactures->reduce(function ($carry, $manufacture) {
             return $carry->merge($manufacture->productIn->details);
         }, collect([]))
             ->sortBy('product.name')
             ->groupBy('product_id');
 
-        $reportPageId = 'manufacture';
+        $materialInDetailsGroupByMaterial = $materialManufactures->reduce(function ($carry, $manufacture) {
+            return $carry->merge($manufacture->materialIn->details);
+        }, collect([]))
+            ->sortBy('material.name')
+            ->groupBy('material_id');
 
-        $title = __('report.name-report', ['name' => __('manufacture')]);
-        $key = '';
-        $tab = $title;
-
-        $subtabs = [
-            'invoice' => __('by invoice'),
-            'material' => __('by item')
-        ];
-
-        return view('pages.report.manufacture', compact(
-            'manufactures',
-            'materialOutDetailsGroupByMaterial',
+        return view('pages.report.manufacture.index', compact(
+            'productManufactures',
+            'productManufactureMaterialOutDetailsGroupByMaterial',
             'productInDetailsGroupByProduct',
 
-            'reportPageId',
-            'title',
-            'key',
-            'tab',
-            'subtabs'
+            'materialManufactures',
+            'materialManufactureMaterialOutDetailsGroupByMaterial',
+            'materialInDetailsGroupByMaterial'
         ));
     }
 
