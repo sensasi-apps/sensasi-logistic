@@ -60,9 +60,7 @@
 
                 <div class="form-group" x-id="['input']">
                     <label :for="$id('input')">{{ __('validation.attributes.at') }}</label>
-                    <input type="date" class="form-control" required :id="$id('input')"
-                        :value="formData.at ? moment(formData.at).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD')"
-                        @@change="formData.at = $event.target.value">
+                    <input type="date" class="form-control" required :id="$id('input')" x-model="formData.at">
                 </div>
 
                 <div class="form-group" x-id="['textarea']">
@@ -136,21 +134,14 @@
                                         <label :for="$id('date-input')"
                                             class="text-capitalize">{{ __('validation.attributes.manufactured_at') }}</label>
                                         <input :id="$id('date-input')" class="form-control form-control-sm"
-                                            :max="moment(formData.at).format('YYYY-MM-DD')"
-                                            :value="detail.manufactured_at ? moment(detail.manufactured_at).format(
-                                                'YYYY-MM-DD') : ''"
-                                            @@change="detail.manufactured_at = $event.target.value"
-                                            type="date">
+                                            :max="formData.at" x-model="detail.manufactured_at" type="date">
                                     </div>
 
                                     <div class="col form-group" x-id="['date-input']">
                                         <label :for="$id('date-input')"
                                             class="text-capitalize">{{ __('validation.attributes.expired_at') }}</label>
                                         <input :id="$id('date-input')" class="form-control form-control-sm"
-                                            :min="moment(formData.at).format('YYYY-MM-DD')"
-                                            :value="detail.expired_at ? moment(detail.expired_at).format('YYYY-MM-DD') : ''"
-                                            @@change="detail.expired_at = $event.target.value"
-                                            type="date">
+                                            :min="formData.at" x-model="detail.expired_at" type="date">
                                     </div>
                                 </div>
 
