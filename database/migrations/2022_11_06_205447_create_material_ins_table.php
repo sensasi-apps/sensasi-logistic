@@ -17,7 +17,7 @@ class CreateMaterialInsTable extends Migration
         Schema::create('material_ins', function (Blueprint $table) {
             $table->id();
             $table->string('code', 15)->nullable()->unique();
-            $table->dateTime('at');
+            $table->date('at');
             $table->string('type');
             $table->text('note')->nullable();
             $table->timestamps();

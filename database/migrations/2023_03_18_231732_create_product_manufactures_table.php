@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('product_manufactures', function (Blueprint $table) {
             $table->id();
             $table->string('code', 15)->nullable()->unique();
-            $table->dateTime('at');
+            $table->date('at');
             $table->text('note')->nullable();
             $table->foreignId('material_out_id')->unique()
                 ->constrained('material_outs')
