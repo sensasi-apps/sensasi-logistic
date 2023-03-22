@@ -20,7 +20,7 @@
         </tr>
     </thead>
 
-    @if ($manufactures->count() == 0)
+    @if ($productManufactures->count() == 0)
 
         <tbody>
             <tr>
@@ -29,28 +29,30 @@
         </tbody>
     @else
         <tbody>
-            @foreach ($manufactures as $manufacture)
+            @foreach ($productManufactures as $productManufacture)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $manufacture->code }}</td>
-                    <td>{{ $manufacture->at->format('d-m-Y') }}</td>
+                    <td>{{ $productManufacture->code }}</td>
+                    <td>{{ $productManufacture->at->format('d-m-Y') }}</td>
+
                     <td>
-                        @foreach ($manufacture->materialOut->details as $detail)
+                        @foreach ($productManufacture->materialOut->details as $detail)
                             <div>
-                                {{ $detail->materialInDetail->material->id_for_human }} &times; {{ $detail->qty }}
+                                {{ $detail->materialInDetail->material->id_for_human }} &times;
+                                {{ $detail->qty }}
                                 {{ $detail->materialInDetail->material->unit }}
                             </div>
                         @endforeach
                     </td>
                     <td>
-                        @foreach ($manufacture->materialOut->details as $detail)
+                        @foreach ($productManufacture->materialOut->details as $detail)
                             <div>
                                 {{ __('$') }} @number($detail->qty * $detail->materialInDetail->price)
                             </div>
                         @endforeach
                     </td>
                     <td>
-                        @foreach ($manufacture->productIn->details as $detail)
+                        @foreach ($productManufacture->productIn->details as $detail)
                             <div>
                                 {{ $detail->product->id_for_human }} &times; {{ $detail->qty }}
                                 {{ $detail->product->unit }}
@@ -58,7 +60,7 @@
                         @endforeach
                     </td>
                     <td>
-                        @foreach ($manufacture->productIn->details as $detail)
+                        @foreach ($productManufacture->productIn->details as $detail)
                             <div>
                                 {{ __('$') }} @number($detail->qty * $detail->product->default_price)
                             </div>
@@ -72,18 +74,18 @@
             <tr>
                 <th colspan="4" class="text-center text-uppercase">{{ __('Total') }}</th>
                 <th>{{ __('$') }} @number(
-                    $manufactures->reduce(function ($carry, $manufacture) {
+                    $productManufactures->reduce(function ($carry, $productManufacture) {
                         return $carry +
-                            $manufacture->materialOut->details->reduce(function ($carry, $detail) {
+                            $productManufacture->materialOut->details->reduce(function ($carry, $detail) {
                                 return $carry + $detail->qty * $detail->materialInDetail->price;
                             });
                     })
                 )</th>
                 <th></th>
                 <th>{{ __('$') }} @number(
-                    $manufactures->reduce(function ($carry, $manufacture) {
+                    $productManufactures->reduce(function ($carry, $productManufacture) {
                         return $carry +
-                            $manufacture->productIn->details->reduce(function ($carry, $detail) {
+                            $productManufacture->productIn->details->reduce(function ($carry, $detail) {
                                 return $carry + $detail->qty * $detail->product->default_price;
                             });
                     })

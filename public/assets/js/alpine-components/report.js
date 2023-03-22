@@ -33,7 +33,7 @@ document.addEventListener('alpine:init', () => {
 			dateRangeInput.name = 'daterange';
 
 			labelInput = document.createElement('input');
-			labelInput.value = label;
+			labelInput.value = label.toLowerCase();
 			labelInput.name = 'label';
 
 			form.appendChild(dateRangeInput);
@@ -48,9 +48,6 @@ document.addEventListener('alpine:init', () => {
 			wrapperDiv.classList.add('print-only');
 
 			const logo = document.body.querySelector('.sidebar-brand a').cloneNode(true);
-			// logo.style.setProperty('color', '#000', 'important');
-			// logo.style.setProperty('font-weight', '700', 'important');
-			// logo.style.setProperty('text-decoration', 'none', 'important');
 			logo.style.color = '#000';
 			logo.style.fontWeight = '700';
 			logo.style.textDecoration = 'none';
