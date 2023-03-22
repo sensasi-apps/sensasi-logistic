@@ -17,8 +17,8 @@ class ProductOut extends Model
         'id_for_human'
     ];
 
-    protected $dates = [
-        'at'
+    protected $casts = [
+        'at' => 'date:Y-m-d',
     ];
 
     public function details(): HasMany

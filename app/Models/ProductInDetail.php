@@ -4,8 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\CUDLogTrait;
 use App\Models\Views\ProductInDetailsStockView;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,9 +16,9 @@ class ProductInDetail extends Model
 
     protected $guarded = ['id'];
 
-    protected $dates = [
-        'expired_at',
-        'manufactured_at'
+    protected $casts = [
+        'expired_at' => 'date:Y-m-d',
+        'manufactured_at' => 'date:Y-m-d'
     ];
 
     public $timestamps = false;

@@ -14,8 +14,9 @@ class MaterialIn extends Model
     use HasFactory, CUDLogTrait;
 
     protected $guarded = ['id'];
-    protected $dates = [
-        'at'
+    
+    protected $casts = [
+        'at' => 'date:Y-m-d',
     ];
 
     protected $appends = [
