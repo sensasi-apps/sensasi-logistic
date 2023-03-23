@@ -9,11 +9,11 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin|Warehouse|Manufacture|Sales')
+    @hasanyrole('Super Admin|Warehouse|Manufacture|Sales|Purchase')
         <li class="menu-header">Data</li>
-    @endunlessrole
+    @endhasanyrole
 
-    @hasanyrole('Warehouse|Super Admin')
+    @hasanyrole('Warehouse|Super Admin|Purchase')
         <li @class(['active' => request()->is('materials*')])>
             <a class="nav-link" href="{{ url('materials') }}">
                 <i class="fas fa-pallet"></i>
@@ -31,7 +31,7 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Warehouse|Sales|Super Admin')
+    @hasanyrole('Warehouse|Sales|Super Admin|Purchase')
         <li @class(['active' => request()->is('products*')])>
             <a class="nav-link" href="{{ url('products') }}">
                 <i class="fas fa-box"></i>
