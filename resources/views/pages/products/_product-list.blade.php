@@ -78,12 +78,11 @@
 
                 <div class="form-group" x-id="['select']">
                     <label :for="$id('select')">{{ __('validation.attributes.tags') }}</label>
-
-                    <select class="form-control select2" multiple x-init="$(document).ready(function() {
+                    <select class="form-control" multiple x-init="$(document).ready(function() {
                         $($el).select2({
+                            dropdownParent: $el.closest('.modal-body'),
                             tags: true,
-                            tokenSeparators: [',', ' '],
-                            dropdownParent: $el.closest('.modal-content')
+                            tokenSeparators: [',', ' ']
                         }).on('select2:select', () => {
                             formData.tags = $($el).val();
                         })

@@ -22,7 +22,7 @@ class MaterialController extends Controller
 
     public function update(Request $request, Material $material): RedirectResponse|JsonResponse
     {
-        $materialFromInput = $this->validateInput($request, $material->id);
+        $materialFromInput = $this->validateInput($request);
 
         $material->update($materialFromInput);
 
@@ -40,18 +40,21 @@ class MaterialController extends Controller
         return Helper::getSuccessCrudResponse('deleted', __('material'), $material->id_for_human);
     }
 
-    private function validateInput(Request $request, int $materialId = null): array
+    private function validateInput(Request $request): array
     {
         $name = $request->name;
         $brand = $request->brand;
 
         return $request->validate([
-            'code' => "nullable|unique:mysql.materials,code,{$materialId}",
-            'name' => ['required', Rule::unique('materials')->where(function ($query) use ($name, $brand) {
-                return $query
-                    ->where('name', $name)
-                    ->where('brand', $brand);
-            })->ignore($materialId)],
+            'code' => "nullable|unique:mysql.materials,code,{$request->id}",
+            'name' => [
+                'required',
+                Rule::unique('materials')->where(function ($query) use ($name, $brand) {
+                    return $query
+                        ->where('name', $name)
+                        ->where('brand', $brand);
+                })->ignore($request->id)
+            ],
             'brand' => 'nullable',
             'low_qty' => 'nullable|numeric',
             'unit' => 'required',

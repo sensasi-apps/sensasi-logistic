@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -21,7 +22,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse|JsonResponse
     {
-        $productFromInput = $this->validateInput($request, $product->id);
+        $productFromInput = $this->validateInput($request);
 
         $product->update($productFromInput);
 
@@ -41,9 +42,20 @@ class ProductController extends Controller
 
     private function validateInput(Request $request): array
     {
+        $name = $request->name;
+        $brand = $request->brand;
+
         return $request->validate([
             'code' => "nullable|string|unique:mysql.products,code,{$request->id}",
-            'name' => "required|string|unique:mysql.products,name,{$request->id}",
+            'name' => [
+                'required',
+                Rule::unique('products')->where(function ($query) use ($name, $brand) {
+                    return $query
+                        ->where('name', $name)
+                        ->where('brand', $brand);
+                })->ignore($request->id)
+            ],
+            'brand' => 'nullable',
             'low_qty' => 'nullable|numeric',
             'unit' => 'required|string',
             'default_price' => 'required|numeric',

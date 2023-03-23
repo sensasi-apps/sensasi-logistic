@@ -11,7 +11,7 @@ class Product extends Model
 {
     use HasFactory, CUDLogTrait;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['code', 'name', 'tags', 'unit', 'low_qty', 'brand', 'default_price'];
     protected $appends = ['tags', 'qty', 'id_for_human'];
     protected $with = ['monthlyMovements'];
 
