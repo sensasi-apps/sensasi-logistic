@@ -77,6 +77,13 @@
                 <span>{{ __('users') }}</span>
             </a>
         </li>
+
+        <li @class(['active' => request()->is('system/user-activities*')])>
+            <a class="nav-link text-capitalized" href="{{ url('system/user-activities') }}">
+                <i class="fas fa-clipboard-list"></i>
+                <span>{{ __('user activities') }}</span>
+            </a>
+        </li>
     @endhasanyrole
 
     @hasanyrole('Super Admin')
@@ -113,8 +120,8 @@
             </a>
         </li>
 
-        <li class="{{ request()->is('system/ip-addr*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('system/ip-addr') }}">
+        <li class="{{ request()->is('_/ip-addr*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('_/ip-addr') }}">
                 <i class="fas fa-network-wired"></i>
                 <span>{{ __('IP Addresses') }}</span>
             </a>
