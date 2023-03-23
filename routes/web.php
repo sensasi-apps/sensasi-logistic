@@ -82,16 +82,6 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:Super Admin|Stackholder')->get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::middleware('role:Super Admin')->controller(AppSystemController::class)->group(function () {
-        Route::prefix('system')->name('system.')->group(function () {
-            Route::get('ip-addr', 'ipAddrIndex')->name('ip-addr');
-
-            Route::resource('users', UserController::class)->except([
-                'create', 'show', 'edit', 'destroy'
-            ]);
-        });
-    });
-
     Route::middleware('role:Super Admin|Stackholder')->group(function () {
         Route::prefix('report')->name('report.')->group(function () {
             route::get('materials', MaterialReportController::class)->name('material.index');
@@ -146,8 +136,19 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
+    Route::middleware('role:Super Admin|Admin')->controller(AppSystemController::class)->group(function () {
+        Route::view('system/user-activities', 'pages.system.user-activities');
+
+        Route::prefix('system')->name('system.')->group(function () {
+            Route::resource('users', UserController::class)->except([
+                'create', 'show', 'edit', 'destroy'
+            ]);
+        });
+    });
+
     Route::middleware('role:Super Admin')->prefix('_')->group(function () {
         Route::view('basic-page-format', 'basic-page-format');
+        Route::get('ip-addr', [AppSystemController::class, 'ipAddrIndex'])->name('ip-addr');
         Route::get('phpinfo', PhpInfoController::class);
     });
 });
