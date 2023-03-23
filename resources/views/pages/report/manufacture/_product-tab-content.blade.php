@@ -15,23 +15,25 @@
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button id="manufacture-invoice-tab" data-toggle="tab" type="button" @class(['nav-link', 'active', 'text-capitalize'])
-                data-target="#manufacture-invoice" aria-controls="manufacture-invoice" aria-selected="true"
+            <button id="product-manufacture-invoice-tab" data-toggle="tab" type="button" @class(['nav-link', 'active', 'text-capitalize'])
+                data-target="#manufacture-invoice" aria-controls="product-manufacture-invoice" aria-selected="true"
                 role="tab">
                 {{ __('by invoice') }}
             </button>
         </li>
 
         <li class="nav-item" role="presentation">
-            <button id="out-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
-                data-target="#out-item" aria-controls="out-item" aria-selected="false" role="tab">
+            <button id="product-manufacture-out-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
+                data-target="#product-manufacture-out-item" aria-controls="product-manufacture-out-item"
+                aria-selected="false" role="tab">
                 {{ __('material outs') }}
             </button>
         </li>
 
         <li class="nav-item" role="presentation">
-            <button id="in-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
-                data-target="#in-item" aria-controls="in-item" aria-selected="false" role="tab">
+            <button id="product-manufacture-in-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
+                data-target="#product-manufacture-in-item" aria-controls="product-manufacture-in-item"
+                aria-selected="false" role="tab">
                 {{ __('product ins') }}
             </button>
         </li>
@@ -40,8 +42,8 @@
     <div class="card">
         <div class="card-body">
             <div class="tab-content">
-                <div @class(['tab-pane fade show', 'active']) id="manufacture-invoice" role="tabpanel"
-                    aria-labelledby="manufacture-invoice-tab">
+                <div @class(['tab-pane fade show', 'active']) id="product-manufacture-invoice" role="tabpanel"
+                    aria-labelledby="product-manufacture-invoice-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ $subtitle }}',
@@ -56,7 +58,8 @@
                     </div>
                 </div>
 
-                <div @class(['tab-pane fade']) id="out-item" role="tabpanel" aria-labelledby="out-item-tab">
+                <div @class(['tab-pane fade']) id="product-manufacture-out-item" role="tabpanel"
+                    aria-labelledby="product-manufacture-out-item-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ __('report.name-report', ['name' => __('manufacture')]) }}',
@@ -67,12 +70,15 @@
                     </button>
 
                     <div class="table-responsive">
-                        @include('pages.report.components._material-out-by-item-table', ['materialOutDetailsGroupByMaterial' => $productManufactureMaterialOutDetailsGroupByMaterial])
+                        @include('pages.report.components._material-out-by-item-table', [
+                            'materialOutDetailsGroupByMaterial' => $productManufactureMaterialOutDetailsGroupByMaterial,
+                        ])
 
                     </div>
                 </div>
 
-                <div @class(['tab-pane fade']) id="in-item" role="tabpanel" aria-labelledby="in-item-tab">
+                <div @class(['tab-pane fade']) id="product-manufacture-in-item" role="tabpanel"
+                    aria-labelledby="product-manufacture-in-item-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ __('report.name-report', ['name' => __('manufacture')]) }}',

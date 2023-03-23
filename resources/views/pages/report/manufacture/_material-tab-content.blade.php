@@ -15,23 +15,25 @@
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button id="manufacture-invoice-tab" data-toggle="tab" type="button" @class(['nav-link', 'active', 'text-capitalize'])
-                data-target="#manufacture-invoice" aria-controls="manufacture-invoice" aria-selected="true"
-                role="tab">
+            <button id="material-manufacture-invoice-tab" data-toggle="tab" type="button" @class(['nav-link', 'active', 'text-capitalize'])
+                data-target="#material-manufacture-invoice" aria-controls="material-manufacture-invoice"
+                aria-selected="true" role="tab">
                 {{ __('by invoice') }}
             </button>
         </li>
 
         <li class="nav-item" role="presentation">
-            <button id="out-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
-                data-target="#out-item" aria-controls="out-item" aria-selected="false" role="tab">
+            <button id="material-manufacture-out-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
+                data-target="#material-manufacture-out-item" aria-controls="material-manufacture-out-item"
+                aria-selected="false" role="tab">
                 {{ __('material outs') }}
             </button>
         </li>
 
         <li class="nav-item" role="presentation">
-            <button id="in-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
-                data-target="#in-item" aria-controls="in-item" aria-selected="false" role="tab">
+            <button id="material-manufacture-in-item-tab" data-toggle="tab" type="button" @class(['nav-link text-capitalize'])
+                data-target="#material-manufacture-in-item" aria-controls="material-manufacture-in-item"
+                aria-selected="false" role="tab">
                 {{ __('material ins') }}
             </button>
         </li>
@@ -40,8 +42,8 @@
     <div class="card">
         <div class="card-body">
             <div class="tab-content">
-                <div @class(['tab-pane fade show', 'active']) id="manufacture-invoice" role="tabpanel"
-                    aria-labelledby="manufacture-invoice-tab">
+                <div @class(['tab-pane fade show', 'active']) id="material-manufacture-invoice" role="tabpanel"
+                    aria-labelledby="material-manufacture-invoice-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ $subtitle }}',
@@ -56,7 +58,8 @@
                     </div>
                 </div>
 
-                <div @class(['tab-pane fade']) id="out-item" role="tabpanel" aria-labelledby="out-item-tab">
+                <div @class(['tab-pane fade']) id="material-manufacture-out-item" role="tabpanel"
+                    aria-labelledby="material-manufacture-out-item-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ __('report.name-report', ['name' => __('manufacture')]) }}',
@@ -73,7 +76,8 @@
                     </div>
                 </div>
 
-                <div @class(['tab-pane fade']) id="in-item" role="tabpanel" aria-labelledby="in-item-tab">
+                <div @class(['tab-pane fade']) id="material-manufacture-in-item" role="tabpanel"
+                    aria-labelledby="material-manufacture-in-item-tab">
                     <button type="button"
                         @@click="printTable(
 							'{{ __('report.name-report', ['name' => __('manufacture')]) }}',
