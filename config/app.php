@@ -4,7 +4,7 @@ return [
 
     'owner' => 'Sensasi Apps',
     'owner_url' => 'https://github.com/sensasi-apps',
-    'version' => '0.1.2',
+    'version' => '0.2.0',
 
     /*
     |--------------------------------------------------------------------------
