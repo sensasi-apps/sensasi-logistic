@@ -162,7 +162,14 @@
                 title: '{{ __('validation.attributes.qty') }}',
                 orderable: false,
                 searchable: false,
-                render: (data, type, row) => `${data} ${row.unit}`
+                render: function(data, type, row) {
+
+                    const isStockLow = row.low_qty && row.qty <= row.low_qty;
+
+                    return isStockLow ?
+                        `<b class="text-${row.qty === 0 ? 'danger' : 'warning'} blinking" x-init="$($el).tooltip()" title="${row.qty === 0 ? '{{ __('out of stock') }}' : '{{ __('low qty') }}'}">${data} ${row.unit}</b>` :
+                        `${data} ${row.unit}`;
+                }
             }, {
                 data: 'tags',
                 name: 'tags_json',
@@ -192,7 +199,14 @@
                 title: '{{ __('validation.attributes.qty') }}',
                 orderable: false,
                 searchable: false,
-                render: (data, type, row) => `${data} ${row.unit}`
+                render: function(data, type, row) {
+
+                    const isStockLow = row.low_qty && row.qty <= row.low_qty;
+
+                    return isStockLow ?
+                        `<b class="text-${row.qty === 0 ? 'danger' : 'warning'} blinking" x-init="$($el).tooltip()" title="${row.qty === 0 ? '{{ __('out of stock') }}' : '{{ __('low qty') }}'}">${data} ${row.unit}</b>` :
+                        `${data} ${row.unit}`;
+                }
             }, {
                 data: 'tags',
                 name: 'tags_json',
