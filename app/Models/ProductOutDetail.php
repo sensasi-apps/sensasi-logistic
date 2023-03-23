@@ -16,7 +16,7 @@ class ProductOutDetail extends Model
 
     public function productInDetail(): BelongsTo
     {
-        return $this->belongsTo(productInDetail::class);
+        return $this->belongsTo(ProductInDetail::class);
     }
 
     public function productOut(): BelongsTo
