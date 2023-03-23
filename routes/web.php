@@ -91,7 +91,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::middleware('role:Super Admin|Warehouse')->group(function () {
+    Route::middleware('role:Super Admin|Warehouse|Purchase|Sales')->group(function () {
         Route::get('materials', MaterialIndexController::class)->name('materials.index');
 
         Route::resource('materials', MaterialController::class)->only([
@@ -107,7 +107,7 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::middleware('role:Super Admin|Sales|Warehouse')->group(function () {
+    Route::middleware('role:Super Admin|Warehouse|Purchase|Sales')->group(function () {
         Route::get('products', ProductIndexController::class)->name('products.index');
 
         Route::resource('products', ProductController::class)->only([
