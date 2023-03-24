@@ -26,8 +26,8 @@ class CreateProductInDetailsTable extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->float('qty');
-            $table->float('price');
+            $table->float('qty', 16, 8);
+            $table->float('price', 16, 8);
             $table->date('expired_at')->nullable();
             $table->date('manufactured_at')->nullable();
             $table->unique(['product_id', 'product_in_id']);
