@@ -83,7 +83,7 @@
                                                     <label class="mb-0 mr-2">{{ __('validation.attributes.price') }}</label>
 
                                                     <div x-data="{ priceText: null }"
-                                                        x-effect="priceText = intToCurrency(detail.material_in_detail?.price || 0)"
+                                                        x-effect="priceText = numberToCurrency(detail.material_in_detail?.price || 0)"
                                                         x-text="priceText">
                                                     </div>
                                                 </div>
@@ -111,7 +111,7 @@
                                                 <strong x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Subtotal') }}"
                                                     x-data="{ subtotal_price: 0 }"
                                                     x-effect="subtotal_price = (detail.qty * detail.material_in_detail?.price || 0)"
-                                                    x-text="intToCurrency(subtotal_price)">
+                                                    x-text="numberToCurrency(subtotal_price)">
                                                 </strong>
 
                                                 <button type="button" class="btn btn-icon btn-outline-danger"
@@ -131,7 +131,7 @@
                                     <div>
                                         <strong
                                             x-effect="$data.total_in_price = formData.material_out?.details?.reduce((a, b) => a + b.material_in_detail?.price * b.qty, 0)"
-                                            x-text="intToCurrency($data.total_in_price || 0)"></strong>
+                                            x-text="numberToCurrency($data.total_in_price || 0)"></strong>
                                     </div>
                                 </div>
 
@@ -224,7 +224,7 @@
                                             <strong x-init="$($el).tooltip()" title="{{ __('subtotal') }}"
                                                 x-data="{ subtotal_price: 0 }"
                                                 x-effect="subtotal_price = detail.price * detail.qty"
-                                                x-text="intToCurrency(subtotal_price || 0)">
+                                                x-text="numberToCurrency(subtotal_price || 0)">
                                             </strong>
 
                                             <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
@@ -248,7 +248,7 @@
                                 <div>
                                     <strong
                                         x-effect="$data.total_out_price = formData.material_in?.details?.reduce((a, b) => a + b.qty * b.price, 0)"
-                                        x-text="intToCurrency(total_out_price || 0)"></strong>
+                                        x-text="numberToCurrency(total_out_price || 0)"></strong>
 
                                     <div>
                                         <a x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Auto calculate from material outs') }}"
@@ -258,7 +258,7 @@
                                         </a>
 
                                         <span
-                                            x-show="total_in_price && total_out_price && intToCurrency(total_in_price) != intToCurrency(total_out_price)"
+                                            x-show="total_in_price && total_out_price && numberToCurrency(total_in_price) != numberToCurrency(total_out_price)"
                                             x-transition class="text-danger">
                                             {{ __('total cost is not equal to total price') }}</span>
                                     </div>
@@ -278,7 +278,7 @@
             @slot('footer')
                 <div>
                     <button type="submit" class="btn btn-success"
-                        :disabled="intToCurrency($data.total_in_price || ($data.total_in_price = 0)) != intToCurrency(
+                        :disabled="numberToCurrency($data.total_in_price || ($data.total_in_price = 0)) != numberToCurrency(
                             $data.total_out_price || ($data.total_out_price = 0))"
                         :class="isFormLoading ? 'btn-progress' : ''" :form="htmlElements.form.id">
                         {{ __('Save') }}

@@ -70,4 +70,13 @@ class Helper
 		return User::where('email', 'super@man.com')
 			->first()->assignRole('Super Admin');
 	}
+
+	public static function numberFomat(int|float $number, int $min_fraction_digits = 0, int $max_fraction_digits = 4): string
+	{
+		$formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL);
+		$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $min_fraction_digits);
+		$formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $max_fraction_digits);
+
+		return $formatter->format($number);
+	}
 }

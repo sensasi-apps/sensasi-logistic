@@ -123,13 +123,13 @@ const handleNotifications = notifications =>
 	notifications?.map(notif =>
 		addAlert(document.querySelector('.section-body'), notif.messageHtml || notif.message, notif.color))
 
-function intToCurrency(number) {
-	return number.toLocaleString('id', {
-		style: 'currency',
-		currency: 'IDR',
-		maximumFractionDigits: 0
-	})
-}
+// TODO: internationaliztion from env
+const numberToCurrency = number => number.toLocaleString('id-ID', {
+	style: 'currency',
+	currency: 'IDR',
+	maximumFractionDigits: 4,
+	minimumFractionDigits: 0
+});
 
 function csrf_token() {
 	return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -174,7 +174,7 @@ function materialInDetailSelect2ResultTemplate(data) {
 		<div style='line-height: 1em'>
 			<small>${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}</small>
 			<p class='my-0' stlye='font-size: 1.1em'><b>${data.materialInDetail.material.id_for_human}<b></p>
-			<small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${intToCurrency(data.materialInDetail.price)}</small>
+			<small><b>${data.materialInDetail.stock.qty}</b>/${data.materialInDetail.qty} ${data.materialInDetail.material.unit} @ ${numberToCurrency(data.materialInDetail.price)}</small>
 		</div>
 	`)
 }
@@ -248,7 +248,7 @@ function productInDetailSelect2ResultTemplate(data) {
 		<div style='line-height: 1em'>
 			<small>${edPrinted}${edPrinted ? ', ' : ''}${atPrinted}</small>
 			<p class='my-0' stlye='font-size: 1.1em'><b>${data.productInDetail.product.id_for_human}<b></p>
-			<small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${intToCurrency(data.productInDetail.price)}</small>
+			<small><b>${data.productInDetail.stock.qty}</b>/${data.productInDetail.qty} ${data.productInDetail.product.unit} @ ${numberToCurrency(data.productInDetail.price)}</small>
 		</div>
 	`)
 }

@@ -23,10 +23,10 @@ class CreateMaterialMonthlyMovementsTable extends Migration
             $table->unsignedTinyInteger('month');
             $table->bigInteger('in')->default(0);
             $table->bigInteger('out')->default(0);
-            $table->float('avg_in')->default(0);
-            $table->float('avg_out')->default(0);
-            $table->float('avg_in_price')->default(0);
-            $table->float('avg_out_price')->default(0);
+            $table->float('avg_in', 16, 8)->default(0);
+            $table->float('avg_out', 16, 8)->default(0);
+            $table->float('avg_in_price', 16, 8)->default(0);
+            $table->float('avg_out_price', 16, 8)->default(0);
             
             $table->primary(['material_id', 'year', 'month']);
         });

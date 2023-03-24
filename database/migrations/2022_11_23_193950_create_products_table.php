@@ -19,7 +19,7 @@ class CreateProductsTable extends Migration
             $table->string('brand')->nullable();
             $table->string('name');
             $table->string('tags_json')->nullable();
-            $table->float('default_price');
+            $table->float('default_price', 16, 8);
             $table->integer('low_qty')->nullable();
             $table->string('unit', 10);
             $table->timestamps();

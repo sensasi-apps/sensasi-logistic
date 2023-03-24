@@ -128,7 +128,7 @@
                                         <strong x-init="$($el).tooltip({ boundary: 'window' })" title="{{ __('Subtotal') }}"
                                             x-data="{ subtotal_price: 0 }"
                                             x-effect="subtotal_price = (detail.qty * detail.price || 0)"
-                                            x-text="intToCurrency(subtotal_price || 0)">
+                                            x-text="numberToCurrency(subtotal_price || 0)">
                                         </strong>
 
                                         <button type="button" class="btn btn-icon btn-outline-danger" tabindex="-1"
@@ -146,7 +146,7 @@
                         <div>
                             <label class="text-capitalize">{{ __('total') }}</label>
                             <div>
-                                <strong x-text="intToCurrency(total_price || 0)"></strong>
+                                <strong x-text="numberToCurrency(total_price || 0)"></strong>
                             </div>
                         </div>
 
