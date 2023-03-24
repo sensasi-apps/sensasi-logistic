@@ -23,15 +23,21 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     {{-- <div class="dropdown-title">Logged in 5 min ago</div> --}}
-                    <a href="#profile" data-toggle="modal" class="dropdown-item has-icon">
-                        <i class="fas fa-cog"></i> Profile
+                    <a href="#profile" data-toggle="modal" class="dropdown-item has-icon text-capitalize">
+                        <i class="fas fa-cog"></i> {{ __('profile') }}
                     </a>
+
+                    <a href="#change-password" data-toggle="modal" class="dropdown-item has-icon text-capitalize">
+                        <i class="fas fa-lock"></i> {{ __('change password') }}
+                    </a>
+
                     {{-- <a href="features-activities.html" class="dropdown-item has-icon">
                         <i class="fas fa-bolt"></i> Activities
                     </a>
                     <a href="features-settings.html" class="dropdown-item has-icon">
                         <i class="fas fa-cog"></i> Settings
                     </a> --}}
+
                     <div class="dropdown-divider"></div>
                     <form action="{{ route('auth.logout') }}" method="POST" id="logoutForm">
                         @csrf

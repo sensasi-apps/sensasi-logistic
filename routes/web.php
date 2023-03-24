@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
     // all user
     Route::get('/', IndexController::class)->name('/');
     Route::post('user/update', [UserController::class, 'selfUpdate'])->name('user.update');
+    Route::post('user/update-password', [UserController::class, 'selfUpdatePassword'])->name('user.update-password');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     Route::middleware('role:Super Admin|Stackholder')->get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
