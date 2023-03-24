@@ -46,7 +46,7 @@
                                         id: type,
                                         text: type
                                     }))
-                                }).on('select2:select', (e) => {
+                                }).on('select2:close', (e) => {
                                     formData.type = e.target.value;
                                 })
                             })"></select>
