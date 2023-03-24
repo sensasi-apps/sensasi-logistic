@@ -148,7 +148,7 @@
                                 <div class="d-flex justify-content-between align-items-end">
                                     <strong x-init="$($el).tooltip()" title="{{ __('subtotal') }}" x-data="{ subtotal_price: 0 }"
                                         x-effect="subtotal_price = detail.price * detail.qty"
-                                        x-text="intToCurrency(subtotal_price || 0)">
+                                        x-text="numberToCurrency(subtotal_price || 0)">
                                     </strong>
 
                                     <x-_disabled-delete-button x-show="detail.out_details?.length > 0"
@@ -172,7 +172,7 @@
                         <div>
                             <strong x-data="{ total_price: 0 }"
                                 x-effect="total_price = formData.details?.reduce((a, b) => a + b.qty * b.price, 0)"
-                                x-text="intToCurrency(total_price || 0)"></strong>
+                                x-text="numberToCurrency(total_price || 0)"></strong>
                         </div>
                     </div>
 
