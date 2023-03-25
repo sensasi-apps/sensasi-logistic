@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class UserRoleSeeder extends Seeder
 {
@@ -14,17 +15,12 @@ class UserRoleSeeder extends Seeder
      */
     public function run()
     {
-        $users = User::where('name', '!=','superman')->get();
+        $users = User::where('name', '!=', 'superman')->get();
 
-        $roles = [
-            'Stackholder',
-            'Manufacture',
-            'Sales',
-            'Warehouse'
-        ];
+        $roles = Role::all()->pluck('name')->toArray();
 
         foreach ($users as $user) {
-            $user->assignRole($roles[rand(0, 3)]);
+            $user->assignRole($roles[rand(0, Role::count() - 1)]);
         }
     }
 }
