@@ -10,6 +10,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -33,11 +34,11 @@ class UserController extends Controller
             'password' => 'confirmed|min:8|max:255'
         ]);
 
-        $validatedInput['password'] = bcrypt($validatedInput['password'] ?? env('APP_KEY'));
+        $validatedInput['password'] = bcrypt($validatedInput['password'] ?? Str::password());
 
         $user = User::create($validatedInput)->assignRole($request->roles);
 
-        return Helper::getSuccessCrudResponse('created', __('users'), $user->name);
+        return Helper::getSuccessCrudResponse('added', __('users'), $user->name);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -48,10 +49,8 @@ class UserController extends Controller
             'password' => 'confirmed|min:8|max:255',
         ]);
 
-        if ($validatedInput['password']) {
+        if (isset($validatedInput['password'])) {
             $validatedInput['password'] = bcrypt($validatedInput['password']);
-        } else {
-            unset($validatedInput['password']);
         }
 
         $user->syncRoles($request->roles)->update($validatedInput);
