@@ -71,21 +71,39 @@
                 <label for="nameInput">{{ __('validation.attributes.name') }}</label>
                 <input type="text" class="form-control" name="name" required value="{{ $user->name ?? '' }}">
             </div>
+        </form>
+
+        @slot('footer')
+            <button type="submit" form="userProfileForm" class="btn btn-primary">{{ __('Save') }}</button>
+        @endslot
+    </x-_modal>
+
+    <x-_modal id="change-password" centered title="{{ __('change password') }}" color="warning">
+        <form action="{{ route('user.update-password') }}" method="post" id="{{ $uniqid = uniqid() }}">
+            @csrf
 
             <div class="form-group">
-                <label for="pwInput">{{ __('validation.attributes.password') }}</label>
-                <input type="password" class="form-control" name="password" minlength="8" maxlength="255">
+                <label class="text-capitalize" for="pwInput">{{ __('validation.attributes.current_password') }}</label>
+                <input type="password" class="form-control" name="current_password" minlength="8" maxlength="255" required>
+            </div>
+
+            <hr>
+
+            <div class="form-group">
+                <label class="text-capitalize" for="pwInput">{{ __('validation.attributes.new_password') }}</label>
+                <input type="password" class="form-control" name="new_password" minlength="8" maxlength="255" required>
             </div>
 
             <div class="form-group">
-                <label for="pwInput2">{{ __('validation.attributes.password_confirmation') }}</label>
-                <input type="password" class="form-control" name="password_confirmation" minlength="8" maxlength="255">
+                <label class="text-capitalize" for="pwInput2">{{ __('validation.attributes.new_password_confirmation') }}</label>
+                <input type="password" class="form-control" name="new_password_confirmation" minlength="8"
+                    maxlength="255" required>
             </div>
 
         </form>
 
         @slot('footer')
-            <button type="submit" form="userProfileForm" class="btn btn-primary">{{ __('Save') }}</button>
+            <button type="submit" form="{{ $uniqid }}" class="btn btn-warning">{{ __('Save') }}</button>
         @endslot
     </x-_modal>
 

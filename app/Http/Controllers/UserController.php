@@ -9,29 +9,10 @@ use Helper;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function validateInput(Request $request, User $user = null)
-    {
-        $validationRules = [
-            'name' => 'required|max:255',
-            'email' => 'required|email:dns|unique:users,email,' . ($user ? $user->id : 'NULL'),
-        ];
-
-        if (!$user || $user->has_default_password || $request->password) {
-            $validationRules['password'] = 'required|confirmed|min:8|max:255';
-        }
-
-        $validatedInput = $request->validate($validationRules);
-
-        if (isset($validatedInput['password'])) {
-            $validatedInput['password'] = bcrypt($validatedInput['password']);
-        }
-
-        return $validatedInput;
-    }
-
     public function index(): View
     {
         return view('pages.system.users', [
@@ -46,7 +27,14 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validatedInput = $this->validateInput($request);
+        $validatedInput = $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email:dns|unique:users,email',
+            'password' => 'confirmed|min:8|max:255'
+        ]);
+
+        $validatedInput['password'] = bcrypt($validatedInput['password'] ?? env('APP_KEY'));
+
         $user = User::create($validatedInput)->assignRole($request->roles);
 
         return Helper::getSuccessCrudResponse('created', __('users'), $user->name);
@@ -54,7 +42,17 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $validatedInput = $this->validateInput($request, $user);
+        $validatedInput = $request->validate([
+            'name' => 'required|max:255',
+            'email' => "required|email:dns|unique:users,email,{$user->id}",
+            'password' => 'confirmed|min:8|max:255',
+        ]);
+
+        if ($validatedInput['password']) {
+            $validatedInput['password'] = bcrypt($validatedInput['password']);
+        } else {
+            unset($validatedInput['password']);
+        }
 
         $user->syncRoles($request->roles)->update($validatedInput);
 
@@ -64,11 +62,36 @@ class UserController extends Controller
     public function selfUpdate(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        $validatedInput = $this->validateInput($request, $user);
+
+        $validatedInput = $request->validate([
+            'name' => 'required|max:255',
+            'email' => "required|email:dns|unique:users,email,{$user->id}"
+        ]);
 
         $user->update($validatedInput);
 
         return Helper::getSuccessCrudResponse('updated', __('users'), $user->name);
+    }
+
+    public function selfUpdatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'new_password' => 'required|confirmed|min:8|max:255',
+            'current_password' => 'required|min:8|max:255',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => __('validation.password')
+            ]);
+        }
+
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+
+        return Helper::getSuccessCrudResponse('updated', __('change password'), $user->name);
     }
 
     /**

@@ -146,6 +146,9 @@ return [
     */
 
 	'attributes' => [
+		'current_password' => 'kata sandi saat ini',
+		'new_password' => 'kata sandi baru',
+		'new_password_confirmation' => 'konfirmasi kata sandi baru',
 		'code' => 'Kode',
 		'name' => 'Nama',
 		'default_price' => 'Harga standar',
