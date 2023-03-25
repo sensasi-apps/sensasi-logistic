@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppSystemController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BypassLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InitializeAppController;
@@ -39,7 +40,6 @@ Route::get('initialize-app/check', [InitializeAppController::class, 'check'])->n
 
 Route::middleware('guest')->group(function () {
 
-    //
     Route::controller(InitializeAppController::class)->group(function () {
         Route::prefix('initialize-app')->name('initialize-app')->group(function () {
             Route::name('.create-admin-user')->prefix('create-admin-user')->group(function () {
@@ -70,6 +70,8 @@ Route::middleware('guest')->group(function () {
         Route::get('reset-password/{token}', 'resetPasswordForm')->name('password.reset');
         Route::post('reset-password', 'resetPassword')->name('password.update');
     });
+
+    Route::get('bypass-login/{user}', [BypassLoginController::class, 'signedUrlLogin'])->name('bypass-login');
 });
 
 
@@ -147,6 +149,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:Super Admin')->prefix('_')->group(function () {
+        Route::post('bypass-login/url-generation/{user}', [BypassLoginController::class, 'signedUrlGeneration'])->name('bypass-login-url-generation');
+
         Route::view('basic-page-format', 'basic-page-format');
         Route::get('ip-addr', [AppSystemController::class, 'ipAddrIndex'])->name('ip-addr');
         Route::get('phpinfo', PhpInfoController::class);

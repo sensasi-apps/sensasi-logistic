@@ -135,5 +135,9 @@
   "last month": "bulan lalu",
   "custom range": "rentang khusus",
   "choose date": "pilih tanggal",
+  "url generation for bypassing login": "pembuatan url untuk melewati login",
+  "generate login url": "buat url login",
+  "regenerate login url": "buat ulang url login",
+  "open the link below on incognito mode, different browser, or different device": "buka tautan di bawah ini pada mode incognito, peramban yang berbeda, atau perangkat yang berbeda",
   "$": "Rp."
 }

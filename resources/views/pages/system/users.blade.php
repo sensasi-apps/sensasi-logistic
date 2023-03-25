@@ -2,6 +2,17 @@
 
 @section('title', __('Users'))
 
+@push('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
+@push('js-lib')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+        integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+@endpush
+
+@include('components.assets._alpinejs')
 @include('components.assets._datatable')
 @include('components.assets._select2')
 
@@ -85,6 +96,84 @@
             <button data-dismiss="modal" class="btn btn-secondary" id="">{{ __('Cancel') }}</button>
         @endslot
     </x-_modal>
+
+    @hasrole('Super Admin')
+        <x-_modal x-data="{
+            userUrlCaches: [],
+            user_id: null,
+            url: null,
+            qrGeneratorInstance: null,
+            isFormLoading: false,
+        }" id="bypass-modal"
+            @url-generation:open-modal.document="
+            user_id = $event.detail;
+            url = userUrlCaches.find(userUrlCache => userUrlCache?.user_id === $event.detail)?.url;
+            isFormLoading = false;
+            $($el).modal('show');
+        "
+            :title="__('url generation for bypassing login')" color="warning">
+            <div class="d-flex justify-content-center flex-wrap flex-column" style="line-break: anywhere;">
+                <div x-show="url" x-transition>
+                    <p>{{ __('open the link below on incognito mode, different browser, or different device') }}:</p>
+
+                    <div class="d-flex justify-content-center" x-init="qrGeneratorInstance = new QRCode($el);
+                    qrGeneratorInstance.makeCode('https://google.com')"></div>
+
+                    <p class="pt-4">
+                        <a class="btn btn-link" style="font-size:1.1em" :href="url" x-text="url" target="_blank"
+                            rel="noopener noreferrer"></a>
+                    </p>
+                </div>
+
+                <form class="d-flex justify-content-center"
+                    @@submit.prevent="async () => {
+                    isFormLoading = true;
+
+                    const response = await fetch(`{{ route('bypass-login-url-generation', '') }}/${user_id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                            'X-CSRF-TOKEN': csrf_token()
+                        }
+                    });
+        
+                    const responseBody = await response.json();
+        
+                    // if error
+                    if (response.status !== 200) {
+                        const modalEl = $el.closest('.modal');
+
+                        modalEl.addAlert(responseBody.message, 'danger');
+                        console.error(response);
+                    }
+        
+                    // if success
+                    if (response.status === 200) {
+                        console.log(responseBody);
+
+                        url = responseBody.url;
+                        qrGeneratorInstance.makeCode(url);
+
+                        userUrlCaches.push({
+                            user_id,
+                            url
+                        });
+
+                        isFormLoading = false;
+                    }
+            }">
+                    <button class="btn btn-warning text-capitalize" x-transition
+                        :class="{
+                            'btn-lg': !url,
+                            'btn-sm': url,
+                            'btn-progress disabled': isFormLoading,
+                        }"
+                        x-text="url ? '{{ __('regenerate login url') }}' : '{{ __('generate login url') }}'"></button>
+                </form>
+            </div>
+        </x-_modal>
+    @endhasrole
 @endpush
 
 @push('js')
@@ -185,8 +274,7 @@
                         }, {
                             data: 'name',
                             title: '{{ __('validation.attributes.name') }}'
-                        },
-                        {
+                        }, {
                             data: 'roles',
                             name: 'roles.name',
                             title: '{{ __('validation.attributes.roles') }}',
@@ -194,8 +282,9 @@
                             render: roles => roles?.map(role =>
                                 `<a href="#" onclick="datatableSearch('${role.name}')" class="m-1 badge badge-primary">${role.name}</a>`
                             ).join('') || null,
-                        },
-                        {
+                        }, {
+                            searchable: false,
+                            orderable: false,
                             render: function(data, type, row) {
                                 const editButton = $(
                                     '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
@@ -205,10 +294,19 @@
                                 editButton.addClass('editUserButton');
                                 editButton.attr('data-user-id', row.id)
                                 return editButton.prop('outerHTML')
-                            },
-                            orderable: false
+                            }
                         }
+                        @hasrole('Super Admin')
+                            , {
+                                orderable: false,
+                                searchable: false,
+                                render: function(data, type, row) {
+                                    return `<a href="javascript:;" class="btn-icon-custom text-warning" x-data @click.prevent="$dispatch('url-generation:open-modal', ${row.id})"><i class="fas fa-key"></i></a>`
+                                }
+                            }
+                        @endhasrole
                     ]
+
                 });
             })
         })();

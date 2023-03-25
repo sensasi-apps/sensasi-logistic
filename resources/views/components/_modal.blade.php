@@ -16,11 +16,11 @@
                 {{ $slot }}
             </div>
 
-            @if (isset($footer))
-                <div class="modal-footer justify-content-between">
+            <div class="modal-footer justify-content-between">
+                @if (isset($footer))
                     {{ $footer }}
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </div>
 </div>
