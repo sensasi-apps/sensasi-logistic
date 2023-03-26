@@ -38,7 +38,8 @@
 
 @push('modal')
     <x-_modal id="userFormModal" centered>
-        <form method="POST" id="userForm">
+        <form method="POST" id="userForm" x-data="{ isChangePassword: false, isShowPassword: false }"
+            @@user-form:open-modal.document="isChangePassword = false; isShowPassword = false">
             @csrf
 
             <div class="form-group">
@@ -53,17 +54,37 @@
                     id="nameInput">
             </div>
 
-            <div class="form-group">
-                <label for="pwInput">{{ __('validation.attributes.password') }}</label>
-                <input type="password" class="form-control" name="password" required id="pwInput" minlength="8"
-                    maxlength="255">
+            <div class="form-check mb-4" x-id="['checkbox']">
+                <input type="checkbox" class="form-check-input" :id="$id('checkbox')" x-model="isChangePassword">
+                <label :for="$id('checkbox')" class="form-check-label">{{ __('change password') }}</label>
             </div>
 
-            <div class="form-group">
-                <label for="pwInput2">{{ __('validation.attributes.password_confirmation') }}</label>
-                <input type="password" class="form-control" name="password_confirmation" required id="pwInput2"
-                    minlength="8" maxlength="255">
-            </div>
+            <template x-if="isChangePassword">
+                <div>
+                    <div class="form-group">
+                        <label for="pwInput">{{ __('validation.attributes.new_password') }}</label>
+
+                        <div class="input-group">
+                            <input :type="isShowPassword ? 'text' : 'password'" class="form-control" name="password"
+                                required id="pwInput" minlength="8" maxlength="255">
+
+                            <div class="input-group-append">
+                                <button tabindex="-1" type="button" @@click.prevent="isShowPassword = !isShowPassword"
+                                    class="btn btn-outline-secondary" type="button">
+                                    <i class="fas" :class="isShowPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pwInput2">{{ __('validation.attributes.new_password') }}</label>
+                        <input :type="isShowPassword ? 'text' : 'password'" type="password" class="form-control"
+                            name="password_confirmation" required id="pwInput2" minlength="8" maxlength="255">
+                    </div>
+                </div>
+            </template>
+
 
             <div class="form-group">
                 <label for="role">{{ __('validation.attributes.roles') }}</label>
@@ -120,8 +141,8 @@
                     qrGeneratorInstance.makeCode('https://google.com')"></div>
 
                     <p class="pt-4">
-                        <a class="btn btn-link" style="font-size:1.1em" :href="url" x-text="url" target="_blank"
-                            rel="noopener noreferrer"></a>
+                        <a class="btn btn-link" style="font-size:1.1em" :href="url" x-text="url"
+                            target="_blank" rel="noopener noreferrer"></a>
                     </p>
                 </div>
 
@@ -267,10 +288,12 @@
                         },
                         cache: true
                     },
-                    order: [],
+                    order: [
+                        [1, 'asc']
+                    ],
                     columns: [{
                             data: 'email',
-                            title: '{{ __('validation.attributes.name') }}'
+                            title: '{{ __('validation.attributes.email') }}'
                         }, {
                             data: 'name',
                             title: '{{ __('validation.attributes.name') }}'
@@ -287,8 +310,9 @@
                             orderable: false,
                             render: function(data, type, row) {
                                 const editButton = $(
-                                    '<a class="btn-icon-custom" href="#"><i class="fas fa-cog"></i></a>'
+                                    `<a class="btn-icon-custom" href="javascript:;" x-data @click="$dispatch('user-form:open-modal')"><i class="fas fa-cog"></i></a>`
                                 )
+
                                 editButton.attr('data-toggle', 'modal')
                                 editButton.attr('data-target', '#userFormModal')
                                 editButton.addClass('editUserButton');

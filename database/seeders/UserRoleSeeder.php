@@ -15,9 +15,9 @@ class UserRoleSeeder extends Seeder
      */
     public function run()
     {
-        $users = User::where('name', '!=', 'superman')->get();
+        $users = User::whereNot('name', 'superman')->get();
 
-        $roles = Role::all()->pluck('name')->toArray();
+        $roles = Role::whereNot('name', 'Super Admin')->get()->pluck('name')->toArray();
 
         foreach ($users as $user) {
             $user->assignRole($roles[rand(0, Role::count() - 1)]);

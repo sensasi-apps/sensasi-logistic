@@ -1,6 +1,6 @@
 <ul class="sidebar-menu text-capitalize pb-4">
 
-    @hasanyrole('Super Admin|Stackholder')
+    @hasanyrole(['Super Admin', 'Stackholder'])
         <li @class(['active' => request()->is('dashboard*')])>
             <a class="nav-link" href="{{ url('dashboard') }}">
                 <i class="fas fa-chart-line"></i>
@@ -9,11 +9,11 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin|Warehouse|Manufacture|Sales|Purchase')
+    @hasanyrole(['Super Admin', 'Warehouse', 'Manufacture', 'Sales', 'Purchase'])
         <li class="menu-header">Data</li>
     @endhasanyrole
 
-    @hasanyrole('Warehouse|Super Admin|Purchase')
+    @hasanyrole(['Warehouse', 'Super Admin', 'Purchase'])
         <li @class(['active' => request()->is('materials*')])>
             <a class="nav-link" href="{{ url('materials') }}">
                 <i class="fas fa-pallet"></i>
@@ -22,7 +22,7 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Manufacture|Super Admin')
+    @hasanyrole(['Manufacture', 'Super Admin'])
         <li @class(['active' => request()->is('manufactures*')])>
             <a class="nav-link" href="{{ url('manufactures') }}">
                 <i class="fas fa-boxes"></i>
@@ -31,7 +31,7 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Warehouse|Sales|Super Admin|Purchase')
+    @hasanyrole(['Warehouse', 'Sales', 'Super Admin', 'Purchase'])
         <li @class(['active' => request()->is('products*')])>
             <a class="nav-link" href="{{ url('products') }}">
                 <i class="fas fa-box"></i>
@@ -41,7 +41,7 @@
     @endhasanyrole
 
 
-    @hasanyrole('Stackholder|Super Admin')
+    @hasanyrole(['Stackholder', 'Super Admin'])
         <li class="menu-header">{{ __('report') }}</li>
 
         <li @class(['active' => request()->is('report/materials*')])>
@@ -66,11 +66,11 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin|Admin')
+    @hasanyrole(['Super Admin', 'Admin'])
         <li class="menu-header">{{ __('system') }}</li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin|Admin')
+    @hasanyrole(['Super Admin', 'Admin'])
         <li @class(['active' => request()->is('report/users*')])>
             <a class="nav-link" href="{{ url('system/users') }}">
                 <i class="fas fa-user-cog"></i>
@@ -86,7 +86,7 @@
         </li>
     @endhasanyrole
 
-    @hasanyrole('Super Admin')
+    @hasanyrole(['Super Admin'])
         <li class="menu-header">Developer Only</li>
 
         <li>
