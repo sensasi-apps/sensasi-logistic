@@ -42,9 +42,14 @@
                     token: '{{ decrypt(request()->cookie('api-token')) }}',
                     ajaxUrl: '{{ $datatableAjaxUrl }}',
                     order: [
-                        [3, 'desc']
+                        [4, 'desc']
                     ],
                     columns: [{
+                        orderable: false,
+                        searchable: false,
+                        title: '#',
+                        data: 'id',
+                    }, {
                         orderable: false,
                         searchable: false,
                         title: '{{ __('user info') }}',
