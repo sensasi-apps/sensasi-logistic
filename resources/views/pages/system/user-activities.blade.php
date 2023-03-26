@@ -91,16 +91,18 @@
                         data: 'value',
                         title: '{{ __('changes') }}',
                         render: (value, type, row) => {
-                            if (typeof value === 'object') {
+                            if (typeof value === 'object' && value !== null) {
                                 let html = ``;
                                 for (var key of Object.keys(value)) {
-                                    html += `<div>${key}: ${value[key]}</div>`;
+                                    if (key !== 'at') {
+                                        html += `<div>${key}: ${value[key]}</div>`;
+                                    }
                                 }
 
                                 return html;
                             }
 
-                            return '';
+                            return '<i class="text-muted">-</i>';
                         }
                     }, {
                         visible: false,
